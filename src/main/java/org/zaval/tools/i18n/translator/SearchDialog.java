@@ -18,80 +18,77 @@
 package org.zaval.tools.i18n.translator;
 
 import java.awt.Component;
-import java.awt.Event;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Panel;
 
 import org.zaval.awt.BorderedPanel;
-import org.zaval.awt.IECheckbox;
-import org.zaval.awt.IERadioButton;
 import org.zaval.awt.dialog.EditDialog;
 
+import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
+import javax.swing.JRadioButton;
+
 class SearchDialog extends EditDialog {
-	private final IERadioButton inKeys;
-	private final IERadioButton inVals;
+	private final JRadioButton inKeys;
+	private final JRadioButton inVals;
 
-	private final IERadioButton regex;
-	private final IERadioButton mask;
-	private final IERadioButton exact;
+	private final JRadioButton regex;
+	private final JRadioButton mask;
+	private final JRadioButton exact;
 
-	private final IECheckbox cases;
-
-	private final IERadioButton cg1[];
-	private final IERadioButton cg2[];
+	private final JCheckBox cases;
 
 	public void setKVGroupLabels(String s1, String s2) {
-		inKeys.setLabel(s1);
-		inVals.setLabel(s2);
+		inKeys.setText(s1);
+		inVals.setText(s2);
 	}
 
 	public void setRMEGroupLabels(String s1, String s2, String s3) {
-		regex.setLabel(s1);
-		mask.setLabel(s2);
-		exact.setLabel(s3);
+		regex.setText(s1);
+		mask.setText(s2);
+		exact.setText(s3);
 	}
 
 	public void setCaseLabel(String s1) {
-		cases.setLabel(s1);
+		cases.setText(s1);
 	}
 
 	public boolean isKeyMatching() {
-		return inKeys.getState();
+		return inKeys.isSelected();
 	}
 
 	public boolean isMaskMatching() {
-		return mask.getState();
+		return mask.isSelected();
 	}
 
 	public boolean isRegexMatching() {
-		return regex.getState();
+		return regex.isSelected();
 	}
 
 	public boolean isCaseSensitive() {
-		return cases.getState();
+		return cases.isSelected();
 	}
 
 	public SearchDialog(Frame f, String s, boolean b, Component l) {
 		super(f, s, b, l);
 
-		cg1 = new IERadioButton[2];
-		cg2 = new IERadioButton[3];
-		inKeys = new IERadioButton("", false);
-		cg1[0] = inKeys;
-		inVals = new IERadioButton("", true);
-		cg1[1] = inVals;
+		inKeys = new JRadioButton("", false);
+		inVals = new JRadioButton("", true);
+		ButtonGroup keysOrValues = new ButtonGroup();
+		keysOrValues.add(inKeys);
+		keysOrValues.add(inVals);
 
-		regex = new IERadioButton("", false);
-		cg2[0] = regex;
-		mask = new IERadioButton("", false);
-		cg2[1] = mask;
-		exact = new IERadioButton("", true);
-		cg2[2] = exact;
+		regex = new JRadioButton("", false);
+		mask = new JRadioButton("", false);
+		exact = new JRadioButton("", true);
+		ButtonGroup matchTypeGroup = new ButtonGroup();
+		matchTypeGroup.add(regex);
+		matchTypeGroup.add(mask);
+		matchTypeGroup.add(exact);
 
-		cases = new IECheckbox("");
-		cases.setState(true);
+		cases = new JCheckBox("", true);
 
 		Panel p = new Panel();
 		p.setLayout(new GridBagLayout());
@@ -113,33 +110,5 @@ class SearchDialog extends EditDialog {
 		constrain(p, cases, 0, 3, 2, 1, GridBagConstraints.NONE, GridBagConstraints.NORTHWEST, 0.0, 0.0, 5, 5, 5, 5);
 
 		constrain(this, p, 0, 1, 2, 1, GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST, 1.0, 1.0, 5, 5, 5, 5);
-	}
-
-	private void applyTo(IERadioButton[] group, IERadioButton b) {
-		int j;
-
-		for (j = 0; j < group.length; ++j) {
-			if (group[j] == b) {
-				break;
-			}
-		}
-		if (j >= group.length) {
-			return;
-		}
-		for (j = 0; j < group.length; ++j) {
-			if (group[j] != b) {
-				group[j].setState(false);
-			}
-		}
-	}
-
-	@Override
-	public boolean action(Event evt, Object what) {
-		if (evt.target instanceof IERadioButton) {
-			applyTo(cg1, (IERadioButton) evt.target);
-			applyTo(cg2, (IERadioButton) evt.target);
-			return true;
-		}
-		return super.action(evt, what);
 	}
 }

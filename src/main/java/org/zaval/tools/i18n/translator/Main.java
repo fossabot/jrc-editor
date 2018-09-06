@@ -24,6 +24,9 @@ import java.util.Locale;
 
 import org.zaval.util.SafeResourceBundle;
 
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
 public class Main { // NO_UCD (unused code)
 	public static void main(String arg[]) {
 		String altDir = System.getProperty("my.root.dir");
@@ -33,6 +36,12 @@ public class Main { // NO_UCD (unused code)
 			path = path.substring(0, path.length() - 1);
 		}
 		path += "/images/";
+
+		try {
+			UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+		}
+		catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+		}
 
 		Translator t;
 		if (arg.length > 0) {
