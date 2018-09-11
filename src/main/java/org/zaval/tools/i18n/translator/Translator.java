@@ -105,6 +105,8 @@ import org.zaval.tools.i18n.translator.generated.JavaParser;
 import org.zaval.tools.i18n.translator.generated.UtfParser;
 import org.zaval.util.SafeResourceBundle;
 
+import javax.swing.JOptionPane;
+
 class Translator extends Frame implements AWTEventListener {
 	private MessageBox2 closeDialog;
 	private MessageBox2 delDialog;
@@ -2311,14 +2313,11 @@ class Translator extends Frame implements AWTEventListener {
 			oldKeyName = oldKeyName.substring(0, oldKeyName.length() - 1);
 		}
 
-		EditDialog ed = new EditDialog(this, RC("tools.translator.label.rename.caption"), true, this);
-		ed.setLabelCaption(RC("tools.translator.label.rename.label"));
-		ed.setButtonsCaption(RC("dialog.button.ok"), CLOSE_BUTTONS[2]);
-		ed.setText(oldKeyName);
-		ed.doModal();
+		String title = RC("tools.translator.label.rename.caption");
+		String message = RC("tools.translator.label.rename.label");
+		String newKeyName = (String) JOptionPane.showInputDialog(this, message, title, JOptionPane.PLAIN_MESSAGE, null, null, oldKeyName);
 
-		String newKeyName = ed.getText();
-		if ((newKeyName.trim().length() <= 0) || !ed.isApply()) {
+		if (null == newKeyName || newKeyName.trim().isEmpty()) {
 			return;
 		}
 		if (oldKeyName.equals(newKeyName)) {
