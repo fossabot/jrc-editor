@@ -1459,12 +1459,11 @@ class Translator extends Frame implements AWTEventListener {
 	}
 
 	private void onNewResource() {
-		EditDialog ed = new EditDialog(this, RC("tools.translator.label.newrestitle"), true, this);
-		ed.setLabelCaption(RC("tools.translator.label.filesuff"));
-		ed.setButtonsCaption(RC("dialog.button.ok"), CLOSE_BUTTONS[2]);
-		ed.doModal();
-		String text = ed.getText();
-		if ((text.length() <= 0) || !ed.isApply()) {
+		String title = RC("tools.translator.label.newrestitle");
+		String message = RC("tools.translator.label.filesuff");
+		String text = JOptionPane.showInputDialog(this, message, title, JOptionPane.PLAIN_MESSAGE);
+
+		if (null == text || text.isEmpty()) {
 			return;
 		}
 		bundle.getBundle().addLanguage(text);
