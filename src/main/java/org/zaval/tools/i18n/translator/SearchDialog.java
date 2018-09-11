@@ -21,14 +21,14 @@ import java.awt.Component;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Panel;
 
-import org.zaval.awt.BorderedPanel;
 import org.zaval.awt.dialog.EditDialog;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.border.LineBorder;
 
 class SearchDialog extends EditDialog {
 	private final JRadioButton inKeys;
@@ -90,13 +90,15 @@ class SearchDialog extends EditDialog {
 
 		cases = new JCheckBox("", true);
 
-		Panel p = new Panel();
+		JPanel p = new JPanel();
 		p.setLayout(new GridBagLayout());
 
-		Panel p1 = new BorderedPanel();
+		JPanel p1 = new JPanel();
 		p1.setLayout(new GridBagLayout());
-		Panel p2 = new BorderedPanel();
+		p1.setBorder(new LineBorder(null));
+		JPanel p2 = new JPanel();
 		p2.setLayout(new GridBagLayout());
+		p2.setBorder(new LineBorder(null));
 
 		constrain(p1, inVals, 0, 0, 1, 1, GridBagConstraints.NONE, GridBagConstraints.NORTHWEST, 0.0, 0.0, 0, 5, 5, 0);
 		constrain(p1, inKeys, 0, 1, 1, 1, GridBagConstraints.NONE, GridBagConstraints.NORTHWEST, 0.0, 0.0, 0, 5, 5, 0);
@@ -110,5 +112,6 @@ class SearchDialog extends EditDialog {
 		constrain(p, cases, 0, 3, 2, 1, GridBagConstraints.NONE, GridBagConstraints.NORTHWEST, 0.0, 0.0, 5, 5, 5, 5);
 
 		constrain(this, p, 0, 1, 2, 1, GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST, 1.0, 1.0, 5, 5, 5, 5);
+		renderDialogFooter();
 	}
 }

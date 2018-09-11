@@ -21,16 +21,16 @@ import java.awt.Component;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Panel;
 
-import org.zaval.awt.BorderedPanel;
-import org.zaval.awt.EmulatedTextField;
-import org.zaval.awt.IELabel;
 import org.zaval.awt.dialog.EditDialog;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JTextField;
+import javax.swing.border.LineBorder;
 
 class ReplaceDialog extends EditDialog {
 	private final JRadioButton regex;
@@ -39,8 +39,8 @@ class ReplaceDialog extends EditDialog {
 	private final JCheckBox cases;
 	private final JCheckBox prompt;
 	private final JCheckBox all;
-	private final EmulatedTextField replaceTo;
-	private final IELabel label;
+	private final JTextField replaceTo;
+	private final JLabel label;
 
 	public void setReplaceLabel(String s) {
 		label.setText(s);
@@ -89,15 +89,18 @@ class ReplaceDialog extends EditDialog {
 		prompt = new JCheckBox("", true);
 		all = new JCheckBox("", false);
 
-		label = new IELabel("To:");
-		replaceTo = new EmulatedTextField(20);
+		label = new JLabel("To:");
+		replaceTo = new JTextField(20);
+		replaceTo.addActionListener(this);
+		replaceTo.setActionCommand(COMMAND_OK);
 		constrain(this, label, 0, 1, 1, 1, GridBagConstraints.NONE, GridBagConstraints.WEST, 0.0, 0.0, 0, 5, 5, 5);
 		constrain(this, replaceTo, 1, 1, 1, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST, 1.0, 0.0, 0, 5, 5, 0);
 
-		Panel p = new Panel();
+		JPanel p = new JPanel();
 		p.setLayout(new GridBagLayout());
 
-		Panel p2 = new BorderedPanel();
+		JPanel p2 = new JPanel();
+		p2.setBorder(new LineBorder(null));
 		p2.setLayout(new GridBagLayout());
 		constrain(p2, exact, 1, 0, 1, 1, GridBagConstraints.NONE, GridBagConstraints.NORTHWEST, 0.0, 0.0, 0, 5, 5, 0);
 		constrain(p2, regex, 1, 1, 1, 1, GridBagConstraints.NONE, GridBagConstraints.NORTHWEST, 0.0, 0.0, 0, 5, 5, 0);
@@ -108,5 +111,6 @@ class ReplaceDialog extends EditDialog {
 		constrain(p, all, 0, 4, 2, 1, GridBagConstraints.NONE, GridBagConstraints.NORTHWEST, 0.0, 0.0, 0, 5, 5, 5);
 
 		constrain(this, p, 0, 2, 2, 1, GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST, 1.0, 1.0, 5, 5, 5, 5);
+		renderDialogFooter();
 	}
 }

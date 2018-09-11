@@ -17,11 +17,8 @@
 
 package org.zaval.awt.dialog;
 
-import java.awt.AWTEvent;
-import java.awt.Button;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.Frame;
@@ -29,55 +26,60 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.Label;
-import java.awt.LayoutManager;
-import java.awt.Panel;
 import java.awt.Toolkit;
-import java.awt.event.AWTEventListener;
-import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import org.zaval.awt.EmulatedTextField;
-import org.zaval.awt.IELabel;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
-public class EditDialog extends Dialog implements AWTEventListener {
-	private final EmulatedTextField edit;
-	private final Button ok;
-	private final Button cancel;
+public class EditDialog extends JDialog implements ActionListener {
+	protected static final String COMMAND_OK = "ok";
+	protected static final String COMMAND_CANCEL = "cancel";
+	private final JTextField edit;
+	private final JButton ok;
+	private final JButton cancel;
 	private boolean isApply;
 	private final Component listener;
-	private final IELabel label;
+	private final JLabel label;
 
 	public EditDialog(Frame f, String s, boolean b, Component l) {
 		super(f, s, b);
 		setLayout(new GridBagLayout());
 
-		ok = new Button("Ok");
-		cancel = new Button("Cancel");
-		label = new IELabel("Name");
+		label = new JLabel("Name");
 
-		Panel p = new Panel();
+		constrain(this, label, 0, 0, 1, 1, GridBagConstraints.NONE, GridBagConstraints.WEST, 0.0, 0.0, 5, 5, 5, 5);
+		edit = new JTextField(20);
+		edit.addActionListener(this);
+		edit.setActionCommand(COMMAND_OK);
+		constrain(this, edit, 1, 0, 4, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST, 1.0, 0.0, 5, 5, 5, 5);
+
+		listener = l;
+		edit.requestFocus();
+		ok = new JButton("Ok");
+		cancel = new JButton("Cancel");
+	}
+
+	protected void renderDialogFooter() {
+		ok.setActionCommand(COMMAND_OK);
+		ok.addActionListener(this);
+		cancel.addActionListener(this);
+		cancel.setActionCommand(COMMAND_CANCEL);
+
+		JPanel p = new JPanel();
 		p.setLayout(new GridLayout(1, 2, 2, 0));
 		p.add(ok);
 		p.add(cancel);
 
-		constrain(this, label, 0, 0, 1, 1, GridBagConstraints.NONE, GridBagConstraints.WEST, 0.0, 0.0, 5, 5, 5, 5);
-		edit = new EmulatedTextField(20);
-		constrain(this, edit, 1, 0, 4, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST, 1.0, 0.0, 5, 5, 5, 5);
 		constrain(this, p, 0, 10, 2, 1, GridBagConstraints.NONE, GridBagConstraints.EAST, 1.0, 0.0, 5, 5, 5, 5);
-
-		listener = l;
-		edit.requestFocus();
 	}
 
 	public void setText(String t) {
-		if (t == null) {
-			edit.setText("");
-		}
-		else {
-			edit.setText(t);
-		}
+		edit.setText(null == t ? "" : t);
 	}
 
 	public String getText() {
@@ -85,28 +87,12 @@ public class EditDialog extends Dialog implements AWTEventListener {
 	}
 
 	public void setButtonsCaption(String o, String c) {
-		ok.setLabel(o);
-		cancel.setLabel(c);
+		ok.setText(o);
+		cancel.setText(c);
 	}
 
 	public void setLabelCaption(String l) {
 		label.setText(l);
-	}
-
-	@Override
-	public boolean handleEvent(Event e) {
-		if ((e.id == Event.WINDOW_DESTROY) || ((e.target == cancel) && (e.id == Event.ACTION_EVENT))) {
-			isApply = false;
-			dispose();
-		}
-
-		if ((e.target == ok) && (e.id == Event.ACTION_EVENT)) {
-			isApply = true;
-			listener.postEvent(new Event(this, Event.ACTION_EVENT, edit.getText()));
-			dispose();
-		}
-
-		return super.handleEvent(e);
 	}
 
 	public boolean isApply() {
@@ -116,7 +102,7 @@ public class EditDialog extends Dialog implements AWTEventListener {
 	private void toCenter() {
 		Dimension s = Toolkit.getDefaultToolkit().getScreenSize();
 		Dimension d = getSize();
-		move((s.width - d.width) / 2, (s.height - d.height) / 2);
+		setLocation((s.width - d.width) / 2, (s.height - d.height) / 2);
 	}
 
 	protected static void constrain(Container c, Component p, int x, int y, int w, int h, int f, int a, double wx, double wy, int t, int l,
@@ -136,117 +122,28 @@ public class EditDialog extends Dialog implements AWTEventListener {
 		if ((t + b + l + r) > 0) {
 			cc.insets = new Insets(t, l, b, r);
 		}
-		LayoutManager lm = c.getLayout();
-		if (lm instanceof GridBagLayout) {
-			GridBagLayout gbl = (GridBagLayout) lm;
-			gbl.setConstraints(p, cc);
-		}
-		c.add(p);
-	}
-
-	@Override
-	public boolean keyDown(Event e, int key) {
-		if (key == '\t') {
-			return moveFocus();
-		}
-		else if (((e.target == ok) && (key == Event.ENTER)) || ((e.target == edit) && (key == Event.ENTER))) {
-			isApply = true;
-			listener.postEvent(new Event(this, Event.ACTION_EVENT, edit.getText()));
-			dispose();
-			return true;
-		}
-		else if ((e.target == cancel) && (key == Event.ENTER)) {
-			isApply = false;
-			dispose();
-			return true;
-		}
-		else {
-			return false;
-		}
+		c.add(p, cc);
 	}
 
 	public void doModal() {
-		Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.KEY_EVENT_MASK);
 		pack();
 		toCenter();
 		edit.requestFocus();
 		show();
-		Toolkit.getDefaultToolkit().removeAWTEventListener(this);
-	}
-
-	private boolean moveFocus() {
-		Component owner = getFocusOwner();
-		return moveFocus(owner);
-	}
-
-	private void optimize(List<Component> v) {
-		int k = v.size();
-		for (int j = 0; j < k; ++j) {
-			Component c = v.get(j);
-			if (c instanceof Button) {
-				v.remove(j);
-				v.add(c);
-				--k;
-				--j;
-			}
-		}
-	}
-
-	private boolean moveFocus(Component c) {
-		List<Component> v = new ArrayList<>();
-
-		linearize(this, v);
-		optimize(v);
-		int k;
-		int j;
-		for (k = v.size(), j = 0; j < k; ++j) {
-			if (c == v.get(j)) {
-				break;
-			}
-		}
-		if (j >= k) {
-			j = -1;
-		}
-		boolean ask = false;
-		if (j == (k - 1)) {
-			ask = true;
-			j = -1; // see below +1
-		}
-		v.get(j + 1).requestFocus();
-		return ask;
-	}
-
-	private void linearize(Container cc, List<Component> v) {
-		int k = cc.getComponentCount();
-		for (int j = 0; j < k; ++j) {
-			Component c = cc.getComponent(j);
-			if (c instanceof Label) {
-				// ignore
-			}
-			else if (c instanceof IELabel) {
-				// ignore
-			}
-			else if (c instanceof Container) {
-				linearize((Container) c, v);
-			}
-			else {
-				v.add(c);
-			}
-		}
 	}
 
 	@Override
-	public void eventDispatched(AWTEvent event) {
-		if (event.getID() != KeyEvent.KEY_TYPED) {
-			return;
+	public void actionPerformed(ActionEvent e) {
+		switch (e.getActionCommand()) {
+			case COMMAND_OK:
+				isApply = true;
+				listener.postEvent(new Event(this, Event.ACTION_EVENT, edit.getText()));
+				dispose();
+				break;
+			case COMMAND_CANCEL:
+				isApply = false;
+				dispose();
+				break;
 		}
-		if (!(event instanceof KeyEvent)) {
-			return;
-		}
-		KeyEvent ke = (KeyEvent) event;
-		if (ke.getKeyChar() != '\t') {
-			return;
-		}
-		moveFocus();
 	}
 }
