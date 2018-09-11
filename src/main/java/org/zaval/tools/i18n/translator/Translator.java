@@ -2220,12 +2220,10 @@ class Translator extends Frame implements AWTEventListener {
 	}
 
 	private void onNewKey() {
-		EditDialog ed = new EditDialog(this, RC("tools.translator.label.newkeytitle"), true, this);
-		ed.setLabelCaption(RC("tools.translator.label.insert"));
-		ed.setButtonsCaption(RC("dialog.button.ok"), CLOSE_BUTTONS[2]);
-		ed.doModal();
-		String text = ed.getText();
-		if ((text.length() <= 0) || !ed.isApply()) {
+		String title = RC("tools.translator.label.newkeytitle");
+		String message = RC("tools.translator.label.insert");
+		String text = JOptionPane.showInputDialog(this, message, title, JOptionPane.PLAIN_MESSAGE);
+		if (null == text || text.isEmpty()) {
 			return;
 		}
 		keyName.setText(text);
