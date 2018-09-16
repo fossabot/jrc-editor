@@ -19,19 +19,22 @@ package org.zaval.awt;
 
 import java.awt.Canvas;
 import java.awt.Dimension;
-import java.awt.Event;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.FilteredImageSource;
 import java.awt.image.ImageProducer;
 
 import org.zaval.awt.image.BoxButtonFilter;
 import org.zaval.awt.image.ButtonImageFilter;
 
-public class SpeedButton extends Canvas {
+public class SpeedButton extends Canvas implements MouseListener {
 	private static final int FREE = 1;
 	private static final int UP = 2;
 	private static final int DOWN = 3;
+
+	private final Runnable callback;
 
 	private Image normImg;
 	private Image upImg;
@@ -42,7 +45,8 @@ public class SpeedButton extends Canvas {
 	private int h;
 	private int state = FREE;
 
-	public SpeedButton(Image src) {
+	public SpeedButton(Runnable callback, Image src) {
+		this.callback = callback;
 		ButtonImageFilter filt = new BoxButtonFilter();
 		w = src.getWidth(this);
 		h = src.getHeight(this);
@@ -55,6 +59,7 @@ public class SpeedButton extends Canvas {
 		int light = 30;
 		init(src, getFilter(src, filt, light, border, false), getFilter(src, filt, -light, border, true),
 			getFilter(src, filt, -Math.abs(light), 0, false));
+		addMouseListener(this);
 	}
 
 	private void init(Image src, Image up, Image down, Image dis) {
@@ -91,7 +96,7 @@ public class SpeedButton extends Canvas {
 
 	@Override
 	public void paint(Graphics gr) {
-		Dimension d = size();
+		Dimension d = getSize();
 		int ww = d.width;
 		int hh = d.height;
 
@@ -110,33 +115,33 @@ public class SpeedButton extends Canvas {
 	}
 
 	@Override
-	public boolean mouseUp(Event ev, int x, int y) {
-		if (!isEnabled() || (state == FREE)) {
-			return true;
+	public void mouseReleased(MouseEvent e) {
+		if (isEnabled() && (state != FREE)) {
+			setState(UP);
 		}
-		setState(UP);
-		getParent().postEvent(new Event(this, Event.ACTION_EVENT, null));
-		return true;
 	}
 
 	@Override
-	public boolean mouseDown(Event ev, int x, int y) {
-		if (!isEnabled()) {
-			return true;
+	public void mouseClicked(MouseEvent e) {
+		if (isEnabled() && (state != FREE)) {
+			callback.run();
 		}
-		setState(DOWN);
-		return true;
 	}
 
 	@Override
-	public boolean mouseEnter(Event ev, int x, int y) {
+	public void mousePressed(MouseEvent e) {
+		if (isEnabled()) {
+			setState(DOWN);
+		}
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
 		setState(UP);
-		return true;
 	}
 
 	@Override
-	public boolean mouseExit(Event ev, int x, int y) {
+	public void mouseExited(MouseEvent e) {
 		setState(FREE);
-		return true;
 	}
 }

@@ -21,7 +21,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Event;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -32,6 +31,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -46,7 +46,7 @@ public class EditDialog extends JDialog implements ActionListener {
 	private final Component listener;
 	private final JLabel label;
 
-	public EditDialog(Frame f, String s, boolean b, Component l) {
+	public EditDialog(JFrame f, String s, boolean b, Component l) {
 		super(f, s, b);
 		setLayout(new GridBagLayout());
 

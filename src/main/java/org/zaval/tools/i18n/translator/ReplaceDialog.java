@@ -18,7 +18,6 @@
 package org.zaval.tools.i18n.translator;
 
 import java.awt.Component;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
@@ -26,6 +25,7 @@ import org.zaval.awt.dialog.EditDialog;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -77,7 +77,7 @@ class ReplaceDialog extends EditDialog {
 		return replaceTo.getText();
 	}
 
-	public ReplaceDialog(Frame f, String s, boolean b, Component l) {
+	public ReplaceDialog(JFrame f, String s, boolean b, Component l) {
 		super(f, s, b, l);
 
 		regex = new JRadioButton("", false);

@@ -29,7 +29,6 @@ import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.FileDialog;
 import java.awt.FlowLayout;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -75,6 +74,10 @@ import java.util.stream.IntStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JToolBar;
+
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
 import org.zaval.awt.AlignConstants;
@@ -94,7 +97,6 @@ import org.zaval.awt.StatusBar;
 import org.zaval.awt.StatusBarElement;
 import org.zaval.awt.StatusBarStubbElement;
 import org.zaval.awt.TextAlignArea;
-import org.zaval.awt.Toolbar;
 import org.zaval.awt.ToolkitResolver;
 import org.zaval.awt.dialog.EditDialog;
 import org.zaval.awt.dialog.MessageBox2;
@@ -107,7 +109,7 @@ import org.zaval.util.SafeResourceBundle;
 
 import javax.swing.JOptionPane;
 
-class Translator extends Frame implements AWTEventListener {
+class Translator extends JFrame implements AWTEventListener {
 	private MessageBox2 closeDialog;
 	private MessageBox2 delDialog;
 	private MessageBox2 errDialog;
@@ -195,7 +197,6 @@ class Translator extends Frame implements AWTEventListener {
 	private String SYS_DIR;
 	private BundleManager bundle = new BundleManager();
 	private final Panel pane = new Panel();
-	private Toolbar tool;
 	private SimpleScrollPanel scrPanel;
 
 	private final String[] CLOSE_BUTTONS = new String[3];
@@ -204,8 +205,6 @@ class Translator extends Frame implements AWTEventListener {
 	private final String[] DELETE_BUTTONS2 = new String[2];
 	private final String[] DELETE_BUTTONS3 = new String[2];
 	private final String[] REPLACE_BUTTONS = new String[3];
-
-	private MenuItem[] tbar2menu;
 
 	private static final int MAX_PICK_LENGTH = 40;
 	private List<String> pickList = new ArrayList<>(8);
@@ -268,20 +267,31 @@ class Translator extends Frame implements AWTEventListener {
 		this.setLayout(new BorderLayout(0, 0));
 		add("Center", pane);
 
-		tool = new Toolbar();
-		tool.add(91, new IELabel(RC("menu.file") + ":"));
-		tool.add(0, new SpeedButton(imgres.getImage(SYS_DIR + "new.gif", this)));
-		tool.add(1, new SpeedButton(imgres.getImage(SYS_DIR + "load.gif", this)));
-		tool.add(2, new SpeedButton(imgres.getImage(SYS_DIR + "save.gif", this)));
-		tool.add(3, new SpeedButton(imgres.getImage(SYS_DIR + "saveas.gif", this)));
-		tool.add(92, new IELabel("+"));
-		tool.add(4, new SpeedButton(imgres.getImage(SYS_DIR + "deploy.gif", this)));
-		tool.add(5, new SpeedButton(imgres.getImage(SYS_DIR + "import.gif", this)));
-		tool.add(93, new IELabel(RC("menu.edit") + ":"));
-		tool.add(6, new SpeedButton(imgres.getImage(SYS_DIR + "newlang.gif", this)));
-		tool.add(7, new SpeedButton(imgres.getImage(SYS_DIR + "del.gif", this)));
-		tool.add(94, new IELabel(RC("menu.help") + ": "));
-		tool.add(8, new SpeedButton(imgres.getImage(SYS_DIR + "about.gif", this)));
+		SpeedButton newBundleToolButton = new SpeedButton(this::onNewBundle, imgres.getImage(SYS_DIR + "new.gif", this));
+		SpeedButton openBundleToolButton = new SpeedButton(this::onLoadBundle, imgres.getImage(SYS_DIR + "load.gif", this));
+		SpeedButton saveBundleToolButton = new SpeedButton(this::onSave, imgres.getImage(SYS_DIR + "save.gif", this));
+		SpeedButton saveAsToolButton = new SpeedButton(this::onSaveAs, imgres.getImage(SYS_DIR + "saveas.gif", this));
+		SpeedButton genToolButton = new SpeedButton(this::onGenCode, imgres.getImage(SYS_DIR + "deploy.gif", this));
+		SpeedButton parseToolButton = new SpeedButton(this::onParseCode, imgres.getImage(SYS_DIR + "import.gif", this));
+		SpeedButton newLangToolButton = new SpeedButton(this::onNewResource, imgres.getImage(SYS_DIR + "newlang.gif", this));
+		SpeedButton delToolButton = new SpeedButton(this::onDeleteKey, imgres.getImage(SYS_DIR + "del.gif", this));
+		SpeedButton aboutToolButton = new SpeedButton(this::onAbout, imgres.getImage(SYS_DIR + "about.gif", this));
+		JToolBar tool = new JToolBar();
+		tool.add(new JLabel(RC("menu.file") + ":"));
+		tool.add(newBundleToolButton);
+		tool.add(openBundleToolButton);
+		tool.add(saveBundleToolButton);
+		tool.add(saveAsToolButton);
+		tool.addSeparator();
+		tool.add(genToolButton);
+		tool.add(parseToolButton);
+		tool.addSeparator();
+		tool.add(new JLabel(RC("menu.edit") + ":"));
+		tool.add(newLangToolButton);
+		tool.add(delToolButton);
+		tool.addSeparator();
+		tool.add(new JLabel(RC("menu.help") + ": "));
+		tool.add(aboutToolButton);
 		add("North", tool);
 
 		setIconImage(imgres.getImage(SYS_DIR + "jrc-editor.gif"));
@@ -519,16 +529,6 @@ class Translator extends Frame implements AWTEventListener {
 		String[] OK_BUT = { RC("dialog.button.ok") };
 		errDialog.setButtons(OK_BUT);
 
-		tbar2menu = new MenuItem[] {
-			newBundleMenu,
-			openBundleMenu,
-			saveBundleMenu,
-			saveAsBundleMenu,
-			genMenu,
-			parseMenu,
-			newLangMenu,
-			delMenu,
-			aboutMenu };
 	}
 
 	@Override
@@ -582,14 +582,6 @@ class Translator extends Frame implements AWTEventListener {
 
 	@Override
 	public boolean action(Event e, Object arg) {
-		if (e.target instanceof Toolbar) {
-			int pos = Integer.parseInt((String) arg);
-			if ((pos < 0) || (pos >= tbar2menu.length)) {
-				return false;
-			}
-			e.target = tbar2menu[pos];
-		}
-
 		if (e.target == statisticsMenu) {
 			onStatistics();
 		}
@@ -1025,7 +1017,6 @@ class Translator extends Frame implements AWTEventListener {
 			textPanel.invalidate();
 			validate();
 		}
-		syncToolbar();
 	}
 
 	private void onDeleteKey() {
@@ -1494,6 +1485,10 @@ class Translator extends Frame implements AWTEventListener {
 		isDirty = false;
 	}
 
+	private void onLoadBundle() {
+		onOpen(false);
+	}
+
 	private SafeResourceBundle rcTable;
 
 	private String RC(String key) {
@@ -1846,7 +1841,6 @@ class Translator extends Frame implements AWTEventListener {
 		textPanel.invalidate();
 		validate();
 		repaint();
-		syncToolbar();
 		if (!part) {
 			loadPickList();
 		}
@@ -1880,12 +1874,6 @@ class Translator extends Frame implements AWTEventListener {
 				}
 			}
 			tree.closeNode(tn.getText());
-		}
-	}
-
-	private void syncToolbar() {
-		for (int j = 0; j < tbar2menu.length; ++j) {
-			tool.setEnabled(j, tbar2menu[j].isEnabled());
 		}
 	}
 
