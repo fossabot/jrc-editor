@@ -57,10 +57,6 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 	private static final int h = 3;
 	private static final int maxlinecount = 15;
 
-	public ResultField getTextContainer() {
-		return text;
-	}
-
 	public MessageBox2(Frame parent) {
 		super(parent, false);
 		setLayout(this);

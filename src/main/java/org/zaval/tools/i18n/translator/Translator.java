@@ -83,7 +83,6 @@ import javax.swing.JToolBar;
 
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
-import org.zaval.awt.AlignConstants;
 import org.zaval.awt.BorderedPanel;
 import org.zaval.awt.ContextMenu;
 import org.zaval.awt.ContextMenuBar;
@@ -93,13 +92,11 @@ import org.zaval.awt.IELabel;
 import org.zaval.awt.LevelTree;
 import org.zaval.awt.ResizeLayout;
 import org.zaval.awt.Resizer;
-import org.zaval.awt.ResultField;
 import org.zaval.awt.SimpleScrollPanel;
 import org.zaval.awt.SpeedButton;
 import org.zaval.awt.StatusBar;
 import org.zaval.awt.StatusBarElement;
 import org.zaval.awt.StatusBarStubbElement;
-import org.zaval.awt.TextAlignArea;
 import org.zaval.awt.ToolkitResolver;
 import org.zaval.awt.dialog.EditDialog;
 import org.zaval.awt.dialog.MessageBox2;
@@ -1729,7 +1726,6 @@ class Translator extends JFrame implements AWTEventListener {
 	}
 
 	private void onStatistics() {
-		MessageBox2 sDialog = new MessageBox2(this);
 		nullsCount = 0;
 		notCompletedCount = 0;
 		setIndicators(tree.getRootNode());
@@ -1737,15 +1733,7 @@ class Translator extends JFrame implements AWTEventListener {
 		text = text + RC("tools.translator.label.statistics.record") + bundle.getBundle().getItemCount() + "\n";
 		text = text + RC("tools.translator.label.statistics.nulls") + nullsCount + "\n";
 		text = text + RC("tools.translator.label.statistics.notcompleted") + notCompletedCount;
-		sDialog.setText(text);
-		sDialog.setTitle(RC("dialog.title.info"));
-		String[] OK_BUT = { RC("dialog.button.ok") };
-		sDialog.setButtons(OK_BUT);
-
-		ResultField rf = sDialog.getTextContainer();
-		TextAlignArea area = rf.getAlignArea();
-		area.setAlign(AlignConstants.FIT | AlignConstants.TOP);
-		sDialog.show();
+		JOptionPane.showMessageDialog(this, text, RC("dialog.title.info"), JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	private void onGenCode() {
