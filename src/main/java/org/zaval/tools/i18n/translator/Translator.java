@@ -49,6 +49,8 @@ import java.awt.datatransfer.Transferable;
 import java.awt.event.AWTEventListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -76,6 +78,7 @@ import java.util.zip.ZipFile;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 
 import org.apache.regexp.RE;
@@ -107,10 +110,7 @@ import org.zaval.tools.i18n.translator.generated.JavaParser;
 import org.zaval.tools.i18n.translator.generated.UtfParser;
 import org.zaval.util.SafeResourceBundle;
 
-import javax.swing.JOptionPane;
-
 class Translator extends JFrame implements AWTEventListener {
-	private MessageBox2 closeDialog;
 	private MessageBox2 delDialog;
 	private MessageBox2 errDialog;
 	private MessageBox2 repDialog;
@@ -238,6 +238,13 @@ class Translator extends JFrame implements AWTEventListener {
 	}
 
 	private void init(String s, SafeResourceBundle res) {
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				onClose();
+			}
+		});
 		SYS_DIR = s;
 		rcTable = res;
 
@@ -507,13 +514,6 @@ class Translator extends JFrame implements AWTEventListener {
 		delDialog.setTitle(RC("dialog.title.warning"));
 		delDialog.setButtons(DELETE_BUTTONS);
 		delDialog.addListener(this);
-
-		closeDialog = new MessageBox2(this);
-		closeDialog.setText(RC("tools.translator.message.save"));
-		closeDialog.setTitle(RC("dialog.title.warning"));
-		closeDialog.setIcon(imgres.getImage(SYS_DIR + "ogo.gif", closeDialog));
-		closeDialog.setButtons(CLOSE_BUTTONS);
-		closeDialog.addListener(this);
 
 		repDialog = new MessageBox2(this);
 		repDialog.setText("");
@@ -785,20 +785,6 @@ class Translator extends JFrame implements AWTEventListener {
 				ls.box.setState(!ls.hidden);
 			}
 		}
-		if ((e.target == closeDialog) && (e.arg instanceof Button)) {
-			if (!((Button) e.arg).getLabel().equals(CLOSE_BUTTONS[2])) {
-				if (((Button) e.arg).getLabel().equals(CLOSE_BUTTONS[0])) {
-					onSave();
-				}
-				if (exitInitiated) {
-					finish();
-				}
-				else {
-					clear();
-				}
-			}
-			exitInitiated = true;
-		}
 		if ((e.target == delDialog) && (e.arg instanceof Button) && ((Button) e.arg).getLabel().equals(DELETE_BUTTONS[0])) {
 			String key = tree.getSelectedText();
 			// remove all subkeys
@@ -1047,7 +1033,22 @@ class Translator extends JFrame implements AWTEventListener {
 	private void onClose() {
 		setTranslations();
 		if (isDirty) {
-			closeDialog.show();
+			String message = RC("tools.translator.message.save");
+			String title = RC("dialog.title.warning");
+			int result = JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
+				null, CLOSE_BUTTONS, CLOSE_BUTTONS[2]);
+			if (0 == result) {
+				onSave();
+			}
+			if (2 != result) {
+				if (exitInitiated) {
+					finish();
+				}
+				else {
+					clear();
+				}
+				exitInitiated = true;
+			}
 		}
 		else if (exitInitiated) {
 			finish();
@@ -1061,7 +1062,7 @@ class Translator extends JFrame implements AWTEventListener {
 	private void finish() {
 		hide();
 		saveIni();
-		System.exit(0);
+		dispose();
 	}
 
 	private void onSave() {
