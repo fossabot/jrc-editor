@@ -968,12 +968,8 @@ class Translator extends JFrame implements AWTEventListener {
 		if (illegalChar.isEmpty()) {
 			return bundle.replace(key, "..", "");
 		}
-		MessageBox2 mess = new MessageBox2(this);
-		mess.setTitle(RC("dialog.title.warning"));
-		mess.setText(bundle.replace(RC("tools.translator.message.illchar"), "[%illchar%]", illegalChar));
-		mess.setIcon(imgres.getImage(SYS_DIR + "stop.gif", mess));
-		mess.setButtons(RC("dialog.button.ok"));
-		mess.show();
+		String text = bundle.replace(RC("tools.translator.message.illchar"), "[%illchar%]", illegalChar);
+		JOptionPane.showMessageDialog(this, text, RC("dialog.title.warning"), JOptionPane.WARNING_MESSAGE);
 		return null;
 	}
 
