@@ -17,14 +17,14 @@
 
 package org.zaval.tools.i18n.translator;
 
-import java.awt.CheckboxMenuItem;
-
 import org.zaval.awt.IELabel;
+
+import javax.swing.JCheckBoxMenuItem;
 
 class LangState {
 	TextAreaWrap tf;
 	boolean hidden;
 	IELabel label;
 	String name;
-	CheckboxMenuItem box;
+	JCheckBoxMenuItem box;
 }

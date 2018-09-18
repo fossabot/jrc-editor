@@ -20,7 +20,6 @@ package org.zaval.tools.i18n.translator;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Button;
-import java.awt.CheckboxMenuItem;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -33,10 +32,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.LayoutManager;
-import java.awt.Menu;
-import java.awt.MenuBar;
-import java.awt.MenuItem;
-import java.awt.MenuShortcut;
 import java.awt.Panel;
 import java.awt.Rectangle;
 import java.awt.TextField;
@@ -76,16 +71,19 @@ import java.util.stream.IntStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 import javax.swing.JToolBar;
 
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
 import org.zaval.awt.BorderedPanel;
-import org.zaval.awt.ContextMenu;
-import org.zaval.awt.ContextMenuBar;
 import org.zaval.awt.EmulatedTextField;
 import org.zaval.awt.GraphTree;
 import org.zaval.awt.IELabel;
@@ -98,7 +96,6 @@ import org.zaval.awt.StatusBar;
 import org.zaval.awt.StatusBarElement;
 import org.zaval.awt.StatusBarStubbElement;
 import org.zaval.awt.ToolkitResolver;
-import org.zaval.awt.dialog.EditDialog;
 import org.zaval.awt.dialog.MessageBox2;
 import org.zaval.awt.peer.TreeNode;
 import org.zaval.io.IniFile;
@@ -129,59 +126,22 @@ class Translator extends JFrame implements AWTEventListener {
 	private boolean allowDot = true;
 	private boolean allowUScore = true;
 
-	private MenuItem newBundleMenu;
-	private MenuItem openBundleMenu;
-	private MenuItem openBundleMenuP;
-	private MenuItem saveBundleMenu;
-	private MenuItem saveAsBundleMenu;
-	private MenuItem genMenu;
-	private MenuItem parseMenu;
-	private MenuItem saveXmlBundleMenu;
-	private MenuItem saveUtfBundleMenu;
-	private MenuItem loadXmlBundleMenu;
-	private MenuItem loadUtfBundleMenu;
-	private MenuItem saveXmlBundleMenuP;
-	private MenuItem saveUtfBundleMenuP;
-	private MenuItem loadXmlBundleMenuP;
-	private MenuItem loadUtfBundleMenuP;
-	private MenuItem loadJarMenu;
-	private MenuItem closeMenu;
-	private MenuItem exitMenu;
-	private MenuItem newLangMenu;
-	private Menu langMenu;
-	private Menu fileMenu;
-	private MenuItem delMenu;
-	private MenuItem insMenu;
-	private MenuItem renMenu;
-	private MenuItem editCopyMenu;
-	private MenuItem editCutMenu;
-	private MenuItem editPasteMenu;
-	private MenuItem editDeleteMenu;
-	private MenuItem searchMenu;
-	private MenuItem searchAgainMenu;
-	private MenuItem replaceToMenu;
-	private MenuItem aboutMenu;
-	private MenuItem expandTreeMenu;
-	private MenuItem collapseTreeMenu;
-	private MenuItem expandNodeMenu;
-	private MenuItem collapseNodeMenu;
-	private CheckboxMenuItem hideTransMenu;
-	private MenuItem statisticsMenu;
-	private CheckboxMenuItem showNullsMenu;
+	private JMenuItem saveBundleMenu;
+	private JMenuItem saveAsBundleMenu;
+	private JMenuItem genMenu;
+	private JMenuItem closeMenu;
+	private JMenuItem exitMenu;
+	private JMenu langMenu;
+	private JMenu fileMenu;
+	private JCheckBoxMenuItem hideTransMenu;
+	private JCheckBoxMenuItem showNullsMenu;
 
 	// Options
-	private CheckboxMenuItem keepLastDirMenu;
-	private CheckboxMenuItem omitSpacesMenu;
-	private CheckboxMenuItem autoExpandTFMenu;
-	private CheckboxMenuItem allowDotMenu;
-	private CheckboxMenuItem allowUScoreMenu;
-
-	// Context menus
-	private MenuItem ctNewMenu;
-	private MenuItem ctNodeExpandMenu;
-	private MenuItem ctNodeCollapseMenu;
-	private MenuItem ctNodeDeleteMenu;
-	private MenuItem ctNodeRenameMenu;
+	private JCheckBoxMenuItem keepLastDirMenu;
+	private JCheckBoxMenuItem omitSpacesMenu;
+	private JCheckBoxMenuItem autoExpandTFMenu;
+	private JCheckBoxMenuItem allowDotMenu;
+	private JCheckBoxMenuItem allowUScoreMenu;
 
 	private EmulatedTextField commField;
 	private IELabel sbl1;
@@ -314,26 +274,27 @@ class Translator extends JFrame implements AWTEventListener {
 		tree = new GraphTree();
 		tree.setResolver(imgres);
 		tree.setBackground(Color.white);
-		ContextMenuBar mbar = new ContextMenuBar(this);
+		JMenuBar mbar = new JMenuBar();
 
-		ContextMenu _ctNewMenu = new ContextMenu("");
-		ctNewMenu = new MenuItem(RC("tools.translator.menu.insert"));
+		JPopupMenu _ctNewMenu = new JPopupMenu("");
+		// Context JMenus
+		JMenuItem ctNewMenu = new JMenuItem(RC("tools.translator.menu.insert"));
 		_ctNewMenu.add(ctNewMenu);
 		mbar.add(_ctNewMenu);
 
-		ContextMenu _ctNodeMenu = new ContextMenu("");
-		ctNewMenu = new MenuItem(RC("tools.translator.menu.insert"));
+		JPopupMenu _ctNodeMenu = new JPopupMenu("");
+		ctNewMenu = createMenuItem(this::onNewKey, RC("tools.translator.menu.insert"));
 		_ctNodeMenu.add(ctNewMenu);
-		ctNodeExpandMenu = new MenuItem(RC("tools.translator.menu.expand"));
+		JMenuItem ctNodeExpandMenu = createMenuItem(this::onExpandTreeNode, RC("tools.translator.menu.expand"));
 		_ctNodeMenu.add(ctNodeExpandMenu);
-		ctNodeCollapseMenu = new MenuItem(RC("tools.translator.menu.collapse"));
+		JMenuItem ctNodeCollapseMenu = createMenuItem(this::onCollapseTreeNode, RC("tools.translator.menu.collapse"));
 		_ctNodeMenu.add(ctNodeCollapseMenu);
-		ctNodeDeleteMenu = new MenuItem(RC("tools.translator.menu.delete"));
+		JMenuItem ctNodeDeleteMenu = createMenuItem(this::onDeleteKey, RC("tools.translator.menu.delete"));
 		_ctNodeMenu.add(ctNodeDeleteMenu);
-		ctNodeRenameMenu = new MenuItem(RC("tools.translator.menu.rename"));
+		JMenuItem ctNodeRenameMenu = createMenuItem(this::onRenameKey, RC("tools.translator.menu.rename"));
 		_ctNodeMenu.add(ctNodeRenameMenu);
 		mbar.add(_ctNodeMenu);
-		tree.setMenuBar(mbar);
+		//tree.setJMenuBar(mbar); //FIXME: replace tree with standard tree widget
 
 		pane.setLayout(new BorderLayout());
 		Panel mainPanel = new BorderedPanel(BorderedPanel.RAISED2/*SUNKEN*/);
@@ -372,72 +333,76 @@ class Translator extends JFrame implements AWTEventListener {
 		tabOrder.add(keyInsertButton);
 		tabOrder.add(keyDeleteButton);
 
-		MenuBar menuBar = new MenuBar();
-		fileMenu = new Menu(RC("menu.file"));
-		newBundleMenu = new MenuItem(RC("tools.translator.menu.new.bundle"), new MenuShortcut(KeyEvent.VK_N));
-		openBundleMenu = new MenuItem(RC("tools.translator.menu.open"), new MenuShortcut(KeyEvent.VK_O));
-		saveBundleMenu = new MenuItem(RC("tools.translator.menu.save"), new MenuShortcut(KeyEvent.VK_S));
-		saveBundleMenu.disable();
-		saveAsBundleMenu = new MenuItem(RC("tools.translator.menu.saveas"));
-		saveAsBundleMenu.disable();
-		closeMenu = new MenuItem(RC("tools.translator.menu.close"));
-		closeMenu.disable();
-		exitMenu = new MenuItem(RC("menu.exit"));
+		JMenuBar menuBar = new JMenuBar();
+		fileMenu = new JMenu(RC("menu.file"));
+		JMenuItem newBundleMenu = createMenuItem(this::onNewBundle, RC("tools.translator.menu.new.bundle"), KeyEvent.VK_N);
+		JMenuItem openBundleMenu = createMenuItem(this::onLoadBundle, RC("tools.translator.menu.open"), KeyEvent.VK_O);
+		saveBundleMenu = createMenuItem(this::onSave, RC("tools.translator.menu.save"), KeyEvent.VK_S);
+		saveBundleMenu.addChangeListener(e -> saveBundleToolButton.setEnabled(saveBundleMenu.isEnabled()));
+		saveBundleMenu.setEnabled(false);
+		saveAsBundleMenu = createMenuItem(this::onSaveAs, RC("tools.translator.menu.saveas"));
+		saveAsBundleMenu.addChangeListener(e -> saveAsToolButton.setEnabled(saveAsBundleMenu.isEnabled()));
+		saveAsBundleMenu.setEnabled(false);
+		closeMenu = createMenuItem(this::onCloseMenu, RC("tools.translator.menu.close"));
+		closeMenu.setEnabled(false);
+		exitMenu = createMenuItem(this::onClose, RC("menu.exit"));
 
-		Menu editMenu = new Menu(RC("menu.edit"));
+		JMenu editMenu = new JMenu(RC("menu.edit"));
 
-		editCopyMenu = new MenuItem(RC("tools.translator.menu.edit.copy") /* , new MenuShortcut(KeyEvent.VK_C) */ );
-		editCutMenu = new MenuItem(RC("tools.translator.menu.edit.cut") /* , new MenuShortcut(KeyEvent.VK_X) */ );
-		editPasteMenu = new MenuItem(RC("tools.translator.menu.edit.paste") /* , new MenuShortcut(KeyEvent.VK_V) */ );
-		editDeleteMenu = new MenuItem(RC("tools.translator.menu.edit.delete"));
-		searchMenu = new MenuItem(RC("menu.search"));
-		searchAgainMenu = new MenuItem(RC("menu.searchagain"), new MenuShortcut(KeyEvent.VK_F));
-		replaceToMenu = new MenuItem(RC("menu.replace"));
+		JMenuItem editCopyMenu = createMenuItem(this::onCopy, RC("tools.translator.menu.edit.copy") /* , KeyEvent.VK_C) */);
+		JMenuItem editCutMenu = createMenuItem(this::onCut, RC("tools.translator.menu.edit.cut") /* , KeyEvent.VK_X) */);
+		JMenuItem editPasteMenu = createMenuItem(this::onPaste, RC("tools.translator.menu.edit.paste") /* , KeyEvent.VK_V) */);
+		JMenuItem editDeleteMenu = createMenuItem(this::onDelete, RC("tools.translator.menu.edit.delete"));
+		JMenuItem searchMenu = createMenuItem(this::onSearch, RC("menu.search"));
+		JMenuItem searchAgainMenu = createMenuItem(this::onSearchAgain, RC("menu.searchagain"), KeyEvent.VK_F);
+		JMenuItem replaceToMenu = createMenuItem(this::onReplace, RC("menu.replace"));
 
-		newLangMenu = new MenuItem(RC("tools.translator.menu.new.lang"), new MenuShortcut(KeyEvent.VK_L));
-		delMenu = new MenuItem(RC("tools.translator.menu.delete"), new MenuShortcut(KeyEvent.VK_D));
-		insMenu = new MenuItem(RC("tools.translator.menu.insert"), new MenuShortcut(KeyEvent.VK_I));
-		renMenu = new MenuItem(RC("tools.translator.menu.rename"), new MenuShortcut(KeyEvent.VK_R));
+		JMenuItem newLangMenu = createMenuItem(this::onNewResource, RC("tools.translator.menu.new.lang"), KeyEvent.VK_L);
+		JMenuItem delMenu = createMenuItem(this::onDeleteKey, RC("tools.translator.menu.delete"), KeyEvent.VK_D);
+		JMenuItem insMenu = createMenuItem(this::onNewKey, RC("tools.translator.menu.insert"), KeyEvent.VK_I);
+		JMenuItem renMenu = createMenuItem(this::onRenameKey, RC("tools.translator.menu.rename"), KeyEvent.VK_R);
 
-		Menu treeMenu = new Menu(RC("menu.tree"));
-		expandNodeMenu = new MenuItem(RC("tools.translator.menu.node.expand") /*, new MenuShortcut(KeyEvent.VK_PLUS)*/);
-		collapseNodeMenu = new MenuItem(RC("tools.translator.menu.node.collapse") /*, new MenuShortcut(KeyEvent.VK_MINUS)*/ );
-		expandTreeMenu = new MenuItem(RC("tools.translator.menu.expand"));
-		collapseTreeMenu = new MenuItem(RC("tools.translator.menu.collapse"));
-		hideTransMenu = new CheckboxMenuItem(RC("tools.translator.menu.hide.completed"));
+		JMenu treeMenu = new JMenu(RC("menu.tree"));
+		JMenuItem expandNodeMenu = createMenuItem(this::onExpandTreeNode, RC("tools.translator.menu.node.expand") /*, KeyEvent.VK_PLUS)*/);
+		JMenuItem collapseNodeMenu = createMenuItem(this::onCollapseTreeNode,
+			RC("tools.translator.menu.node.collapse") /*, KeyEvent.VK_MINUS)*/);
+		JMenuItem expandTreeMenu = createMenuItem(this::onExpandAllTreeNodes, RC("tools.translator.menu.expand"));
+		JMenuItem collapseTreeMenu = createMenuItem(this::onCollapseAllTreeNodes, RC("tools.translator.menu.collapse"));
+		hideTransMenu = createCheckBoxMenuItem(this::onToggleHideTranslated, RC("tools.translator.menu.hide.completed"));
 
-		Menu viewMenu = new Menu(RC("menu.options"));
-		statisticsMenu = new MenuItem(RC("tools.translator.menu.statistics"));
-		showNullsMenu = new CheckboxMenuItem(RC("tools.translator.menu.nulls"), false);
-		langMenu = new Menu(RC("tools.translator.menu.showres"));
-		langMenu.disable();
-		Menu optionsMenu = new Menu/*Item*/(RC("tools.translator.menu.options"));
-		keepLastDirMenu = new CheckboxMenuItem(RC("tools.translator.menu.options.keeplastdir"), true);
-		omitSpacesMenu = new CheckboxMenuItem(RC("tools.translator.menu.options.omitspaces"), true);
-		autoExpandTFMenu = new CheckboxMenuItem(RC("tools.translator.menu.options.autofit"), true);
-		allowDotMenu = new CheckboxMenuItem(RC("tools.translator.menu.options.allowdot"), true);
-		allowUScoreMenu = new CheckboxMenuItem(RC("tools.translator.menu.options.allowuscore"), true);
-		omitSpacesMenu.disable();
+		JMenu viewMenu = new JMenu(RC("menu.options"));
+		JMenuItem statisticsMenu = createMenuItem(this::onStatistics, RC("tools.translator.menu.statistics"));
+		showNullsMenu = createCheckBoxMenuItem(this::onShowNulls, RC("tools.translator.menu.nulls"), false);
+		langMenu = new JMenu(RC("tools.translator.menu.showres"));
+		langMenu.setEnabled(false);
+		JMenu optionsMenu = new JMenu(RC("tools.translator.menu.options"));
+		keepLastDirMenu = createCheckBoxMenuItem(this::onToggleKeepLastDir, RC("tools.translator.menu.options.keeplastdir"), true);
+		omitSpacesMenu = createCheckBoxMenuItem(this::onToggleOmitSpaces, RC("tools.translator.menu.options.omitspaces"), true);
+		autoExpandTFMenu = createCheckBoxMenuItem(this::onToggleAutoExpandTF, RC("tools.translator.menu.options.autofit"), true);
+		allowDotMenu = createCheckBoxMenuItem(this::onToggleAllowDot, RC("tools.translator.menu.options.allowdot"), true);
+		allowUScoreMenu = createCheckBoxMenuItem(this::onToggleAllowUnderscore, RC("tools.translator.menu.options.allowuscore"), true);
+		omitSpacesMenu.setEnabled(false);
 
-		Menu helpMenu = new Menu(RC("menu.help"));
-		aboutMenu = new MenuItem(RC("menu.about"));
+		JMenu helpMenu = new JMenu(RC("menu.help"));
+		JMenuItem aboutMenu = createMenuItem(this::onAbout, RC("menu.about"));
 
-		Menu toolMenu = new Menu(RC("tools.translator.menu.tools"));
-		genMenu = new MenuItem(RC("tools.translator.menu.generate"));
-		genMenu.disable();
-		parseMenu = new MenuItem(RC("tools.translator.menu.parse"));
-		saveXmlBundleMenu = new MenuItem(RC("tools.translator.menu.save.xml"));
-		saveUtfBundleMenu = new MenuItem(RC("tools.translator.menu.save.utf"));
-		loadXmlBundleMenu = new MenuItem(RC("tools.translator.menu.load.xml"));
-		loadUtfBundleMenu = new MenuItem(RC("tools.translator.menu.load.utf"));
+		JMenu toolMenu = new JMenu(RC("tools.translator.menu.tools"));
+		genMenu = createMenuItem(this::onGenCode, RC("tools.translator.menu.generate"));
+		genMenu.addChangeListener(e -> genToolButton.setEnabled(genMenu.isEnabled()));
+		genMenu.setEnabled(false);
+		JMenuItem parseMenu = createMenuItem(this::onParseCode, RC("tools.translator.menu.parse"));
+		JMenuItem saveXmlBundleMenu = createMenuItem(() -> onSaveXml(false), RC("tools.translator.menu.save.xml"));
+		JMenuItem saveUtfBundleMenu = createMenuItem(() -> onSaveUtf(false), RC("tools.translator.menu.save.utf"));
+		JMenuItem loadXmlBundleMenu = createMenuItem(() -> onLoadXml(false), RC("tools.translator.menu.load.xml"));
+		JMenuItem loadUtfBundleMenu = createMenuItem(() -> onLoadUtf(false), RC("tools.translator.menu.load.utf"));
 
-		saveXmlBundleMenuP = new MenuItem(RC("tools.translator.menu.save.xml.part"));
-		saveUtfBundleMenuP = new MenuItem(RC("tools.translator.menu.save.utf.part"));
-		loadXmlBundleMenuP = new MenuItem(RC("tools.translator.menu.load.xml.part"));
-		loadUtfBundleMenuP = new MenuItem(RC("tools.translator.menu.load.utf.part"));
-		openBundleMenuP = new MenuItem(RC("tools.translator.menu.load.part"));
+		JMenuItem saveXmlBundleMenuP = createMenuItem(() -> onSaveXml(true), RC("tools.translator.menu.save.xml.part"));
+		JMenuItem saveUtfBundleMenuP = createMenuItem(() -> onSaveUtf(true), RC("tools.translator.menu.save.utf.part"));
+		JMenuItem loadXmlBundleMenuP = createMenuItem(() -> onLoadXml(true), RC("tools.translator.menu.load.xml.part"));
+		JMenuItem loadUtfBundleMenuP = createMenuItem(() -> onLoadUtf(true), RC("tools.translator.menu.load.utf.part"));
+		JMenuItem openBundleMenuP = createMenuItem(() -> onOpen(true), RC("tools.translator.menu.load.part"));
 
-		loadJarMenu = new MenuItem(RC("tools.translator.menu.load.jar"));
+		JMenuItem loadJarMenu = createMenuItem(this::onLoadJar, RC("tools.translator.menu.load.jar"));
 
 		fileMenu.add(newBundleMenu);
 		fileMenu.add(openBundleMenu);
@@ -504,7 +469,7 @@ class Translator extends JFrame implements AWTEventListener {
 		menuBar.add(treeMenu);
 		menuBar.add(toolMenu);
 		menuBar.add(helpMenu);
-		setMenuBar(menuBar);
+		setJMenuBar(menuBar);
 
 		delDialog = new MessageBox2(this);
 		delDialog.setIcon(imgres.getImage(SYS_DIR + "ogo.gif", delDialog));
@@ -525,6 +490,78 @@ class Translator extends JFrame implements AWTEventListener {
 		errDialog.setIcon(imgres.getImage(SYS_DIR + "Stop.gif", errDialog));
 		String[] OK_BUT = { RC("dialog.button.ok") };
 		errDialog.setButtons(OK_BUT);
+	}
+
+	private void onToggleAllowUnderscore() {
+		allowUScore = allowUScoreMenu.getState();
+	}
+
+	private void onToggleAllowDot() {
+		allowDot = allowDotMenu.getState();
+	}
+
+	private void onToggleAutoExpandTF() {
+		autoExpandTF = autoExpandTFMenu.getState();
+	}
+
+	private void onToggleOmitSpaces() {
+		omitSpaces = omitSpacesMenu.getState();
+	}
+
+	private void onToggleKeepLastDir() {
+		keepLastDir = keepLastDirMenu.getState();
+	}
+
+	private void onShowNulls() {
+		setIndicators(tree.getRootNode());
+		tree.repaint();
+	}
+
+	private void onToggleHideTranslated() {
+		hideTranslated(hideTransMenu.getState());
+	}
+
+	private void onCollapseAllTreeNodes() {
+		tree.collapseAll();
+		tree.repaint();
+	}
+
+	private void onExpandAllTreeNodes() {
+		tree.expandAll();
+		tree.repaint();
+	}
+
+	private void onCloseMenu() {
+		exitInitiated = false;
+		onClose();
+	}
+
+	private void onCollapseTreeNode() {
+		collapse(tree.getSelectedNode());
+	}
+
+	private void onExpandTreeNode() {
+		expand(tree.getSelectedNode());
+	}
+
+	private JMenuItem createMenuItem(Runnable callback, String text, int mnemonic) {
+		JMenuItem item = new JMenuItem(text, mnemonic);
+		item.addActionListener(e -> callback.run());
+		return item;
+	}
+
+	private JMenuItem createMenuItem(Runnable callback, String text) {
+		return createMenuItem(callback, text, 0);
+	}
+
+	private JCheckBoxMenuItem createCheckBoxMenuItem(Runnable callback, String text, boolean defaultState) {
+		JCheckBoxMenuItem item = new JCheckBoxMenuItem(text, defaultState);
+		item.addActionListener(e -> callback.run());
+		return item;
+	}
+
+	private JCheckBoxMenuItem createCheckBoxMenuItem(Runnable callback, String text) {
+		return createCheckBoxMenuItem(callback, text, true);
 
 	}
 
@@ -579,209 +616,6 @@ class Translator extends JFrame implements AWTEventListener {
 
 	@Override
 	public boolean action(Event e, Object arg) {
-		if (e.target == statisticsMenu) {
-			onStatistics();
-		}
-		if (e.target == searchMenu) {
-			onSearch();
-		}
-		if (e.target == searchAgainMenu) {
-			onSearchAgain();
-		}
-		if (e.target == replaceToMenu) {
-			onReplace();
-		}
-
-		if ((e.target == expandNodeMenu) || (e.target == ctNodeExpandMenu)) {
-			expand(tree.getSelectedNode());
-		}
-		if ((e.target == collapseNodeMenu) || (e.target == ctNodeCollapseMenu)) {
-			collapse(tree.getSelectedNode());
-		}
-		if (e.target == expandTreeMenu) {
-			tree.expandAll();
-			tree.repaint();
-		}
-		if (e.target == collapseTreeMenu) {
-			tree.collapseAll();
-			tree.repaint();
-		}
-		if (e.target == hideTransMenu) {
-			hideTranslated(hideTransMenu.getState());
-		}
-		if (e.target == dropComment) {
-			commField.setText("");
-			setTranslations();
-		}
-
-		if (e.target == editCopyMenu) {
-			Component ccur = getFocusOwner();
-			if (ccur instanceof EmulatedTextField) {
-				EmulatedTextField cur = (EmulatedTextField) ccur;
-				cur.blCopy();
-			}
-			else if (ccur instanceof TextField) {
-				TextField cur = (TextField) ccur;
-				Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
-				StringSelection s2 = new StringSelection(cur.getSelectedText());
-				c.setContents(s2, s2);
-			}
-		}
-		if (e.target == editCutMenu) {
-			Component ccur = getFocusOwner();
-			if (ccur instanceof EmulatedTextField) {
-				EmulatedTextField cur = (EmulatedTextField) ccur;
-				cur.blCopy();
-				cur.blDelete();
-			}
-			else if (ccur instanceof TextField) {
-				TextField cur = (TextField) ccur;
-				Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
-				StringSelection s2 = new StringSelection(cur.getSelectedText());
-				c.setContents(s2, s2);
-				if (!cur.getSelectedText().isEmpty()) {
-					cur.setText(cur.getText().substring(0, cur.getSelectionStart()) + cur.getText().substring(cur.getSelectionEnd()));
-				}
-			}
-		}
-		if (e.target == editPasteMenu) {
-			Component ccur = getFocusOwner();
-			if (ccur instanceof EmulatedTextField) {
-				EmulatedTextField cur = (EmulatedTextField) ccur;
-				cur.blPaste();
-			}
-			else if (ccur instanceof TextField) {
-				TextField cur = (TextField) ccur;
-
-				Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
-				Transferable t = c.getContents("e");
-
-				String nt = "";
-				if (t.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-					try {
-						nt = (String) t.getTransferData(DataFlavor.stringFlavor);
-					}
-					catch (Exception ex) {
-					}
-				}
-
-				if (!cur.getSelectedText().isEmpty()) {
-					cur.setText(cur.getText().substring(0, cur.getSelectionStart()) + nt + cur.getText().substring(cur.getSelectionEnd()));
-				}
-				else {
-					cur.setText(cur.getText().substring(0, cur.getCaretPosition()) + nt + cur.getText().substring(cur.getCaretPosition()));
-				}
-			}
-		}
-		if (e.target == editDeleteMenu) {
-			Component ccur = getFocusOwner();
-			if (ccur instanceof EmulatedTextField) {
-				EmulatedTextField cur = (EmulatedTextField) ccur;
-				cur.blDelete();
-			}
-			else if (ccur instanceof TextField) {
-				TextField cur = (TextField) ccur;
-				if (!cur.getSelectedText().isEmpty()) {
-					cur.setText(cur.getText().substring(0, cur.getSelectionStart()) + cur.getText().substring(cur.getSelectionEnd()));
-				}
-			}
-		}
-
-		if (e.target == newLangMenu) {
-			onNewResource();
-		}
-		if ((e.target == insMenu) || (e.target == ctNewMenu)) {
-			onNewKey();
-		}
-		if ((e.target == renMenu) || (e.target == ctNodeRenameMenu)) {
-			onRenameKey();
-		}
-		if (e.target == newBundleMenu) {
-			onNewBundle();
-		}
-		if (e.target == closeMenu) {
-			exitInitiated = false;
-			onClose();
-		}
-		if (e.target == openBundleMenu) {
-			onOpen(false);
-		}
-		if (e.target == saveBundleMenu) {
-			onSave();
-		}
-		if (e.target == saveAsBundleMenu) {
-			onSaveAs();
-		}
-		if (e.target == exitMenu) {
-			onClose();
-		}
-		if (e.target == keyInsertButton) {
-			onInsertKey();
-		}
-		if ((e.target == keyDeleteButton) || (e.target == delMenu) || (e.target == ctNodeDeleteMenu)) {
-			onDeleteKey();
-		}
-		if (e.target == genMenu) {
-			onGenCode();
-		}
-		if (e.target == parseMenu) {
-			onParseCode();
-		}
-		if (e.target == aboutMenu) {
-			onAbout();
-		}
-
-		if (e.target == loadXmlBundleMenu) {
-			onLoadXml(false);
-		}
-		if (e.target == saveXmlBundleMenu) {
-			onSaveXml(false);
-		}
-		if (e.target == loadUtfBundleMenu) {
-			onLoadUtf(false);
-		}
-		if (e.target == saveUtfBundleMenu) {
-			onSaveUtf(false);
-		}
-
-		if (e.target == openBundleMenuP) {
-			onOpen(true);
-		}
-		if (e.target == loadXmlBundleMenuP) {
-			onLoadXml(true);
-		}
-		if (e.target == saveXmlBundleMenuP) {
-			onSaveXml(true);
-		}
-		if (e.target == loadUtfBundleMenuP) {
-			onLoadUtf(true);
-		}
-		if (e.target == saveUtfBundleMenuP) {
-			onSaveUtf(true);
-		}
-
-		if (e.target == loadJarMenu) {
-			onLoadJar();
-		}
-
-		if ((e.target instanceof CheckboxMenuItem) && (e.target == showNullsMenu)) {
-			setIndicators(tree.getRootNode());
-			tree.repaint();
-		}
-		if (e.target instanceof CheckboxMenuItem) {
-			for (int i = 0; i < langStates.size(); i++) {
-				LangState ls = getLangState(i);
-				if (e.target == ls.box) {
-					ls.hidden = !ls.hidden;
-					ls.tf.setVisible(!ls.hidden);
-					ls.label.setVisible(!ls.hidden);
-					setIndicators(tree.getRootNode());
-					textPanel.invalidate();
-					validate();
-				}
-				ls.box.setState(!ls.hidden);
-			}
-		}
 		if ((e.target == delDialog) && (e.arg instanceof Button) && ((Button) e.arg).getLabel().equals(DELETE_BUTTONS[0])) {
 			String key = tree.getSelectedText();
 			// remove all subkeys
@@ -838,35 +672,88 @@ class Translator extends JFrame implements AWTEventListener {
 			}
 		}
 
-		if (e.target == keepLastDirMenu) {
-			keepLastDir = keepLastDirMenu.getState();
-		}
-		if (e.target == omitSpacesMenu) {
-			omitSpaces = omitSpacesMenu.getState();
-		}
-		if (e.target == autoExpandTFMenu) {
-			autoExpandTF = autoExpandTFMenu.getState();
-		}
-		if (e.target == allowDotMenu) {
-			allowDot = allowDotMenu.getState();
-		}
-		if (e.target == allowUScoreMenu) {
-			allowUScore = allowUScoreMenu.getState();
-		}
+		updateStatusBar();
+		return true;
+	}
 
-		if (e.target instanceof MenuItem) {
-			String lbl = ((MenuItem) e.target).getLabel();
-			for (String path : pickList) {
-				String patz = stretchPath(path);
-				if (patz.equals(lbl)) {
-					clear();
-					readResources(path, false);
-					break;
-				}
+	private void updateStatusBar() {
+		sbl1.setText(" " + getVisLangCount() + "/" + bundle.getBundle().getLangCount() + ", " + bundle.getBundle().getItemCount() + " ");
+	}
+
+	private void onDelete() {
+		Component ccur = getFocusOwner();
+		if (ccur instanceof EmulatedTextField) {
+			EmulatedTextField cur = (EmulatedTextField) ccur;
+			cur.blDelete();
+		}
+		else if (ccur instanceof TextField) {
+			TextField cur = (TextField) ccur;
+			if (!cur.getSelectedText().isEmpty()) {
+				cur.setText(cur.getText().substring(0, cur.getSelectionStart()) + cur.getText().substring(cur.getSelectionEnd()));
 			}
 		}
-		sbl1.setText(" " + getVisLangCount() + "/" + bundle.getBundle().getLangCount() + ", " + bundle.getBundle().getItemCount() + " ");
-		return true;
+	}
+
+	private void onPaste() {
+		Component ccur = getFocusOwner();
+		if (ccur instanceof EmulatedTextField) {
+			EmulatedTextField cur = (EmulatedTextField) ccur;
+			cur.blPaste();
+		}
+		else if (ccur instanceof TextField) {
+			TextField cur = (TextField) ccur;
+
+			Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
+			Transferable t = c.getContents("e");
+
+			String nt = "";
+			if (t.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+				try {
+					nt = (String) t.getTransferData(DataFlavor.stringFlavor);
+				}
+				catch (Exception ex) {
+				}
+			}
+
+			if (!cur.getSelectedText().isEmpty()) {
+				cur.setText(cur.getText().substring(0, cur.getSelectionStart()) + nt + cur.getText().substring(cur.getSelectionEnd()));
+			}
+			else {
+				cur.setText(cur.getText().substring(0, cur.getCaretPosition()) + nt + cur.getText().substring(cur.getCaretPosition()));
+			}
+		}
+	}
+
+	private void onCut() {
+		Component ccur = getFocusOwner();
+		if (ccur instanceof EmulatedTextField) {
+			EmulatedTextField cur = (EmulatedTextField) ccur;
+			cur.blCopy();
+			cur.blDelete();
+		}
+		else if (ccur instanceof TextField) {
+			TextField cur = (TextField) ccur;
+			Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
+			StringSelection s2 = new StringSelection(cur.getSelectedText());
+			c.setContents(s2, s2);
+			if (!cur.getSelectedText().isEmpty()) {
+				cur.setText(cur.getText().substring(0, cur.getSelectionStart()) + cur.getText().substring(cur.getSelectionEnd()));
+			}
+		}
+	}
+
+	private void onCopy() {
+		Component ccur = getFocusOwner();
+		if (ccur instanceof EmulatedTextField) {
+			EmulatedTextField cur = (EmulatedTextField) ccur;
+			cur.blCopy();
+		}
+		else if (ccur instanceof TextField) {
+			TextField cur = (TextField) ccur;
+			Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
+			StringSelection s2 = new StringSelection(cur.getSelectedText());
+			c.setContents(s2, s2);
+		}
 	}
 
 	private void setTranslations() {
@@ -987,9 +874,9 @@ class Translator extends JFrame implements AWTEventListener {
 			tree.selectNodeAndOpen(key);
 			tree.repaint();
 			setTranslations();
-			saveBundleMenu.enable();
-			saveAsBundleMenu.enable();
-			genMenu.enable();
+			saveBundleMenu.setEnabled(true);
+			saveAsBundleMenu.setEnabled(true);
+			genMenu.setEnabled(true);
 			setIndicators(tree.getRootNode());
 			isDirty = true;
 
@@ -1098,15 +985,11 @@ class Translator extends JFrame implements AWTEventListener {
 		bundle = new BundleManager();
 		langStates = new ArrayList<>();
 
-		closeMenu.disable();
-		saveBundleMenu.disable();
-		saveAsBundleMenu.disable();
-		genMenu.disable();
-		langMenu.disable();
-	}
-
-	private LangState getLangState(int idx) {
-		return langStates.get(idx);
+		closeMenu.setEnabled(false);
+		saveBundleMenu.setEnabled(false);
+		saveAsBundleMenu.setEnabled(false);
+		genMenu.setEnabled(false);
+		langMenu.setEnabled(false);
 	}
 
 	private int getVisLangCount() {
@@ -1120,7 +1003,7 @@ class Translator extends JFrame implements AWTEventListener {
 			ls.box.setState(true);
 		}
 		// Fire it async as it take large time
-		hideTransMenu.disable();
+		hideTransMenu.setEnabled(false);
 		(new Thread(this::setIndicatorsInit)).start();
 	}
 
@@ -1128,7 +1011,7 @@ class Translator extends JFrame implements AWTEventListener {
 		sbl2.setText(RC("tools.translator.progress.indicator"));
 		sbl2.repaint();
 		setIndicators(tree.getRootNode());
-		hideTransMenu.enable();
+		hideTransMenu.setEnabled(true);
 		sbl2.setText("");
 		sbl2.repaint();
 	}
@@ -1456,7 +1339,7 @@ class Translator extends JFrame implements AWTEventListener {
 
 		for (int i = 0; i < langStates.size(); i++) {
 			LangState ls = getLangState(i);
-			CheckboxMenuItem cmi = ls.box;
+			JCheckBoxMenuItem cmi = ls.box;
 			boolean show = cmi.getState();
 			ls.tf.setVisible(show);
 			ls.hidden = !show;
@@ -1579,7 +1462,7 @@ class Translator extends JFrame implements AWTEventListener {
 
 		keynLab = new IELabel("");
 		constrain(textPanel, keynLab, 0, 1, 3, 1, GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, 1.0, 0.0, 10, 3, 0, 15);
-		langMenu.enable();
+		langMenu.setEnabled(true);
 	}
 
 	private void syncLanguage(String lang) {
@@ -1589,7 +1472,15 @@ class Translator extends JFrame implements AWTEventListener {
 		String langLab = lang2.getLangDescription();
 		LangState ls = new LangState();
 		ls.name = lang2.getLangId();
-		ls.box = new CheckboxMenuItem(langLab, false);
+		ls.box = new JCheckBoxMenuItem(langLab, false);
+		ls.box.addActionListener(e -> {
+			ls.hidden = !ls.hidden;
+			ls.tf.setVisible(!ls.hidden);
+			ls.label.setVisible(!ls.hidden);
+			setIndicators(tree.getRootNode());
+			textPanel.invalidate();
+			validate();
+		});
 		ls.box.setState(true);
 		ls.label = new IELabel(langLab + ":", IELabel.LEFT);
 		ls.tf = new TextAreaWrap();
@@ -1818,10 +1709,10 @@ class Translator extends JFrame implements AWTEventListener {
 
 		tree.requestFocus();
 
-		closeMenu.enable();
-		saveBundleMenu.enable();
-		saveAsBundleMenu.enable();
-		genMenu.enable();
+		closeMenu.setEnabled(true);
+		saveBundleMenu.setEnabled(true);
+		saveAsBundleMenu.setEnabled(true);
+		genMenu.setEnabled(true);
 
 		textPanel.invalidate();
 		validate();
@@ -1865,7 +1756,11 @@ class Translator extends JFrame implements AWTEventListener {
 	private void linkPickList() {
 		for (String aPickList : pickList) {
 			String patz = stretchPath(aPickList);
-			MenuItem item = new MenuItem(patz);
+			JMenuItem item = new JMenuItem(patz);
+			item.addActionListener(e -> {
+				clear();
+				readResources(aPickList, false);
+			});
 			fileMenu.add(item);
 		}
 		if (!pickList.isEmpty()) {
@@ -1881,17 +1776,20 @@ class Translator extends JFrame implements AWTEventListener {
 
 		int j;
 		String s1 = stretchPath(pickList.get(0));
-		for (j = 0; j < fileMenu.countItems(); ++j) {
-			String patz = fileMenu.getItem(j).getLabel();
-			if (patz.equals(s1)) {
-				break;
+		for (j = 0; j < fileMenu.getItemCount(); ++j) {
+			JMenuItem item = fileMenu.getItem(j);
+			if (null != item) {
+				String patz = item.getText();
+				if (patz.equals(s1)) {
+					break;
+				}
 			}
 		}
 		pickList = new ArrayList<>();
-		if (j >= fileMenu.countItems()) {
+		if (j >= fileMenu.getItemCount()) {
 			return;
 		}
-		for (; j < fileMenu.countItems();) {
+		for (; j < fileMenu.getItemCount();) {
 			fileMenu.remove(j);
 		}
 	}
