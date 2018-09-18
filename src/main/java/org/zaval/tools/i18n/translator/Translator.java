@@ -71,6 +71,7 @@ import java.util.stream.IntStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -110,9 +111,6 @@ class Translator extends JFrame implements AWTEventListener {
 	private MessageBox2 repDialog;
 
 	private EmulatedTextField keyName;
-	private Button keyInsertButton;
-	private Button keyDeleteButton;
-	private Button dropComment;
 	private IELabel keynLab;
 	private GraphTree tree;
 	private Panel textPanel;
@@ -308,10 +306,10 @@ class Translator extends JFrame implements AWTEventListener {
 		keyName.setBackground(Color.white);
 		constrain(keyPanel, keyName, 1, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.BOTH, 1.0, 1.0, 5, 5, 5, 5);
 
-		keyInsertButton = new Button(RC("tools.translator.label.insert"));
+		JButton keyInsertButton = createButton(this::onInsertKey, RC("tools.translator.label.insert"));
 		constrain(keyPanel, keyInsertButton, 2, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 5, 5);
 
-		keyDeleteButton = new Button(RC("tools.translator.label.delete"));
+		JButton keyDeleteButton = createButton(this::onDeleteKey, RC("tools.translator.label.delete"));
 		constrain(keyPanel, keyDeleteButton, 3, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 5, 5);
 
 		pane.add(keyPanel, "South");
@@ -562,7 +560,12 @@ class Translator extends JFrame implements AWTEventListener {
 
 	private JCheckBoxMenuItem createCheckBoxMenuItem(Runnable callback, String text) {
 		return createCheckBoxMenuItem(callback, text, true);
+	}
 
+	private JButton createButton(Runnable callback, String text) {
+		JButton item = new JButton(text);
+		item.addActionListener(e -> callback.run());
+		return item;
 	}
 
 	@Override
@@ -1457,12 +1460,17 @@ class Translator extends JFrame implements AWTEventListener {
 		commField.setBackground(Color.lightGray);
 		constrain(textPanel, commField, 1, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.BOTH, 1.0, 1.0, 3, 3, 5, 15);
 
-		dropComment = new Button(RC("tools.translator.label.dropcomment"));
+		JButton dropComment = createButton(this::onDropComment, RC("tools.translator.label.dropcomment"));
 		constrain(textPanel, dropComment, 2, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, 0.0, 0.0, 3, 3, 5, 15);
 
 		keynLab = new IELabel("");
 		constrain(textPanel, keynLab, 0, 1, 3, 1, GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, 1.0, 0.0, 10, 3, 0, 15);
 		langMenu.setEnabled(true);
+	}
+
+	private void onDropComment() {
+		commField.setText("");
+		setTranslations();
 	}
 
 	private void syncLanguage(String lang) {
