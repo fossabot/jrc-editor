@@ -17,9 +17,6 @@
 
 package org.zaval.tools.i18n.translator;
 
-import org.zaval.tools.i18n.translator.generated.JavaParser;
-import org.zaval.tools.i18n.translator.generated.UtfParser;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
@@ -29,6 +26,9 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Map;
 import java.util.StringTokenizer;
+
+import org.zaval.tools.i18n.translator.generated.JavaParser;
+import org.zaval.tools.i18n.translator.generated.UtfParser;
 
 public class Split { // NO_UCD (unused code)
 	private BundleManager bundle = new BundleManager();

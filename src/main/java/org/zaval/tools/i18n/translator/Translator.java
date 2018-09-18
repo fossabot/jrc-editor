@@ -81,6 +81,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JToolBar;
+import javax.swing.WindowConstants;
 
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
@@ -193,7 +194,7 @@ class Translator extends JFrame implements AWTEventListener {
 	}
 
 	private void init(String s, SafeResourceBundle res) {
-		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
@@ -238,6 +239,7 @@ class Translator extends JFrame implements AWTEventListener {
 		SpeedButton newLangToolButton = new SpeedButton(this::onNewResource, imgres.getImage(SYS_DIR + "newlang.gif", this));
 		SpeedButton delToolButton = new SpeedButton(this::onDeleteKey, imgres.getImage(SYS_DIR + "del.gif", this));
 		SpeedButton aboutToolButton = new SpeedButton(this::onAbout, imgres.getImage(SYS_DIR + "about.gif", this));
+
 		JToolBar tool = new JToolBar();
 		tool.add(new JLabel(RC("menu.file") + ":"));
 		tool.add(newBundleToolButton);
@@ -766,8 +768,7 @@ class Translator extends JFrame implements AWTEventListener {
 
 	private void setTranslations(String newKey) {
 		if (wasSelectedKey != null) {
-			for (int i = 0; i < langStates.size(); i++) {
-				LangState ls = getLangState(i);
+			for (LangState ls : langStates) {
 				if (ls.hidden) {
 					continue;
 				}
@@ -804,8 +805,7 @@ class Translator extends JFrame implements AWTEventListener {
 		}
 
 		BundleItem bi = bundle.getBundle().getItem(newKey);
-		for (int i = 0; i < langStates.size(); i++) {
-			LangState ls = getLangState(i);
+		for (LangState ls : langStates) {
 			String ss = bi == null ? null : bi.getTranslation(ls.name);
 			if (ss == null) {
 				ss = "";
@@ -996,12 +996,11 @@ class Translator extends JFrame implements AWTEventListener {
 	}
 
 	private int getVisLangCount() {
-		return (int) IntStream.range(0, langStates.size()).mapToObj(this::getLangState).filter(ls -> !ls.hidden).count();
+		return (int) langStates.stream().filter(ls -> !ls.hidden).count();
 	}
 
 	private void setAllIndicators() {
-		for (int i = 0; i < langStates.size(); i++) {
-			LangState ls = getLangState(i);
+		for (LangState ls : langStates) {
 			ls.hidden = false;
 			ls.box.setState(true);
 		}
@@ -1047,8 +1046,7 @@ class Translator extends JFrame implements AWTEventListener {
 		}
 		boolean isPres = false;
 		boolean isAbs = false;
-		for (int i = 0; i < langStates.size(); i++) {
-			LangState ls = getLangState(i);
+		for (LangState ls : langStates) {
 			if (ls.hidden) {
 				continue;
 			}
@@ -1209,7 +1207,7 @@ class Translator extends JFrame implements AWTEventListener {
 
 		if (tree.getSelectedText().equals(curItemForReplace.getId())) {
 			int k = bundle.getBundle().getLangIndex(lang);
-			LangState ls = getLangState(k);
+			LangState ls = langStates.get(k);
 			if (ls != null) {
 				ls.tf.setText(val);
 				ls.tf.getControl().requestFocus();
@@ -1303,7 +1301,7 @@ class Translator extends JFrame implements AWTEventListener {
 						validate();
 						if (replaceTo == null) {
 							textPanel.requestFocus();
-							LangState ls = getLangState(k);
+							LangState ls = langStates.get(k);
 							ls.tf.getControl().requestFocus();
 						}
 						return;
@@ -1334,14 +1332,13 @@ class Translator extends JFrame implements AWTEventListener {
 		String message = RC("tools.translator.label.filesuff");
 		String text = JOptionPane.showInputDialog(this, message, title, JOptionPane.PLAIN_MESSAGE);
 
-		if (null == text || text.isEmpty()) {
+		if ((null == text) || text.isEmpty()) {
 			return;
 		}
 		bundle.getBundle().addLanguage(text);
 		syncLanguage(text);
 
-		for (int i = 0; i < langStates.size(); i++) {
-			LangState ls = getLangState(i);
+		for (LangState ls : langStates) {
 			JCheckBoxMenuItem cmi = ls.box;
 			boolean show = cmi.getState();
 			ls.tf.setVisible(show);
@@ -2101,7 +2098,7 @@ class Translator extends JFrame implements AWTEventListener {
 		String title = RC("tools.translator.label.newkeytitle");
 		String message = RC("tools.translator.label.insert");
 		String text = JOptionPane.showInputDialog(this, message, title, JOptionPane.PLAIN_MESSAGE);
-		if (null == text || text.isEmpty()) {
+		if ((null == text) || text.isEmpty()) {
 			return;
 		}
 		keyName.setText(text);
@@ -2129,7 +2126,7 @@ class Translator extends JFrame implements AWTEventListener {
 		}
 		int i;
 		for (i = 0; i < langStates.size(); i++) {
-			LangState ls = getLangState(i);
+			LangState ls = langStates.get(i);
 			if (ls.hidden) {
 				continue;
 			}
@@ -2140,7 +2137,7 @@ class Translator extends JFrame implements AWTEventListener {
 
 		if (i < langStates.size()) {
 			for (++i; i < langStates.size(); ++i) {
-				LangState ls = getLangState(i);
+				LangState ls = langStates.get(i);
 				if (ls.hidden) {
 					continue;
 				}
@@ -2151,7 +2148,7 @@ class Translator extends JFrame implements AWTEventListener {
 			return;
 		}
 		for (i = 0; i < langStates.size(); ++i) {
-			LangState ls = getLangState(i);
+			LangState ls = langStates.get(i);
 			if (ls.hidden) {
 				continue;
 			}
@@ -2193,7 +2190,7 @@ class Translator extends JFrame implements AWTEventListener {
 		String message = RC("tools.translator.label.rename.label");
 		String newKeyName = (String) JOptionPane.showInputDialog(this, message, title, JOptionPane.PLAIN_MESSAGE, null, null, oldKeyName);
 
-		if (null == newKeyName || newKeyName.trim().isEmpty()) {
+		if ((null == newKeyName) || newKeyName.trim().isEmpty()) {
 			return;
 		}
 		if (oldKeyName.equals(newKeyName)) {

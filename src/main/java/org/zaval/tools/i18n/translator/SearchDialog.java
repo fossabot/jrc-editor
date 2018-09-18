@@ -21,14 +21,14 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
-import org.zaval.awt.dialog.EditDialog;
-
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.border.LineBorder;
+
+import org.zaval.awt.dialog.EditDialog;
 
 class SearchDialog extends EditDialog {
 	private final JRadioButton inKeys;
