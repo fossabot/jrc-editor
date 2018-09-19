@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2001-2002  Zaval Creative Engineering Group (http://www.zaval.org)
+ * Copyright (C) $YEAR Christoph Obexer <cobexer@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
