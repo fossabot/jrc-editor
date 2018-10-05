@@ -34,7 +34,7 @@ import java.awt.List;
 import java.awt.Panel;
 import java.awt.Toolkit;
 
-import org.zaval.awt.IELabel;
+import javax.swing.JLabel;
 
 class LangDialog extends Dialog {
 	private final List edit;
@@ -42,13 +42,13 @@ class LangDialog extends Dialog {
 	private final Button cancel;
 	private boolean isApply;
 	private final Component listener;
-	private final IELabel label;
+	private final JLabel label;
 
 	public LangDialog(Frame f, String s, boolean b, Component l) {
 		super(f, s, b);
 		setLayout(new GridBagLayout());
 
-		label = new IELabel("List of languages");
+		label = new JLabel("List of languages");
 		constrain(this, label, 0, 0, 1, 1, GridBagConstraints.NONE, GridBagConstraints.WEST, 0.0, 0.0, 5, 5, 5, 5);
 		edit = new List(10, true);
 		constrain(this, edit, 0, 1, 4, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST, 1.0, 0.0, 5, 5, 5, 5);

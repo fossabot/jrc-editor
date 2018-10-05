@@ -19,13 +19,12 @@
 package org.zaval.tools.i18n.translator;
 
 import javax.swing.JCheckBoxMenuItem;
-
-import org.zaval.awt.IELabel;
+import javax.swing.JLabel;
 
 class LangState {
 	TextAreaWrap tf;
 	boolean hidden;
-	IELabel label;
+	JLabel label;
 	String name;
 	JCheckBoxMenuItem box;
 }

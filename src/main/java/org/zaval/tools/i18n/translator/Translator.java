@@ -88,7 +88,6 @@ import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
 import org.zaval.awt.BorderedPanel;
 import org.zaval.awt.EmulatedTextField;
-import org.zaval.awt.IELabel;
 import org.zaval.awt.ResizeLayout;
 import org.zaval.awt.Resizer;
 import org.zaval.awt.SimpleScrollPanel;
@@ -113,7 +112,7 @@ class Translator extends JFrame implements AWTEventListener {
 	private MessageBox2 repDialog;
 
 	private EmulatedTextField keyName;
-	private IELabel keynLab;
+	private JLabel keynLab;
 	private TranslationTree tree;
 	private Panel textPanel;
 	private List<LangState> langStates = new ArrayList<>();
@@ -144,8 +143,8 @@ class Translator extends JFrame implements AWTEventListener {
 	private JCheckBoxMenuItem allowUScoreMenu;
 
 	private EmulatedTextField commField;
-	private IELabel sbl1;
-	private IELabel sbl2;
+	private JLabel sbl1;
+	private JLabel sbl2;
 
 	private ToolkitResolver imgres;
 	private boolean exitInitiated = true;
@@ -262,9 +261,9 @@ class Translator extends JFrame implements AWTEventListener {
 		setIconImage(imgres.getImage(SYS_DIR + "jrc-editor.gif"));
 
 		StatusBar panel3 = new StatusBar/*Panel*/();
-		sbl1 = new IELabel();
+		sbl1 = new JLabel();
 		panel3.add(new StatusBarElement(sbl1, 20));
-		sbl2 = new IELabel();
+		sbl2 = new JLabel();
 		panel3.add(new StatusBarElement(sbl2, 80));
 		StatusBarElement se = new StatusBarStubbElement(new Panel(), 0, new Dimension(22, 19));
 		se.setLayout(new FlowLayout(FlowLayout.LEFT, 1, 2));
@@ -294,7 +293,7 @@ class Translator extends JFrame implements AWTEventListener {
 		GridBagLayout gbl = new GridBagLayout();
 		Panel keyPanel = new Panel(gbl);
 
-		IELabel keyLabel = new IELabel(RC("tools.translator.label.key"));
+		JLabel keyLabel = new JLabel(RC("tools.translator.label.key"));
 		constrain(keyPanel, keyLabel, 0, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 5, 5);
 
 		keyName = new EmulatedTextField();
@@ -1435,7 +1434,7 @@ class Translator extends JFrame implements AWTEventListener {
 	}
 
 	private void initControls() {
-		IELabel commLab = new IELabel(RC("tools.translator.label.comments"));
+		JLabel commLab = new JLabel(RC("tools.translator.label.comments"));
 		constrain(textPanel, commLab, 0, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, 0.0, 0.0, 10, 3, 0, 15);
 
 		commField = new EmulatedTextField();
@@ -1445,7 +1444,7 @@ class Translator extends JFrame implements AWTEventListener {
 		JButton dropComment = createButton(this::onDropComment, RC("tools.translator.label.dropcomment"));
 		constrain(textPanel, dropComment, 2, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, 0.0, 0.0, 3, 3, 5, 15);
 
-		keynLab = new IELabel("");
+		keynLab = new JLabel("");
 		constrain(textPanel, keynLab, 0, 1, 3, 1, GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, 1.0, 0.0, 10, 3, 0, 15);
 		langMenu.setEnabled(true);
 	}
@@ -1472,7 +1471,7 @@ class Translator extends JFrame implements AWTEventListener {
 			validate();
 		});
 		ls.box.setState(true);
-		ls.label = new IELabel(langLab + ":", IELabel.LEFT);
+		ls.label = new JLabel(langLab + ":");
 		ls.tf = new TextAreaWrap();
 		ls.tf.getControl().setBackground(Color.white);
 		ls.tf.setLocale(new Locale(lang, ""));
