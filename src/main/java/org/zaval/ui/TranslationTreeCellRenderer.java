@@ -16,50 +16,35 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package org.zaval.awt;
+package org.zaval.ui;
 
 import java.awt.Component;
-import java.awt.Image;
-import java.awt.MediaTracker;
-import java.awt.Toolkit;
-import java.io.File;
-import java.io.IOException;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JTree;
+import javax.swing.tree.TreeCellRenderer;
 
-public class ToolkitResolver implements ImageResolver {
-	private final Toolkit kit;
+class TranslationTreeCellRenderer implements TreeCellRenderer {
+	private final ImageIcon warningIcon;
+	private final TreeCellRenderer treeCellRenderer;
 
-	public ToolkitResolver() {
-		kit = Toolkit.getDefaultToolkit();
-	}
-
-	public Image getImage(String str, Component listener) {
-		Image i = kit.getImage(str);
-		MediaTracker track = new MediaTracker(listener);
-		try {
-			track.addImage(i, 0);
-			track.waitForID(0);
-		}
-		catch (Exception e) {
-			i = null;
-		}
-		return i;
+	TranslationTreeCellRenderer(TranslationTree tree, TreeCellRenderer treeCellRenderer) {
+		this.warningIcon = tree.getWarningIcon();
+		this.treeCellRenderer = treeCellRenderer;
 	}
 
 	@Override
-	public Image getImage(String str) {
-		return kit.getImage(str);
-	}
+	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row,
+		boolean hasFocus) {
+		JLabel c = (JLabel) treeCellRenderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
 
-	@Override
-	public ImageIcon getImageIcon(String url) {
-		try {
-			return new ImageIcon(ImageIO.read(new File(url)));
+		if (((TranslationTreeNode) value).isShowIndicator()) {
+			c.setIcon(warningIcon);
 		}
-		catch (IOException ioe) {
-			throw new RuntimeException(ioe);
+		else {
+			c.setIcon(null);
 		}
+		return c;
 	}
 }

@@ -20,6 +20,10 @@ package org.zaval.awt;
 
 import java.awt.Image;
 
+import javax.swing.ImageIcon;
+
 public interface ImageResolver {
 	Image getImage(String str);
+
+	ImageIcon getImageIcon(String url);
 }

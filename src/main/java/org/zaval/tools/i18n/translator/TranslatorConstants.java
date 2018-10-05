@@ -24,8 +24,5 @@ abstract class TranslatorConstants {
 	public static final char KEY_SEPARATOR = '.';
 	public static final char KEY_SEPARATOR_2 = '_';
 
-	public static final int REMOVE_REQUIRED = 9991;
-	public static final String OPEN_IMAGE = "BITMAP1.gif";
-	public static final String CLOSE_IMAGE = "BITMAP2.gif";
 	public static final String WARN_IMAGE = "incomplete.gif";
 }

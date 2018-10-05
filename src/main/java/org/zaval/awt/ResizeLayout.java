@@ -25,6 +25,9 @@ import java.awt.LayoutManager;
 import java.awt.Panel;
 import java.awt.Rectangle;
 
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+
 public class ResizeLayout implements LayoutManager {
 	private int fix = -1;
 
@@ -112,17 +115,17 @@ public class ResizeLayout implements LayoutManager {
 
 	@Override
 	public void layoutContainer(Container parent) {
-		Panel left = null;
-		Panel right = null;
+		Component left = null;
+		Component right = null;
 		Component rl = null;
 		Component[] obj = parent.getComponents();
 		for (Component element : obj) {
-			if (element instanceof Panel) {
+			if ((element instanceof Panel) || (element instanceof JScrollPane) || (element instanceof JPanel)) {
 				if (left == null) {
-					left = (Panel) element;
+					left = element;
 				}
 				else if (right == null) {
-					right = (Panel) element;
+					right = element;
 				}
 				else {
 					break;

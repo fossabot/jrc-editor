@@ -88,9 +88,7 @@ import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
 import org.zaval.awt.BorderedPanel;
 import org.zaval.awt.EmulatedTextField;
-import org.zaval.awt.GraphTree;
 import org.zaval.awt.IELabel;
-import org.zaval.awt.LevelTree;
 import org.zaval.awt.ResizeLayout;
 import org.zaval.awt.Resizer;
 import org.zaval.awt.SimpleScrollPanel;
@@ -100,13 +98,15 @@ import org.zaval.awt.StatusBarElement;
 import org.zaval.awt.StatusBarStubbElement;
 import org.zaval.awt.ToolkitResolver;
 import org.zaval.awt.dialog.MessageBox2;
-import org.zaval.awt.peer.TreeNode;
 import org.zaval.io.IniFile;
 import org.zaval.io.InputIniFile;
 import org.zaval.tools.i18n.translator.generated.JavaParser;
 import org.zaval.tools.i18n.translator.generated.UtfParser;
+import org.zaval.ui.TranslationTree;
+import org.zaval.ui.TranslationTreeNode;
 import org.zaval.util.SafeResourceBundle;
 
+@SuppressWarnings("serial")
 class Translator extends JFrame implements AWTEventListener {
 	private MessageBox2 delDialog;
 	private MessageBox2 errDialog;
@@ -114,7 +114,7 @@ class Translator extends JFrame implements AWTEventListener {
 
 	private EmulatedTextField keyName;
 	private IELabel keynLab;
-	private GraphTree tree;
+	private TranslationTree tree;
 	private Panel textPanel;
 	private List<LangState> langStates = new ArrayList<>();
 	private String lastDirectory = ".";
@@ -272,30 +272,22 @@ class Translator extends JFrame implements AWTEventListener {
 		panel3.add(se);
 		add("South", panel3);
 
-		tree = new GraphTree();
-		tree.setResolver(imgres);
-		tree.setBackground(Color.white);
-		JMenuBar mbar = new JMenuBar();
+		tree = new TranslationTree(imgres.getImageIcon(SYS_DIR + TranslatorConstants.WARN_IMAGE));
+		tree.addSelectionListener(this::onTreeSelectionchanged);
+		tree.addKeyListener(this::onTreeKeyEvent);
 
-		JPopupMenu _ctNewMenu = new JPopupMenu("");
-		// Context JMenus
-		JMenuItem ctNewMenu = new JMenuItem(RC("tools.translator.menu.insert"));
-		_ctNewMenu.add(ctNewMenu);
-		mbar.add(_ctNewMenu);
-
-		JPopupMenu _ctNodeMenu = new JPopupMenu("");
-		ctNewMenu = createMenuItem(this::onNewKey, RC("tools.translator.menu.insert"));
-		_ctNodeMenu.add(ctNewMenu);
+		JPopupMenu ctNodeMenu = new JPopupMenu("");
+		JMenuItem ctNewMenu = createMenuItem(this::onNewKey, RC("tools.translator.menu.insert"));
+		ctNodeMenu.add(ctNewMenu);
 		JMenuItem ctNodeExpandMenu = createMenuItem(this::onExpandTreeNode, RC("tools.translator.menu.expand"));
-		_ctNodeMenu.add(ctNodeExpandMenu);
+		ctNodeMenu.add(ctNodeExpandMenu);
 		JMenuItem ctNodeCollapseMenu = createMenuItem(this::onCollapseTreeNode, RC("tools.translator.menu.collapse"));
-		_ctNodeMenu.add(ctNodeCollapseMenu);
+		ctNodeMenu.add(ctNodeCollapseMenu);
 		JMenuItem ctNodeDeleteMenu = createMenuItem(this::onDeleteKey, RC("tools.translator.menu.delete"));
-		_ctNodeMenu.add(ctNodeDeleteMenu);
+		ctNodeMenu.add(ctNodeDeleteMenu);
 		JMenuItem ctNodeRenameMenu = createMenuItem(this::onRenameKey, RC("tools.translator.menu.rename"));
-		_ctNodeMenu.add(ctNodeRenameMenu);
-		mbar.add(_ctNodeMenu);
-		//tree.setJMenuBar(mbar); //FIXME: replace tree with standard tree widget
+		ctNodeMenu.add(ctNodeRenameMenu);
+		tree.setComponentPopupMenu(ctNodeMenu);
 
 		pane.setLayout(new BorderLayout());
 		Panel mainPanel = new BorderedPanel(BorderedPanel.RAISED2/*SUNKEN*/);
@@ -323,13 +315,13 @@ class Translator extends JFrame implements AWTEventListener {
 		scrPanel = new SimpleScrollPanel(textPanel);
 		setBackground(Color.lightGray);
 		mainPanel.setLayout(resizeLayout);
-		mainPanel.add(tree);
+		mainPanel.add(tree.getComponent());
 		mainPanel.add(scrPanel);
 		mainPanel.add(rss);
 		GridBagLayout textLayout = new GridBagLayout();
 		textPanel.setLayout(textLayout);
 
-		tabOrder.add(tree);
+		tabOrder.add(tree.getComponent());
 		tabOrder.add(keyName);
 		tabOrder.add(keyInsertButton);
 		tabOrder.add(keyDeleteButton);
@@ -523,12 +515,12 @@ class Translator extends JFrame implements AWTEventListener {
 	}
 
 	private void onCollapseAllTreeNodes() {
-		tree.collapseAll();
+		tree.setAllExpandedState(false);
 		tree.repaint();
 	}
 
 	private void onExpandAllTreeNodes() {
-		tree.expandAll();
+		tree.setAllExpandedState(true);
 		tree.repaint();
 	}
 
@@ -571,24 +563,18 @@ class Translator extends JFrame implements AWTEventListener {
 		return item;
 	}
 
-	@Override
-	public boolean handleEvent(Event e) {
-		if (e.id == Event.WINDOW_DESTROY) {
-			onClose();
-			return true;
+	private void onTreeSelectionchanged(TranslationTreeNode newSelectedNode) {
+		String newKey = null != newSelectedNode ? newSelectedNode.getText() : null;
+		if (!Objects.equals(wasSelectedKey, newKey)) {
+			setTranslations(newKey);
+			invokeAutoFit();
 		}
+	}
 
-		if (e.target == tree) {
-			if (e.id == TranslatorConstants.REMOVE_REQUIRED) {
-				onDeleteKey();
-			}
-			if ((e.target == tree) && (!Objects.equals(wasSelectedKey, tree.getSelectedText()))) {
-				setTranslations();
-				invokeAutoFit();
-			}
-			// actually, we should just list all events that tree can handle itself.
+	private void onTreeKeyEvent(KeyEvent e) {
+		if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+			onDeleteKey();
 		}
-		return super.handleEvent(e);
 	}
 
 	@Override
@@ -627,9 +613,9 @@ class Translator extends JFrame implements AWTEventListener {
 			// remove all subkeys
 			if (key != null) {
 				isDirty = true;
-				TreeNode tn = tree.getNode(key);
+				TranslationTreeNode tn = tree.getNode(key);
 				if (tn != null) {
-					tn = tn.parent;
+					tn = tn.getParent();
 				}
 				bundle.getBundle().removeKeysBeginningWith(key);
 
@@ -646,18 +632,18 @@ class Translator extends JFrame implements AWTEventListener {
 			String key = tree.getSelectedText();
 			if (key != null) {
 				isDirty = true;
-				TreeNode tn = tree.getNode(key);
+				TranslationTreeNode tn = tree.getNode(key);
 				if (tn == null) {
 					return true;
 				}
 
 				// Not an leaf => don't touch tree but update model
 				bundle.getBundle().removeKey(key);
-				if ((tree.enumChild(tn) == null) || (tree.enumChild(tn).length == 0)) {
+				if (tree.enumChild(tn).length == 0) {
 					tree.remove(key);
 					removeLeafs(key);
 				}
-				tree.selectNode(tn.parent);
+				tree.selectNode(tn.getParent());
 
 				adjustIndicator(tn);
 				tree.repaint();
@@ -875,7 +861,7 @@ class Translator extends JFrame implements AWTEventListener {
 			bundle.getBundle().resort();
 			commField.setText("");
 			isDirty = true;
-			tree.selectNodeAndOpen(key);
+			tree.selectNode(key);
 			tree.repaint();
 			setTranslations();
 			saveBundleMenu.setEnabled(true);
@@ -896,11 +882,11 @@ class Translator extends JFrame implements AWTEventListener {
 		}
 		delDialog.setText(bundle.replace(RC("tools.translator.message.delkey"), "[%key%]", key));
 
-		TreeNode tn = tree.getNode(key);
+		TranslationTreeNode tn = tree.getNode(key);
 		if (tn == null) {
 			return;
 		}
-		boolean hasChilds = (tree.enumChild(tn) != null) && (tree.enumChild(tn).length != 0);
+		boolean hasChilds = tree.enumChild(tn).length != 0;
 		BundleItem bi = bundle.getBundle().getItem(key);
 		if ((bi != null) && hasChilds) {
 			delDialog.setButtons(DELETE_BUTTONS);
@@ -979,9 +965,7 @@ class Translator extends JFrame implements AWTEventListener {
 		wasSelectedKey = null;
 		textPanel.removeAll();
 		langMenu.removeAll();
-		if (tree.getRootNode() != null) {
-			tree.remove(tree.getRootNode());
-		}
+		tree.removeAll();
 		tree.repaint();
 		textPanel.invalidate();
 		validate();
@@ -1019,30 +1003,30 @@ class Translator extends JFrame implements AWTEventListener {
 		sbl2.repaint();
 	}
 
-	private boolean setIndicators(TreeNode tn) {
+	private boolean setIndicators(TranslationTreeNode tn) {
 		if (tn == null) {
 			return false;
 		}
-		boolean res = setIndicators(tn.sibling);
-		return setIndicator(tn, setIndicators(tn.child)) || res;
+		boolean res = setIndicators(tn.getNextSibling());
+		return setIndicator(tn, setIndicators(tn.getFirstChild())) || res;
 	}
 
-	private boolean setIndicator(TreeNode tn, boolean childOn) {
+	private boolean setIndicator(TranslationTreeNode tn, boolean childOn) {
 		if (tn == null) {
 			return false;
 		}
 		if (getVisLangCount() < 2) {
-			tn.setIndicator(null);
+			tn.setShowIndicator(false);
 			return false;
 		}
 		if (childOn) {
-			tn.setIndicator(SYS_DIR + TranslatorConstants.WARN_IMAGE);
+			tn.setShowIndicator(true);
 			return true;
 		}
 
 		BundleItem bi = bundle.getBundle().getItem(tn.getText());
 		if (bi == null) {
-			tn.setIndicator(null);
+			tn.setShowIndicator(false);
 			return false;
 		}
 		boolean isPres = false;
@@ -1058,16 +1042,16 @@ class Translator extends JFrame implements AWTEventListener {
 			isAbs |= ts == null;
 			isPres |= ts != null;
 		}
-		tn.setIndicator(null);
+		tn.setShowIndicator(false);
 		if (isAbs && isPres) {
-			tree.setIndicator(tn.getText(), SYS_DIR + TranslatorConstants.WARN_IMAGE);
+			tn.setShowIndicator(true);
 			notCompletedCount++;
 		}
 		else {
 			if (isAbs) {
 				nullsCount++;
 				if (showNullsMenu.getState()) {
-					tn.setIndicator(SYS_DIR + TranslatorConstants.WARN_IMAGE);
+					tn.setShowIndicator(true);
 					return true;
 				}
 			}
@@ -1075,22 +1059,22 @@ class Translator extends JFrame implements AWTEventListener {
 		return isAbs && isPres;
 	}
 
-	private void adjustIndicator(TreeNode tn) {
+	private void adjustIndicator(TranslationTreeNode tn) {
 		if (tn == null) {
 			return;
 		}
-		setIndicator(tn, isSetInSiblings(tn.child));
-		adjustIndicator(tn.parent);
+		setIndicator(tn, isSetInSiblings(tn.getFirstChild()));
+		adjustIndicator(tn.getParent());
 	}
 
-	private boolean isSetInSiblings(TreeNode tn) {
+	private boolean isSetInSiblings(TranslationTreeNode tn) {
 		if (tn == null) {
 			return false;
 		}
-		if (tn.getIndicator() != null) {
+		if (tn.isShowIndicator()) {
 			return true;
 		}
-		return isSetInSiblings(tn.sibling);
+		return isSetInSiblings(tn.getNextSibling());
 	}
 
 	private void onSearch() {
@@ -1520,23 +1504,18 @@ class Translator extends JFrame implements AWTEventListener {
 			ind = ind2;
 		}
 
-		TreeNode tnew = new TreeNode(s, SYS_DIR + TranslatorConstants.OPEN_IMAGE, SYS_DIR + TranslatorConstants.CLOSE_IMAGE);
 		if (ind < 0) {
-			tnew.caption = s;
-			tree.insertRoot(s);
-			tnew = tree.getNode(s);
-			tnew.setExpandedImage(SYS_DIR + TranslatorConstants.OPEN_IMAGE);
-			tnew.setCollapsedImage(SYS_DIR + TranslatorConstants.CLOSE_IMAGE);
+			TranslationTreeNode tnew = tree.getRootNode().createChildNode(s);
+			tnew.setCaption(s);
 		}
 		else {
 			String tname = s.substring(0, ind);
 			addToTree(tname);
-			TreeNode ttpar = tree.getNode(tname);
-			tnew.caption = s.substring(ind + 1);
-			tree.insert(tnew, ttpar, LevelTree.CHILD);
+			TranslationTreeNode ttpar = tree.getNode(tname);
+			TranslationTreeNode tnew = ttpar.createChildNode(s);
+			tnew.setCaption(s.substring(ind + 1));
 			tnew = tree.getNode(s);
 		}
-		tnew.setContextMenu(1);
 	}
 
 	private String lookupFileForLoad(String mask) {
@@ -1708,7 +1687,7 @@ class Translator extends JFrame implements AWTEventListener {
 		/* ... find first key, open it and select */
 		if (bundle.getBundle().getItemCount() > 0) {
 			String id = bundle.getBundle().getItem(0).getId();
-			tree.selectNodeAndOpen(id);
+			tree.selectNode(id);
 			wasSelectedKey = null;
 			setTranslations();
 		}
@@ -1735,25 +1714,19 @@ class Translator extends JFrame implements AWTEventListener {
 		}
 	}
 
-	private void expand(TreeNode tn) {
+	private void expand(TranslationTreeNode tn) {
 		if (tn != null) {
-			TreeNode[] children = tree.enumChild(tn);
-			if (children != null) {
-				for (TreeNode element : children) {
-					expand(element);
-				}
+			for (TranslationTreeNode element : tree.enumChild(tn)) {
+				expand(element);
 			}
 			tree.openNode(tn.getText());
 		}
 	}
 
-	private void collapse(TreeNode tn) {
+	private void collapse(TranslationTreeNode tn) {
 		if (tn != null) {
-			TreeNode[] children = tree.enumChild(tn);
-			if (children != null) {
-				for (TreeNode element : children) {
-					collapse(element);
-				}
+			for (TranslationTreeNode element : tree.enumChild(tn)) {
+				collapse(element);
 			}
 			tree.closeNode(tn.getText());
 		}
@@ -2164,9 +2137,9 @@ class Translator extends JFrame implements AWTEventListener {
 		if (bundle.getBundle().getItem(key) != null) {
 			return;
 		}
-		TreeNode tn = tree.getNode(key);
+		TranslationTreeNode tn = tree.getNode(key);
 		if (tn != null) {
-			if ((tree.enumChild(tn) != null) && (tree.enumChild(tn).length > 0)) {
+			if (tree.enumChild(tn).length > 0) {
 				return;
 			}
 			tree.remove(key);
@@ -2244,7 +2217,7 @@ class Translator extends JFrame implements AWTEventListener {
 		removeLeafs(oldKeyName);
 		bundle.getBundle().resort();
 
-		tree.selectNodeAndOpen(newKeyName);
+		tree.selectNode(newKeyName);
 		tree.repaint();
 		setTranslations();
 		setIndicators(tree.getSelectedNode());
@@ -2287,13 +2260,13 @@ class Translator extends JFrame implements AWTEventListener {
 		tree.repaint();
 	}
 
-	private void hideTranslated(TreeNode tn, boolean hide) {
+	private void hideTranslated(TranslationTreeNode tn, boolean hide) {
 		while (tn != null) {
-			if (tn.getIndicator() == null) {
-				tn.setHide(hide);
+			if (!tn.isShowIndicator()) {
+				tn.setVisible(!hide);
 			}
-			hideTranslated(tn.child, hide);
-			tn = tn.sibling;
+			hideTranslated(tn.getFirstChild(), hide);
+			tn = tn.getNextSibling();
 		}
 	}
 
