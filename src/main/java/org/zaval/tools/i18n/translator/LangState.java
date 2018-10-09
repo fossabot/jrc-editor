@@ -20,9 +20,10 @@ package org.zaval.tools.i18n.translator;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
+import javax.swing.JTextArea;
 
 class LangState {
-	TextAreaWrap tf;
+	JTextArea tf;
 	boolean hidden;
 	JLabel label;
 	String name;

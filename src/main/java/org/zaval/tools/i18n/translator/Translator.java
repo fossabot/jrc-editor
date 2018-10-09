@@ -34,14 +34,8 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Panel;
-import java.awt.Rectangle;
-import java.awt.TextField;
 import java.awt.Toolkit;
 import java.awt.Window;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
 import java.awt.event.AWTEventListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -82,6 +76,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.WindowConstants;
@@ -91,7 +86,6 @@ import javax.swing.text.JTextComponent;
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
 import org.zaval.awt.BorderedPanel;
-import org.zaval.awt.EmulatedTextField;
 import org.zaval.awt.ResizeLayout;
 import org.zaval.awt.Resizer;
 import org.zaval.awt.SimpleScrollPanel;
@@ -692,40 +686,12 @@ class Translator extends JFrame implements AWTEventListener {
 				cur.replaceSelection("");
 			}
 		}
-		else if (ccur instanceof TextField) {
-			TextField cur = (TextField) ccur;
-			if (!cur.getSelectedText().isEmpty()) {
-				cur.setText(cur.getText().substring(0, cur.getSelectionStart()) + cur.getText().substring(cur.getSelectionEnd()));
-			}
-		}
 	}
 
 	private void onPaste() {
 		Component ccur = getFocusOwner();
 		if (ccur instanceof JTextComponent) {
 			((JTextComponent) ccur).paste();
-		}
-		else if (ccur instanceof TextField) {
-			TextField cur = (TextField) ccur;
-
-			Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
-			Transferable t = c.getContents("e");
-
-			String nt = "";
-			if (t.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-				try {
-					nt = (String) t.getTransferData(DataFlavor.stringFlavor);
-				}
-				catch (Exception ex) {
-				}
-			}
-
-			if (!cur.getSelectedText().isEmpty()) {
-				cur.setText(cur.getText().substring(0, cur.getSelectionStart()) + nt + cur.getText().substring(cur.getSelectionEnd()));
-			}
-			else {
-				cur.setText(cur.getText().substring(0, cur.getCaretPosition()) + nt + cur.getText().substring(cur.getCaretPosition()));
-			}
 		}
 	}
 
@@ -734,27 +700,12 @@ class Translator extends JFrame implements AWTEventListener {
 		if (ccur instanceof JTextComponent) {
 			((JTextComponent) ccur).cut();
 		}
-		else if (ccur instanceof TextField) {
-			TextField cur = (TextField) ccur;
-			Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
-			StringSelection s2 = new StringSelection(cur.getSelectedText());
-			c.setContents(s2, s2);
-			if (!cur.getSelectedText().isEmpty()) {
-				cur.setText(cur.getText().substring(0, cur.getSelectionStart()) + cur.getText().substring(cur.getSelectionEnd()));
-			}
-		}
 	}
 
 	private void onCopy() {
 		Component ccur = getFocusOwner();
 		if (ccur instanceof JTextComponent) {
 			((JTextComponent) ccur).copy();
-		}
-		else if (ccur instanceof TextField) {
-			TextField cur = (TextField) ccur;
-			Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
-			StringSelection s2 = new StringSelection(cur.getSelectedText());
-			c.setContents(s2, s2);
 		}
 	}
 
@@ -1208,7 +1159,7 @@ class Translator extends JFrame implements AWTEventListener {
 			LangState ls = langStates.get(k);
 			if (ls != null) {
 				ls.tf.setText(val);
-				ls.tf.getControl().requestFocus();
+				ls.tf.requestFocusInWindow();
 			}
 		}
 		isDirty = true;
@@ -1301,7 +1252,7 @@ class Translator extends JFrame implements AWTEventListener {
 						if (replaceTo == null) {
 							textPanel.requestFocus();
 							LangState ls = langStates.get(k);
-							ls.tf.getControl().requestFocus();
+							ls.tf.requestFocusInWindow();
 						}
 						return;
 					}
@@ -1492,16 +1443,15 @@ class Translator extends JFrame implements AWTEventListener {
 		});
 		ls.box.setState(true);
 		ls.label = new JLabel(langLab + ":");
-		ls.tf = new TextAreaWrap();
-		ls.tf.getControl().setBackground(Color.white);
+		ls.tf = new JTextArea();
 		ls.tf.setLocale(new Locale(lang, ""));
-		ls.tf.getControl().addKeyListener(new KeyAdapter() {
+		ls.tf.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent ke) {
 				if (!ke.isActionKey() && (ke.getKeyChar() == '\n')) {
 					invokeAutoFit();
 				}
-				checkForScrolling(ke.getComponent());
+				//checkForScrolling(ke.getComponent()); //TODO: scroll into view?
 			}
 		});
 
@@ -1509,8 +1459,7 @@ class Translator extends JFrame implements AWTEventListener {
 		langMenu.add(ls.box);
 
 		constrain(textPanel, ls.label, 0, i + 2, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 10, 3, 0, 3);
-		constrain(textPanel, ls.tf.getControl(), 1, i + 2, 2, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, 1.0, 1.0, 3,
-			3, 5, 3);
+		constrain(textPanel, ls.tf, 1, i + 2, 2, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, 1.0, 1.0, 3, 3, 5, 3);
 	}
 
 	private void addToTree(String s) {
@@ -2129,7 +2078,7 @@ class Translator extends JFrame implements AWTEventListener {
 			if (ls.hidden) {
 				continue;
 			}
-			if (ls.tf.getControl() == focused) {
+			if (ls.tf == focused) {
 				break;
 			}
 		}
@@ -2373,51 +2322,5 @@ class Translator extends JFrame implements AWTEventListener {
 		}
 		return IntStream.range(tp, t.length).anyMatch(vp -> match_mask(s, sp + 1, t, vp, matchCase))
 			|| match_mask(s, sp + 1, t, tp, matchCase);
-	}
-
-	private void checkForScrolling(Component what) {
-		if (what instanceof EmulatedTextField) {
-			Rectangle r1 = what.getBounds();
-			Rectangle r2 = ((EmulatedTextField) what).getCursorShape();
-			if ((r1 == null) || (r2 == null)) {
-				return;
-			}
-			r1.x += r2.x;
-			r1.y += r2.y;
-			r1.width = r2.width + 25;
-			r1.height = r2.height + 25;
-
-			// Now R1 contains top/right cursor position
-			Dimension s1 = scrPanel.size();
-			s1.width -= scrPanel.getVScrollbar().isVisible() ? scrPanel.getVScrollbar().size().width : 0;
-			s1.height -= scrPanel.getHScrollbar().isVisible() ? scrPanel.getHScrollbar().size().height : 0;
-			// Now s1 contains view rect area
-
-			int curHS = scrPanel.getHScrollbar().isVisible() ? scrPanel.getHScrollbar().getValue() : 0;
-			int curVS = scrPanel.getVScrollbar().isVisible() ? scrPanel.getVScrollbar().getValue() : 0;
-
-			if (((r1.x + r1.width) >= (s1.width + curHS))
-				|| ((r1.y + r1.height) >= (s1.height + curVS))
-				|| (r1.x < curHS)
-				|| (r1.y < curVS)) {
-
-				int newX = curHS;
-				Dimension s2 = scrPanel.getScrollableObject().preferredSize();
-				if ((r1.x + r1.width) >= s1.width) {
-					newX = Math.min((r1.x + r1.width) - s1.width, s2.width - s1.width);
-				}
-				int newY = curVS;
-				if ((r1.y + r1.height) >= s1.height) {
-					newY = Math.min((r1.y + r1.height) - s1.height, s2.height - s1.height);
-				}
-				if (r1.x < curHS) {
-					newX = r1.x;
-				}
-				if (r1.y < curVS) {
-					newX = r1.y;
-				}
-				scrPanel.scroll(newX, newY);
-			}
-		}
 	}
 }
