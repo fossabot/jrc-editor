@@ -69,6 +69,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
@@ -80,7 +81,6 @@ import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
 import org.zaval.awt.ResizeLayout;
 import org.zaval.awt.Resizer;
-import org.zaval.awt.SimpleScrollPanel;
 import org.zaval.awt.SpeedButton;
 import org.zaval.awt.ToolkitResolver;
 import org.zaval.awt.dialog.MessageBox2;
@@ -140,7 +140,7 @@ class Translator extends JFrame {
 	private String SYS_DIR;
 	private BundleManager bundle = new BundleManager();
 	private final JPanel pane = new JPanel();
-	private SimpleScrollPanel scrPanel;
+	private JScrollPane scrPane;
 
 	private final String[] CLOSE_BUTTONS = new String[3];
 	private final String[] YESNO_BUTTONS = new String[2];
@@ -304,11 +304,11 @@ class Translator extends JFrame {
 		ResizeLayout resizeLayout = new ResizeLayout();
 		Resizer rss = new Resizer();
 		textPanel = new JPanel();
-		scrPanel = new SimpleScrollPanel(textPanel);
+		scrPane = new JScrollPane(textPanel);
 		setBackground(Color.lightGray);
 		mainPanel.setLayout(resizeLayout);
 		mainPanel.add(tree.getComponent());
-		mainPanel.add(scrPanel);
+		mainPanel.add(scrPane);
 		mainPanel.add(rss);
 		GridBagLayout textLayout = new GridBagLayout();
 		textPanel.setLayout(textLayout);
