@@ -61,15 +61,15 @@ PARSER_BEGIN(JavaParser)
 
 package org.zaval.tools.i18n.translator.generated;
 
-import java.io.*;
+import java.io.FileInputStream;
 import java.util.*;
 
 public class JavaParser
 {
-    private Stack cNames = new Stack();
-    private Stack fNames = new Stack();
+    private Stack<String> cNames = new Stack<String>();
+    private Stack<String> fNames = new Stack<String>();
     private String pkgName, className, funName;
-    private Hashtable hash = new Hashtable();
+    private Hashtable<String, String> hash = new Hashtable<String, String>();
 
     private void makeCName(Token tok)
     {
@@ -80,7 +80,7 @@ public class JavaParser
 
     private void makeCName()
     {
-        String s = (String)cNames.pop();
+        String s = cNames.pop();
         className = s;
     }
 
@@ -93,11 +93,11 @@ public class JavaParser
 
     private void makeFName()
     {
-        String s = fNames.empty() ? null : (String)fNames.pop();
+        String s = fNames.empty() ? null : fNames.pop();
         funName = s;
     }
 
-    public Hashtable parse()
+    public Hashtable<String, String> parse()
     throws ParseException
     {
         CompilationUnit();
@@ -160,7 +160,7 @@ public class JavaParser
         if(!valid(kk)) return;
 
         if(hash.containsKey(key)){
-            String oldVal = (String)hash.get(key);
+            String oldVal = hash.get(key);
             if(!oldVal.equals(orgVal)){
                 int i = 0;
                 for(i = 0; hash.containsKey(key + "-" + i); ++i);
@@ -177,7 +177,7 @@ public class JavaParser
             FileInputStream in = new FileInputStream(fn[i]);
             System.out.println(fn[i] + ":");
             JavaParser t = new JavaParser(in);
-            Hashtable s = t.parse();
+            Hashtable<String, String> s = t.parse();
             System.err.println(fn[i] + ":" + s.size());
         }
     }

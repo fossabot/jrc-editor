@@ -50,18 +50,17 @@ PARSER_BEGIN(UtfParser)
 
 package org.zaval.tools.i18n.translator.generated;
 
-import java.io.*;
 import java.util.*;
 
 public class UtfParser
 {
     private String key = "default";
-    private Hashtable ask;
+    private Hashtable<String, String> ask;
 
-    public Hashtable parse()
+    public Hashtable<String, String> parse()
     throws ParseException
     {
-        ask = new Hashtable();
+        ask = new Hashtable<String, String>();
         parseMain();
         return ask;
     }

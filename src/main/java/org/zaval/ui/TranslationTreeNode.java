@@ -34,7 +34,7 @@ public class TranslationTreeNode extends DefaultMutableTreeNode {
 		this.fullPath = fullPath;
 	}
 
-	public static TranslationTreeNode createRootNode() {
+	static TranslationTreeNode createRootNode() {
 		return new TranslationTreeNode(null, "/");
 	}
 

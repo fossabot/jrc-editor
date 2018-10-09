@@ -31,6 +31,7 @@ import javax.swing.border.LineBorder;
 
 import org.zaval.awt.dialog.EditDialog;
 
+@SuppressWarnings("serial")
 class SearchDialog extends EditDialog {
 	private final JRadioButton inKeys;
 	private final JRadioButton inVals;

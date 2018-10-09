@@ -19,13 +19,13 @@
 package org.zaval.awt;
 
 public abstract class AlignConstants {
-	public static final int LEFT = 0x1;
-	public static final int RIGHT = 0x2;
-	public static final int TOP = 0x4;
-	public static final int BOTTOM = 0x8;
-	public static final int FIT = 0x10;
-	public static final int JUSTIFY = 0x20;
+	static final int LEFT = 0x1;
+	static final int RIGHT = 0x2;
+	static final int TOP = 0x4;
+	static final int BOTTOM = 0x8;
+	static final int FIT = 0x10;
+	static final int JUSTIFY = 0x20;
 
 	public static final int TLEFT = LEFT | TOP;
-	public static final int CENTER = 0;
+	static final int CENTER = 0;
 }

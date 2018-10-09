@@ -22,6 +22,7 @@ package org.zaval.xml;
  * This code based upon NanoXML 2.2 sources
  */
 
+@SuppressWarnings("serial")
 public class XmlParseException extends RuntimeException {
 
 	XmlParseException(String name, int lineNr, String message) {

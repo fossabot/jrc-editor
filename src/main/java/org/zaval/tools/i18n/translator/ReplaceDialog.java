@@ -33,6 +33,7 @@ import javax.swing.border.LineBorder;
 
 import org.zaval.awt.dialog.EditDialog;
 
+@SuppressWarnings("serial")
 class ReplaceDialog extends EditDialog {
 	private final JRadioButton regex;
 	private final JRadioButton exact;

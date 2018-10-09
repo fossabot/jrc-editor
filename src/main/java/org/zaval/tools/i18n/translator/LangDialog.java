@@ -36,6 +36,7 @@ import java.awt.Toolkit;
 
 import javax.swing.JLabel;
 
+@SuppressWarnings("serial")
 class LangDialog extends Dialog {
 	private final List edit;
 	private final Button ok;

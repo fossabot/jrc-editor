@@ -30,6 +30,7 @@ import java.awt.image.ImageProducer;
 import org.zaval.awt.image.BoxButtonFilter;
 import org.zaval.awt.image.ButtonImageFilter;
 
+@SuppressWarnings("serial")
 public class SpeedButton extends Canvas implements MouseListener {
 	private static final int FREE = 1;
 	private static final int UP = 2;

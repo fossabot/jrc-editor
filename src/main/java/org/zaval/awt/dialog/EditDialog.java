@@ -37,6 +37,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+@SuppressWarnings("serial")
 public class EditDialog extends JDialog implements ActionListener {
 	protected static final String COMMAND_OK = "ok";
 	protected static final String COMMAND_CANCEL = "cancel";

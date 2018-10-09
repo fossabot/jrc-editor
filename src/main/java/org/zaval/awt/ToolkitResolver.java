@@ -28,7 +28,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
-public class ToolkitResolver implements ImageResolver {
+public class ToolkitResolver {
 	private final Toolkit kit;
 
 	public ToolkitResolver() {
@@ -48,12 +48,10 @@ public class ToolkitResolver implements ImageResolver {
 		return i;
 	}
 
-	@Override
 	public Image getImage(String str) {
 		return kit.getImage(str);
 	}
 
-	@Override
 	public ImageIcon getImageIcon(String url) {
 		try {
 			return new ImageIcon(ImageIO.read(new File(url)));

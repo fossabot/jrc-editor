@@ -44,6 +44,7 @@ import org.zaval.awt.ResultField;
 import org.zaval.awt.StaticImage;
 import org.zaval.awt.TextAlignArea;
 
+@SuppressWarnings("serial")
 public class MessageBox2 extends Dialog implements LayoutManager {
 	private StaticImage icon;
 	private List<Button> buttons;

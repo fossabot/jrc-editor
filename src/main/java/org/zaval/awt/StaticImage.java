@@ -23,6 +23,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
 
+@SuppressWarnings("serial")
 public class StaticImage extends Canvas {
 	private Image image;
 	private int width;

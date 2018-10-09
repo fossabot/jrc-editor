@@ -147,7 +147,7 @@ public class TextAlignArea extends AlignArea {
 		}
 	}
 
-	void draw(Graphics g, int offx, int offy, Color col) {
+	private void draw(Graphics g, int offx, int offy, Color col) {
 		Dimension d = getSize();
 		Insets ins = getInsets();
 		Rectangle r = getAlignRectangle();

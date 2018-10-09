@@ -29,6 +29,7 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("serial")
 public class Resizer extends Canvas {
 	private int startx;
 	private int oldrg;

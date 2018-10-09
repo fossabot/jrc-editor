@@ -26,6 +26,7 @@ import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Rectangle;
 
+@SuppressWarnings("serial")
 public class ResultField extends Canvas {
 	private final TextAlignArea alignArea = new TextAlignArea();
 
