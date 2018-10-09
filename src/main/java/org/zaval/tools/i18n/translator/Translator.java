@@ -28,9 +28,9 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.FileDialog;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Panel;
@@ -80,10 +80,12 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.WindowConstants;
+import javax.swing.border.BevelBorder;
 import javax.swing.text.JTextComponent;
 
 import org.apache.regexp.RE;
@@ -94,9 +96,6 @@ import org.zaval.awt.ResizeLayout;
 import org.zaval.awt.Resizer;
 import org.zaval.awt.SimpleScrollPanel;
 import org.zaval.awt.SpeedButton;
-import org.zaval.awt.StatusBar;
-import org.zaval.awt.StatusBarElement;
-import org.zaval.awt.StatusBarStubbElement;
 import org.zaval.awt.ToolkitResolver;
 import org.zaval.awt.dialog.MessageBox2;
 import org.zaval.io.IniFile;
@@ -262,15 +261,25 @@ class Translator extends JFrame implements AWTEventListener {
 
 		setIconImage(imgres.getImage(SYS_DIR + "jrc-editor.gif"));
 
-		StatusBar panel3 = new StatusBar/*Panel*/();
+		JPanel panel3 = new JPanel();
+		panel3.setPreferredSize(new Dimension(0, (int) (panel3.getFontMetrics(panel3.getFont()).getHeight() * 1.5f)));
+		panel3.setLayout(new GridBagLayout());
+		panel3.setBorder(new BevelBorder(BevelBorder.LOWERED));
 		sbl1 = new JLabel();
-		panel3.add(new StatusBarElement(sbl1, 20));
+		JPanel sbl1Panel = new JPanel();
+		sbl1Panel.setPreferredSize(new Dimension(2, 0));
+		sbl1Panel.setLayout(new GridLayout(1, 1));
+		sbl1Panel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+		sbl1Panel.add(sbl1);
 		sbl2 = new JLabel();
-		panel3.add(new StatusBarElement(sbl2, 80));
-		StatusBarElement se = new StatusBarStubbElement(new Panel(), 0, new Dimension(22, 19));
-		se.setLayout(new FlowLayout(FlowLayout.LEFT, 1, 2));
-		se.setType(0);
-		panel3.add(se);
+		JPanel sbl2Panel = new JPanel();
+		sbl2Panel.setPreferredSize(new Dimension(8, 0));
+		sbl2Panel.setLayout(new GridLayout(1, 1));
+		sbl2Panel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+		sbl2Panel.add(sbl2);
+
+		constrain(panel3, sbl1Panel, 0, 0, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, 0.2, 1.0, 0, 0, 0, 0);
+		constrain(panel3, sbl2Panel, 1, 0, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, 0.8, 1.0, 0, 0, 0, 0);
 		add("South", panel3);
 
 		tree = new TranslationTree(imgres.getImageIcon(SYS_DIR + TranslatorConstants.WARN_IMAGE));
@@ -512,6 +521,7 @@ class Translator extends JFrame implements AWTEventListener {
 
 	private void onToggleHideTranslated() {
 		hideTranslated(hideTransMenu.getState());
+		updateStatusBar();
 	}
 
 	private void onCollapseAllTreeNodes() {
@@ -626,6 +636,7 @@ class Translator extends JFrame implements AWTEventListener {
 				wasSelectedKey = null;
 				setTranslations();
 			}
+			updateStatusBar();
 		}
 		if ((e.target == delDialog) && (e.arg instanceof Button) && ((Button) e.arg).getLabel().equals(DELETE_BUTTONS[1])) {
 			// Only this
@@ -653,6 +664,7 @@ class Translator extends JFrame implements AWTEventListener {
 				textPanel.invalidate();
 				validate();
 			}
+			updateStatusBar();
 		}
 
 		if (e.target == repDialog) {
@@ -662,9 +674,9 @@ class Translator extends JFrame implements AWTEventListener {
 			else if ((e.arg instanceof Button) && ((Button) e.arg).getLabel().equals(REPLACE_BUTTONS[2])) {
 				replaceTo = null;
 			}
+			updateStatusBar();
 		}
 
-		updateStatusBar();
 		return true;
 	}
 
@@ -871,6 +883,7 @@ class Translator extends JFrame implements AWTEventListener {
 			textPanel.invalidate();
 			validate();
 		}
+		updateStatusBar();
 	}
 
 	private void onDeleteKey() {
@@ -896,6 +909,7 @@ class Translator extends JFrame implements AWTEventListener {
 			delDialog.setButtons(DELETE_BUTTONS2);
 		}
 		delDialog.show();
+		updateStatusBar();
 	}
 
 	private void onClose() {
@@ -1104,6 +1118,7 @@ class Translator extends JFrame implements AWTEventListener {
 		lastKeyFound = null;
 		onSearchAgain();
 		ed.dispose();
+		updateStatusBar();
 	}
 
 	private void onReplace() {
@@ -1197,6 +1212,7 @@ class Translator extends JFrame implements AWTEventListener {
 			}
 		}
 		isDirty = true;
+		updateStatusBar();
 	}
 
 	private void makeReplace(BundleItem bi, LangItem li) {
@@ -1308,6 +1324,7 @@ class Translator extends JFrame implements AWTEventListener {
 			errDialog.setText(first ? RC("tools.translator.label.search.nokeys") : RC("tools.translator.label.search.nomorekeys"));
 		}
 		errDialog.show();
+		updateStatusBar();
 	}
 
 	private void onNewResource() {
@@ -1331,6 +1348,7 @@ class Translator extends JFrame implements AWTEventListener {
 		setAllIndicators();
 		textPanel.invalidate();
 		validate();
+		updateStatusBar();
 	}
 
 	private void onNewBundle() {
@@ -1343,10 +1361,12 @@ class Translator extends JFrame implements AWTEventListener {
 		initData(false);
 		setTitle(null);
 		isDirty = false;
+		updateStatusBar();
 	}
 
 	private void onLoadBundle() {
 		onOpen(false);
+		updateStatusBar();
 	}
 
 	private SafeResourceBundle rcTable;
@@ -1430,6 +1450,7 @@ class Translator extends JFrame implements AWTEventListener {
 		(new Thread(new Loader(fileName, part))).start();
 		setTitle(fileName);
 		addToPickList(fileName);
+		updateStatusBar();
 	}
 
 	private void initControls() {
@@ -1604,6 +1625,7 @@ class Translator extends JFrame implements AWTEventListener {
 		text = text + RC("tools.translator.label.statistics.nulls") + nullsCount + "\n";
 		text = text + RC("tools.translator.label.statistics.notcompleted") + notCompletedCount;
 		JOptionPane.showMessageDialog(this, text, RC("dialog.title.info"), JOptionPane.INFORMATION_MESSAGE);
+		updateStatusBar();
 	}
 
 	private void onGenCode() {
@@ -1703,6 +1725,7 @@ class Translator extends JFrame implements AWTEventListener {
 		if (!part) {
 			loadPickList();
 		}
+		updateStatusBar();
 	}
 
 	private void invokeAutoFit() {
@@ -1897,6 +1920,7 @@ class Translator extends JFrame implements AWTEventListener {
 			}
 			readResources(filename, part);
 		}
+		updateStatusBar();
 	}
 
 	private void onSaveXml(boolean part) {
@@ -2040,6 +2064,7 @@ class Translator extends JFrame implements AWTEventListener {
 			initData(part);
 			setTitle(filename);
 		}
+		updateStatusBar();
 	}
 
 	private void onLoadUtf(boolean part) {
@@ -2064,6 +2089,7 @@ class Translator extends JFrame implements AWTEventListener {
 			initData(part);
 			setTitle(filename);
 		}
+		updateStatusBar();
 	}
 
 	private void onNewKey() {
@@ -2075,6 +2101,7 @@ class Translator extends JFrame implements AWTEventListener {
 		}
 		keyName.setText(text);
 		onInsertKey();
+		updateStatusBar();
 	}
 
 	private void moveFocus() {
@@ -2219,6 +2246,7 @@ class Translator extends JFrame implements AWTEventListener {
 		tree.repaint();
 		setTranslations();
 		setIndicators(tree.getSelectedNode());
+		updateStatusBar();
 	}
 
 	private void onLoadJar() {
@@ -2249,6 +2277,7 @@ class Translator extends JFrame implements AWTEventListener {
 				infoException(e);
 			}
 		}
+		updateStatusBar();
 	}
 
 	private void hideTranslated(boolean hide) {
