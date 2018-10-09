@@ -81,8 +81,10 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
+import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.WindowConstants;
+import javax.swing.text.JTextComponent;
 
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
@@ -111,7 +113,7 @@ class Translator extends JFrame implements AWTEventListener {
 	private MessageBox2 errDialog;
 	private MessageBox2 repDialog;
 
-	private EmulatedTextField keyName;
+	private JTextField keyName;
 	private JLabel keynLab;
 	private TranslationTree tree;
 	private Panel textPanel;
@@ -142,7 +144,7 @@ class Translator extends JFrame implements AWTEventListener {
 	private JCheckBoxMenuItem allowDotMenu;
 	private JCheckBoxMenuItem allowUScoreMenu;
 
-	private EmulatedTextField commField;
+	private JTextField commField;
 	private JLabel sbl1;
 	private JLabel sbl2;
 
@@ -296,8 +298,7 @@ class Translator extends JFrame implements AWTEventListener {
 		JLabel keyLabel = new JLabel(RC("tools.translator.label.key"));
 		constrain(keyPanel, keyLabel, 0, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 5, 5);
 
-		keyName = new EmulatedTextField();
-		keyName.setBackground(Color.white);
+		keyName = new JTextField();
 		constrain(keyPanel, keyName, 1, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.BOTH, 1.0, 1.0, 5, 5, 5, 5);
 
 		JButton keyInsertButton = createButton(this::onInsertKey, RC("tools.translator.label.insert"));
@@ -673,9 +674,11 @@ class Translator extends JFrame implements AWTEventListener {
 
 	private void onDelete() {
 		Component ccur = getFocusOwner();
-		if (ccur instanceof EmulatedTextField) {
-			EmulatedTextField cur = (EmulatedTextField) ccur;
-			cur.blDelete();
+		if (ccur instanceof JTextComponent) {
+			JTextComponent cur = (JTextComponent) ccur;
+			if (cur.getSelectionStart() > 0) {
+				cur.replaceSelection("");
+			}
 		}
 		else if (ccur instanceof TextField) {
 			TextField cur = (TextField) ccur;
@@ -687,9 +690,8 @@ class Translator extends JFrame implements AWTEventListener {
 
 	private void onPaste() {
 		Component ccur = getFocusOwner();
-		if (ccur instanceof EmulatedTextField) {
-			EmulatedTextField cur = (EmulatedTextField) ccur;
-			cur.blPaste();
+		if (ccur instanceof JTextComponent) {
+			((JTextComponent) ccur).paste();
 		}
 		else if (ccur instanceof TextField) {
 			TextField cur = (TextField) ccur;
@@ -717,10 +719,8 @@ class Translator extends JFrame implements AWTEventListener {
 
 	private void onCut() {
 		Component ccur = getFocusOwner();
-		if (ccur instanceof EmulatedTextField) {
-			EmulatedTextField cur = (EmulatedTextField) ccur;
-			cur.blCopy();
-			cur.blDelete();
+		if (ccur instanceof JTextComponent) {
+			((JTextComponent) ccur).cut();
 		}
 		else if (ccur instanceof TextField) {
 			TextField cur = (TextField) ccur;
@@ -735,9 +735,8 @@ class Translator extends JFrame implements AWTEventListener {
 
 	private void onCopy() {
 		Component ccur = getFocusOwner();
-		if (ccur instanceof EmulatedTextField) {
-			EmulatedTextField cur = (EmulatedTextField) ccur;
-			cur.blCopy();
+		if (ccur instanceof JTextComponent) {
+			((JTextComponent) ccur).copy();
 		}
 		else if (ccur instanceof TextField) {
 			TextField cur = (TextField) ccur;
@@ -1437,7 +1436,7 @@ class Translator extends JFrame implements AWTEventListener {
 		JLabel commLab = new JLabel(RC("tools.translator.label.comments"));
 		constrain(textPanel, commLab, 0, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, 0.0, 0.0, 10, 3, 0, 15);
 
-		commField = new EmulatedTextField();
+		commField = new JTextField();
 		commField.setBackground(Color.lightGray);
 		constrain(textPanel, commField, 1, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.BOTH, 1.0, 1.0, 3, 3, 5, 15);
 
