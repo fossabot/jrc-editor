@@ -22,7 +22,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.LayoutManager;
-import java.awt.Panel;
 import java.awt.Rectangle;
 
 import javax.swing.JPanel;
@@ -61,16 +60,16 @@ public class ResizeLayout implements LayoutManager {
 
 	@Override
 	public Dimension preferredLayoutSize(Container parent) {
-		Panel left = null;
-		Panel right = null;
+		JPanel left = null;
+		JPanel right = null;
 		Component[] obj = parent.getComponents();
 		for (Component element : obj) {
-			if (element instanceof Panel) {
+			if (element instanceof JPanel) {
 				if (left == null) {
-					left = (Panel) element;
+					left = (JPanel) element;
 				}
 				else if (right == null) {
-					right = (Panel) element;
+					right = (JPanel) element;
 				}
 				else {
 					break;
@@ -88,16 +87,16 @@ public class ResizeLayout implements LayoutManager {
 
 	@Override
 	public Dimension minimumLayoutSize(Container parent) {
-		Panel left = null;
-		Panel right = null;
+		JPanel left = null;
+		JPanel right = null;
 		Component[] obj = parent.getComponents();
 		for (Component element : obj) {
-			if (element instanceof Panel) {
+			if (element instanceof JPanel) {
 				if (left == null) {
-					left = (Panel) element;
+					left = (JPanel) element;
 				}
 				else if (right == null) {
-					right = (Panel) element;
+					right = (JPanel) element;
 				}
 				else {
 					break;
@@ -120,7 +119,7 @@ public class ResizeLayout implements LayoutManager {
 		Component rl = null;
 		Component[] obj = parent.getComponents();
 		for (Component element : obj) {
-			if ((element instanceof Panel) || (element instanceof JScrollPane) || (element instanceof JPanel)) {
+			if ((element instanceof JScrollPane) || (element instanceof JPanel)) {
 				if (left == null) {
 					left = element;
 				}

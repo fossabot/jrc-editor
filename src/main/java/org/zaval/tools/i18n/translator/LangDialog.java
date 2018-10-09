@@ -31,10 +31,10 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.List;
-import java.awt.Panel;
 import java.awt.Toolkit;
 
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
 class LangDialog extends Dialog {
@@ -57,7 +57,7 @@ class LangDialog extends Dialog {
 		ok = new Button("Ok");
 		cancel = new Button("Cancel");
 
-		Panel p = new Panel();
+		JPanel p = new JPanel();
 		p.setLayout(new GridLayout(1, 2, 2, 0));
 		p.add(ok);
 		p.add(cancel);

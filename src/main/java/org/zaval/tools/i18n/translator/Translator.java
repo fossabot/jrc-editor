@@ -18,12 +18,10 @@
 
 package org.zaval.tools.i18n.translator;
 
-import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Event;
@@ -32,11 +30,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.LayoutManager;
-import java.awt.Panel;
-import java.awt.Toolkit;
-import java.awt.Window;
-import java.awt.event.AWTEventListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -85,7 +78,6 @@ import javax.swing.text.JTextComponent;
 
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
-import org.zaval.awt.BorderedPanel;
 import org.zaval.awt.ResizeLayout;
 import org.zaval.awt.Resizer;
 import org.zaval.awt.SimpleScrollPanel;
@@ -101,7 +93,7 @@ import org.zaval.ui.TranslationTreeNode;
 import org.zaval.util.SafeResourceBundle;
 
 @SuppressWarnings("serial")
-class Translator extends JFrame implements AWTEventListener {
+class Translator extends JFrame {
 	private MessageBox2 delDialog;
 	private MessageBox2 errDialog;
 	private MessageBox2 repDialog;
@@ -109,7 +101,7 @@ class Translator extends JFrame implements AWTEventListener {
 	private JTextField keyName;
 	private JLabel keynLab;
 	private TranslationTree tree;
-	private Panel textPanel;
+	private JPanel textPanel;
 	private List<LangState> langStates = new ArrayList<>();
 	private String lastDirectory = ".";
 
@@ -147,7 +139,7 @@ class Translator extends JFrame implements AWTEventListener {
 	private String wasSelectedKey;
 	private String SYS_DIR;
 	private BundleManager bundle = new BundleManager();
-	private final Panel pane = new Panel();
+	private final JPanel pane = new JPanel();
 	private SimpleScrollPanel scrPanel;
 
 	private final String[] CLOSE_BUTTONS = new String[3];
@@ -198,8 +190,6 @@ class Translator extends JFrame implements AWTEventListener {
 		});
 		SYS_DIR = s;
 		rcTable = res;
-
-		Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.KEY_EVENT_MASK);
 
 		CLOSE_BUTTONS[0] = RC("dialog.button.yes");
 		CLOSE_BUTTONS[1] = RC("dialog.button.no");
@@ -294,9 +284,8 @@ class Translator extends JFrame implements AWTEventListener {
 		tree.setComponentPopupMenu(ctNodeMenu);
 
 		pane.setLayout(new BorderLayout());
-		Panel mainPanel = new BorderedPanel(BorderedPanel.RAISED2/*SUNKEN*/);
-		GridBagLayout gbl = new GridBagLayout();
-		Panel keyPanel = new Panel(gbl);
+		JPanel mainPanel = new JPanel();
+		JPanel keyPanel = new JPanel(new GridBagLayout());
 
 		JLabel keyLabel = new JLabel(RC("tools.translator.label.key"));
 		constrain(keyPanel, keyLabel, 0, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 5, 5);
@@ -314,7 +303,7 @@ class Translator extends JFrame implements AWTEventListener {
 		pane.add(mainPanel, "Center");
 		ResizeLayout resizeLayout = new ResizeLayout();
 		Resizer rss = new Resizer();
-		textPanel = new Panel();
+		textPanel = new JPanel();
 		scrPanel = new SimpleScrollPanel(textPanel);
 		setBackground(Color.lightGray);
 		mainPanel.setLayout(resizeLayout);
@@ -579,35 +568,6 @@ class Translator extends JFrame implements AWTEventListener {
 		if (e.getKeyCode() == KeyEvent.VK_DELETE) {
 			onDeleteKey();
 		}
-	}
-
-	@Override
-	public void eventDispatched(AWTEvent event) {
-		if (event.getID() != KeyEvent.KEY_TYPED) {
-			return;
-		}
-		if (!(event instanceof KeyEvent)) {
-			return;
-		}
-		KeyEvent ke = (KeyEvent) event;
-		if (ke.getKeyChar() != '\t') {
-			return;
-		}
-		moveFocus();
-	}
-
-	@Override
-	public boolean keyDown(Event e, int key) {
-		if ((e.target == keyName) && (key == Event.ENTER)) {
-			onInsertKey();
-			return true;
-		}
-		else if ((e.target instanceof Button) && (key == Event.ENTER)) {
-			action(e, null);
-			return true;
-		}
-		// to be corrected if keyName wants to receive "Enter" from JTextField
-		return false;
 	}
 
 	@Override
@@ -2053,59 +2013,6 @@ class Translator extends JFrame implements AWTEventListener {
 		updateStatusBar();
 	}
 
-	private void moveFocus() {
-		Component p = this;
-		while ((p != null) && !(p instanceof Window)) {
-			p = p.getParent();
-		}
-		if (p == null) {
-			return;
-		}
-		Window wnd = (Window) p;
-
-		Component focused = wnd.getFocusOwner();
-		int idx = tabOrder.indexOf(focused);
-		if (idx >= 0) {
-			if ((idx + 1) < tabOrder.size()) {
-				Component c = tabOrder.get(idx + 1);
-				c.requestFocus();
-				return;
-			}
-		}
-		int i;
-		for (i = 0; i < langStates.size(); i++) {
-			LangState ls = langStates.get(i);
-			if (ls.hidden) {
-				continue;
-			}
-			if (ls.tf == focused) {
-				break;
-			}
-		}
-
-		if (i < langStates.size()) {
-			for (++i; i < langStates.size(); ++i) {
-				LangState ls = langStates.get(i);
-				if (ls.hidden) {
-					continue;
-				}
-				ls.tf.requestFocus();
-				return;
-			}
-			tree.requestFocus();
-			return;
-		}
-		for (i = 0; i < langStates.size(); ++i) {
-			LangState ls = langStates.get(i);
-			if (ls.hidden) {
-				continue;
-			}
-			ls.tf.requestFocus();
-			return;
-		}
-		tree.requestFocus();
-	}
-
 	private void removeLeafs(String key) {
 		// Don't touch hier if key/childs are exists
 		if (bundle.getBundle().getItem(key) != null) {
@@ -2246,8 +2153,8 @@ class Translator extends JFrame implements AWTEventListener {
 		}
 	}
 
-	private void constrain(Container c, Component p, int x, int y, int width, int height, int anchor, int fill, double weightx,
-		double weighty, int insetLeft, int insetTop, int insetRight, int insetBottom) {
+	private void constrain(JPanel c, Component p, int x, int y, int width, int height, int anchor, int fill, double weightx, double weighty,
+		int insetLeft, int insetTop, int insetRight, int insetBottom) {
 		GridBagConstraints cc = new GridBagConstraints();
 
 		cc.gridx = x;
@@ -2263,10 +2170,7 @@ class Translator extends JFrame implements AWTEventListener {
 		if ((insetTop + insetBottom + insetLeft + insetRight) > 0) {
 			cc.insets = new Insets(insetTop, insetLeft, insetBottom, insetRight);
 		}
-		LayoutManager lm = c.getLayout();
-		GridBagLayout gbl = (GridBagLayout) lm;
-		gbl.setConstraints(p, cc);
-		c.add(p);
+		c.add(p, cc);
 	}
 
 	private boolean match_regex(String mask, String val, boolean matchCase) {
