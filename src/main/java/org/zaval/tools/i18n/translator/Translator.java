@@ -20,7 +20,6 @@ package org.zaval.tools.i18n.translator;
 
 import java.awt.BorderLayout;
 import java.awt.Button;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -288,7 +287,7 @@ class Translator extends JFrame {
 		JPanel keyPanel = new JPanel(new GridBagLayout());
 
 		JLabel keyLabel = new JLabel(RC("tools.translator.label.key"));
-		constrain(keyPanel, keyLabel, 0, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 5, 5);
+		constrain(keyPanel, keyLabel, 0, 0, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 5, 5);
 
 		keyName = new JTextField();
 		constrain(keyPanel, keyName, 1, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.BOTH, 1.0, 1.0, 5, 5, 5, 5);
@@ -305,7 +304,6 @@ class Translator extends JFrame {
 		Resizer rss = new Resizer();
 		textPanel = new JPanel();
 		scrPane = new JScrollPane(textPanel);
-		setBackground(Color.lightGray);
 		mainPanel.setLayout(resizeLayout);
 		mainPanel.add(tree.getComponent());
 		mainPanel.add(scrPane);
@@ -1369,8 +1367,8 @@ class Translator extends JFrame {
 		constrain(textPanel, commLab, 0, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, 0.0, 0.0, 10, 3, 0, 15);
 
 		commField = new JTextField();
-		commField.setBackground(Color.lightGray);
-		constrain(textPanel, commField, 1, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.BOTH, 1.0, 1.0, 3, 3, 5, 15);
+		commField.setPreferredSize(new Dimension(0, commField.getFontMetrics(commField.getFont()).getHeight() * 3));
+		constrain(textPanel, commField, 1, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, 1.0, 1.0, 3, 3, 5, 15);
 
 		JButton dropComment = createButton(this::onDropComment, RC("tools.translator.label.dropcomment"));
 		constrain(textPanel, dropComment, 2, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, 0.0, 0.0, 3, 3, 5, 15);
