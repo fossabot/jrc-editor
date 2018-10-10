@@ -69,6 +69,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
@@ -78,8 +79,6 @@ import javax.swing.text.JTextComponent;
 
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
-import org.zaval.awt.ResizeLayout;
-import org.zaval.awt.Resizer;
 import org.zaval.awt.SpeedButton;
 import org.zaval.awt.ToolkitResolver;
 import org.zaval.awt.dialog.MessageBox2;
@@ -283,7 +282,8 @@ class Translator extends JFrame {
 		tree.setComponentPopupMenu(ctNodeMenu);
 
 		pane.setLayout(new BorderLayout());
-		JPanel mainPanel = new JPanel();
+		JSplitPane mainPanel = new JSplitPane();
+		mainPanel.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
 		JPanel keyPanel = new JPanel(new GridBagLayout());
 
 		JLabel keyLabel = new JLabel(RC("tools.translator.label.key"));
@@ -300,14 +300,10 @@ class Translator extends JFrame {
 
 		pane.add(keyPanel, "South");
 		pane.add(mainPanel, "Center");
-		ResizeLayout resizeLayout = new ResizeLayout();
-		Resizer rss = new Resizer();
 		textPanel = new JPanel();
 		scrPane = new JScrollPane(textPanel);
-		mainPanel.setLayout(resizeLayout);
-		mainPanel.add(tree.getComponent());
-		mainPanel.add(scrPane);
-		mainPanel.add(rss);
+		mainPanel.setLeftComponent(tree.getComponent());
+		mainPanel.setRightComponent(scrPane);
 		GridBagLayout textLayout = new GridBagLayout();
 		textPanel.setLayout(textLayout);
 
