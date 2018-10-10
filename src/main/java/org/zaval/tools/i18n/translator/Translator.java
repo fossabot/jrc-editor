@@ -29,6 +29,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -73,6 +74,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.text.JTextComponent;
@@ -328,12 +330,18 @@ class Translator extends JFrame {
 
 		JMenu editMenu = new JMenu(RC("menu.edit"));
 
-		JMenuItem editCopyMenu = createMenuItem(this::onCopy, RC("tools.translator.menu.edit.copy") /* , KeyEvent.VK_C) */);
-		JMenuItem editCutMenu = createMenuItem(this::onCut, RC("tools.translator.menu.edit.cut") /* , KeyEvent.VK_X) */);
-		JMenuItem editPasteMenu = createMenuItem(this::onPaste, RC("tools.translator.menu.edit.paste") /* , KeyEvent.VK_V) */);
+		JMenuItem editCopyMenu = createMenuItem(this::onCopy, RC("tools.translator.menu.edit.copy"));
+		editCopyMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK));
+		JMenuItem editCutMenu = createMenuItem(this::onCut, RC("tools.translator.menu.edit.cut"));
+		editCutMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK));
+		JMenuItem editPasteMenu = createMenuItem(this::onPaste, RC("tools.translator.menu.edit.paste"));
+		editPasteMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK));
 		JMenuItem editDeleteMenu = createMenuItem(this::onDelete, RC("tools.translator.menu.edit.delete"));
+		editDeleteMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
 		JMenuItem searchMenu = createMenuItem(this::onSearch, RC("menu.search"));
+		searchMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK));
 		JMenuItem searchAgainMenu = createMenuItem(this::onSearchAgain, RC("menu.searchagain"), KeyEvent.VK_F);
+		searchAgainMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0));
 		JMenuItem replaceToMenu = createMenuItem(this::onReplace, RC("menu.replace"));
 
 		JMenuItem newLangMenu = createMenuItem(this::onNewResource, RC("tools.translator.menu.new.lang"), KeyEvent.VK_L);
