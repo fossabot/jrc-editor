@@ -94,7 +94,6 @@ import org.zaval.util.SafeResourceBundle;
 
 @SuppressWarnings("serial")
 class Translator extends JFrame {
-	private MessageBox2 delDialog;
 	private MessageBox2 repDialog;
 
 	private JTextField keyName;
@@ -143,9 +142,6 @@ class Translator extends JFrame {
 
 	private final String[] CLOSE_BUTTONS = new String[3];
 	private final String[] YESNO_BUTTONS = new String[2];
-	private final String[] DELETE_BUTTONS = new String[3];
-	private final String[] DELETE_BUTTONS2 = new String[2];
-	private final String[] DELETE_BUTTONS3 = new String[2];
 	private final String[] REPLACE_BUTTONS = new String[3];
 
 	private static final int MAX_PICK_LENGTH = 40;
@@ -200,15 +196,6 @@ class Translator extends JFrame {
 
 		YESNO_BUTTONS[0] = RC("dialog.button.yes");
 		YESNO_BUTTONS[1] = RC("dialog.button.no");
-
-		DELETE_BUTTONS[0] = RC("dialog.button.delete.all");
-		DELETE_BUTTONS[1] = RC("dialog.button.delete.this");
-		DELETE_BUTTONS[2] = RC("dialog.button.cancel");
-
-		DELETE_BUTTONS2[0] = DELETE_BUTTONS[0];
-		DELETE_BUTTONS2[1] = DELETE_BUTTONS[2];
-		DELETE_BUTTONS3[0] = DELETE_BUTTONS[1];
-		DELETE_BUTTONS3[1] = DELETE_BUTTONS[2];
 
 		imgres = new ToolkitResolver();
 		this.setLayout(new BorderLayout(0, 0));
@@ -457,12 +444,6 @@ class Translator extends JFrame {
 		menuBar.add(helpMenu);
 		setJMenuBar(menuBar);
 
-		delDialog = new MessageBox2(this);
-		delDialog.setIcon(imgres.getImage(SYS_DIR + "ogo.gif", delDialog));
-		delDialog.setTitle(RC("dialog.title.warning"));
-		delDialog.setButtons(DELETE_BUTTONS);
-		delDialog.addListener(this);
-
 		repDialog = new MessageBox2(this);
 		repDialog.setText("");
 		repDialog.setTitle(RC("dialog.title.warning"));
@@ -566,55 +547,6 @@ class Translator extends JFrame {
 
 	@Override
 	public boolean action(Event e, Object arg) {
-		if ((e.target == delDialog) && (e.arg instanceof Button) && ((Button) e.arg).getLabel().equals(DELETE_BUTTONS[0])) {
-			String key = tree.getSelectedText();
-			// remove all subkeys
-			if (key != null) {
-				isDirty = true;
-				TranslationTreeNode tn = tree.getNode(key);
-				if (tn != null) {
-					tn = tn.getParent();
-				}
-				bundle.getBundle().removeKeysBeginningWith(key);
-
-				tree.remove(key); // kill children
-				removeLeafs(key); // clean leafs out of model
-				adjustIndicator(tn);
-				tree.repaint();
-				wasSelectedKey = null;
-				setTranslations();
-			}
-			updateStatusBar();
-		}
-		if ((e.target == delDialog) && (e.arg instanceof Button) && ((Button) e.arg).getLabel().equals(DELETE_BUTTONS[1])) {
-			// Only this
-			String key = tree.getSelectedText();
-			if (key != null) {
-				isDirty = true;
-				TranslationTreeNode tn = tree.getNode(key);
-				if (tn == null) {
-					return true;
-				}
-
-				// Not an leaf => don't touch tree but update model
-				bundle.getBundle().removeKey(key);
-				if (tree.enumChild(tn).length == 0) {
-					tree.remove(key);
-					removeLeafs(key);
-				}
-				tree.selectNode(tn.getParent());
-
-				adjustIndicator(tn);
-				tree.repaint();
-
-				wasSelectedKey = null;
-				setTranslations();
-				textPanel.invalidate();
-				validate();
-			}
-			updateStatusBar();
-		}
-
 		if (e.target == repDialog) {
 			if ((e.arg instanceof Button) && ((Button) e.arg).getLabel().equals(REPLACE_BUTTONS[0])) {
 				makeReplaceImpl();
@@ -796,7 +728,8 @@ class Translator extends JFrame {
 		if (key == null) {
 			return;
 		}
-		delDialog.setText(bundle.replace(RC("tools.translator.message.delkey"), "[%key%]", key));
+		String title = RC("dialog.title.warning");
+		String message = bundle.replace(RC("tools.translator.message.delkey"), "[%key%]", key);
 
 		TranslationTreeNode tn = tree.getNode(key);
 		if (tn == null) {
@@ -804,17 +737,66 @@ class Translator extends JFrame {
 		}
 		boolean hasChilds = tree.enumChild(tn).length != 0;
 		BundleItem bi = bundle.getBundle().getItem(key);
+		boolean doDeleteThis = false;
+		boolean doDeleteAll = false;
 		if ((bi != null) && hasChilds) {
-			delDialog.setButtons(DELETE_BUTTONS);
+			String[] options = { RC("dialog.button.delete.all"), RC("dialog.button.delete.this"), RC("dialog.button.cancel") };
+			int selection = JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_CANCEL_OPTION,
+				JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+			doDeleteAll = 0 == selection;
+			doDeleteThis = 1 == selection;
 		}
 		else if ((bi != null) && !hasChilds) {
-			delDialog.setButtons(DELETE_BUTTONS3);
+			String[] options = { RC("dialog.button.delete.this"), RC("dialog.button.cancel") };
+			int selection = JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null,
+				options, options[0]);
+			doDeleteThis = 0 == selection;
 		}
 		else if (bi == null) {
-			delDialog.setButtons(DELETE_BUTTONS2);
+			String[] options = { RC("dialog.button.delete.all"), RC("dialog.button.cancel") };
+			int selection = JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null,
+				options, options[0]);
+			doDeleteAll = 0 == selection;
 		}
-		delDialog.show();
-		updateStatusBar();
+
+		if (doDeleteAll) {
+			// remove all subkeys
+			if (key != null) {
+				isDirty = true;
+				tn = tn.getParent();
+				bundle.getBundle().removeKeysBeginningWith(key);
+
+				tree.remove(key); // kill children
+				removeLeafs(key); // clean leafs out of model
+				adjustIndicator(tn);
+				tree.repaint();
+				wasSelectedKey = null;
+				setTranslations();
+			}
+			updateStatusBar();
+		}
+		else if (doDeleteThis) {
+			// Only this
+			if (key != null) {
+				isDirty = true;
+				// Not an leaf => don't touch tree but update model
+				bundle.getBundle().removeKey(key);
+				if (tree.enumChild(tn).length == 0) {
+					tree.remove(key);
+					removeLeafs(key);
+				}
+				tree.selectNode(tn.getParent());
+
+				adjustIndicator(tn);
+				tree.repaint();
+
+				wasSelectedKey = null;
+				setTranslations();
+				textPanel.invalidate();
+				validate();
+			}
+			updateStatusBar();
+		}
 	}
 
 	private void onClose() {
