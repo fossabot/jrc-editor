@@ -18,7 +18,6 @@
 
 package org.zaval.tools.i18n.translator;
 
-import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
@@ -73,8 +72,8 @@ class SearchDialog extends EditDialog {
 		return cases.isSelected();
 	}
 
-	public SearchDialog(JFrame f, String s, boolean b, Component l) {
-		super(f, s, b, l);
+	public SearchDialog(JFrame f, String s, boolean b) {
+		super(f, s, b);
 
 		inKeys = new JRadioButton("", false);
 		inVals = new JRadioButton("", true);

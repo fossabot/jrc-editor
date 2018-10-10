@@ -995,7 +995,7 @@ class Translator extends JFrame {
 	}
 
 	private void onSearch() {
-		SearchDialog ed = new SearchDialog(this, RC("tools.translator.label.search.caption"), true, this);
+		SearchDialog ed = new SearchDialog(this, RC("tools.translator.label.search.caption"), true);
 		ed.setLabelCaption(RC("tools.translator.label.search.label"));
 		ed.setButtonsCaption(RC("dialog.button.ok"), CLOSE_BUTTONS[2]);
 
@@ -1027,7 +1027,7 @@ class Translator extends JFrame {
 	}
 
 	private void onReplace() {
-		ReplaceDialog ed = new ReplaceDialog(this, RC("tools.translator.label.replace.caption"), true, this);
+		ReplaceDialog ed = new ReplaceDialog(this, RC("tools.translator.label.replace.caption"), true);
 		ed.setLabelCaption(RC("tools.translator.label.search.label"));
 		ed.setButtonsCaption(RC("dialog.button.ok"), CLOSE_BUTTONS[2]);
 		ed.setReplaceLabel(RC("tools.translator.label.replace.label"));

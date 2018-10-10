@@ -21,7 +21,6 @@ package org.zaval.awt.dialog;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Event;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -45,10 +44,9 @@ public class EditDialog extends JDialog implements ActionListener {
 	private final JButton ok;
 	private final JButton cancel;
 	private boolean isApply;
-	private final Component listener;
 	private final JLabel label;
 
-	public EditDialog(JFrame f, String s, boolean b, Component l) {
+	public EditDialog(JFrame f, String s, boolean b) {
 		super(f, s, b);
 		setLayout(new GridBagLayout());
 
@@ -60,7 +58,6 @@ public class EditDialog extends JDialog implements ActionListener {
 		edit.setActionCommand(COMMAND_OK);
 		constrain(this, edit, 1, 0, 4, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST, 1.0, 0.0, 5, 5, 5, 5);
 
-		listener = l;
 		edit.requestFocus();
 		ok = new JButton("Ok");
 		cancel = new JButton("Cancel");
@@ -131,7 +128,7 @@ public class EditDialog extends JDialog implements ActionListener {
 		pack();
 		toCenter();
 		edit.requestFocus();
-		show();
+		setVisible(true);
 	}
 
 	@Override
@@ -139,7 +136,6 @@ public class EditDialog extends JDialog implements ActionListener {
 		switch (e.getActionCommand()) {
 			case COMMAND_OK:
 				isApply = true;
-				listener.postEvent(new Event(this, Event.ACTION_EVENT, edit.getText()));
 				dispose();
 				break;
 			case COMMAND_CANCEL:
