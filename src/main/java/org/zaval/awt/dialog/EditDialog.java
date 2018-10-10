@@ -27,7 +27,6 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -37,9 +36,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 @SuppressWarnings("serial")
-public class EditDialog extends JDialog implements ActionListener {
-	protected static final String COMMAND_OK = "ok";
-	protected static final String COMMAND_CANCEL = "cancel";
+public class EditDialog extends JDialog {
 	private final JTextField edit;
 	private final JButton ok;
 	private final JButton cancel;
@@ -54,8 +51,7 @@ public class EditDialog extends JDialog implements ActionListener {
 
 		constrain(this, label, 0, 0, 1, 1, GridBagConstraints.NONE, GridBagConstraints.WEST, 0.0, 0.0, 5, 5, 5, 5);
 		edit = new JTextField(20);
-		edit.addActionListener(this);
-		edit.setActionCommand(COMMAND_OK);
+		edit.addActionListener(this::onPerform);
 		constrain(this, edit, 1, 0, 4, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST, 1.0, 0.0, 5, 5, 5, 5);
 
 		edit.requestFocus();
@@ -64,10 +60,8 @@ public class EditDialog extends JDialog implements ActionListener {
 	}
 
 	protected void renderDialogFooter() {
-		ok.setActionCommand(COMMAND_OK);
-		ok.addActionListener(this);
-		cancel.addActionListener(this);
-		cancel.setActionCommand(COMMAND_CANCEL);
+		ok.addActionListener(this::onPerform);
+		cancel.addActionListener(this::onCancel);
 
 		JPanel p = new JPanel();
 		p.setLayout(new GridLayout(1, 2, 2, 0));
@@ -131,17 +125,13 @@ public class EditDialog extends JDialog implements ActionListener {
 		setVisible(true);
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		switch (e.getActionCommand()) {
-			case COMMAND_OK:
-				isApply = true;
-				dispose();
-				break;
-			case COMMAND_CANCEL:
-				isApply = false;
-				dispose();
-				break;
-		}
+	protected void onPerform(ActionEvent e) {
+		isApply = true;
+		dispose();
+	}
+
+	protected void onCancel(ActionEvent e) {
+		isApply = false;
+		dispose();
 	}
 }

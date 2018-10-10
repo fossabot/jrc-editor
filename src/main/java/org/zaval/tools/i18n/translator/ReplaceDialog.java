@@ -92,8 +92,7 @@ class ReplaceDialog extends EditDialog {
 
 		label = new JLabel("To:");
 		replaceTo = new JTextField(20);
-		replaceTo.addActionListener(this);
-		replaceTo.setActionCommand(COMMAND_OK);
+		replaceTo.addActionListener(this::onPerform);
 		constrain(this, label, 0, 1, 1, 1, GridBagConstraints.NONE, GridBagConstraints.WEST, 0.0, 0.0, 0, 5, 5, 5);
 		constrain(this, replaceTo, 1, 1, 1, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST, 1.0, 0.0, 0, 5, 5, 0);
 
