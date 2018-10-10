@@ -34,7 +34,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
@@ -43,8 +42,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -95,7 +95,6 @@ import org.zaval.util.SafeResourceBundle;
 @SuppressWarnings("serial")
 class Translator extends JFrame {
 	private MessageBox2 delDialog;
-	private MessageBox2 errDialog;
 	private MessageBox2 repDialog;
 
 	private JTextField keyName;
@@ -470,13 +469,6 @@ class Translator extends JFrame {
 		repDialog.setIcon(imgres.getImage(SYS_DIR + "ogo.gif", repDialog));
 		repDialog.setButtons(REPLACE_BUTTONS);
 		repDialog.addListener(this);
-
-		errDialog = new MessageBox2(this);
-		errDialog.setText("");
-		errDialog.setTitle(RC("dialog.title.warning"));
-		errDialog.setIcon(imgres.getImage(SYS_DIR + "Stop.gif", errDialog));
-		String[] OK_BUT = { RC("dialog.button.ok") };
-		errDialog.setButtons(OK_BUT);
 	}
 
 	private void onToggleAllowUnderscore() {
@@ -1185,8 +1177,10 @@ class Translator extends JFrame {
 			if (first) {
 				searchCriteria = null;
 			}
-			errDialog.setText(first ? RC("tools.translator.label.search.nokeys") : RC("tools.translator.label.search.nomorekeys"));
-			errDialog.show();
+
+			String title = RC("dialog.title.warning");
+			String message = first ? RC("tools.translator.label.search.nokeys") : RC("tools.translator.label.search.nomorekeys");
+			JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
@@ -1231,12 +1225,15 @@ class Translator extends JFrame {
 			searchCriteria = null;
 		}
 		if (replacements > 0) {
-			errDialog.setText(bundle.replace(RC("tools.translator.label.replaced.count"), "[%replaced%]", Integer.toString(replacements)));
+			String message = bundle.replace(RC("tools.translator.label.replaced.count"), "[%replaced%]", Integer.toString(replacements));
+			String title = RC("dialog.title.warning");
+			JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE);
 		}
 		else {
-			errDialog.setText(first ? RC("tools.translator.label.search.nokeys") : RC("tools.translator.label.search.nomorekeys"));
+			String message = first ? RC("tools.translator.label.search.nokeys") : RC("tools.translator.label.search.nomorekeys");
+			String title = RC("dialog.title.warning");
+			JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE);
 		}
-		errDialog.show();
 		updateStatusBar();
 	}
 
@@ -1355,8 +1352,9 @@ class Translator extends JFrame {
 	private void readResources(String fileName, boolean part) {
 		File f = new File(fileName);
 		if (!f.canRead()) {
-			errDialog.setText(fileName + ":" + RC("no.file.found"));
-			errDialog.show();
+			String title = RC("dialog.title.warning");
+			String message = fileName + ": " + RC("no.file.found");
+			JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
@@ -1502,16 +1500,15 @@ class Translator extends JFrame {
 	private void infoException(Exception e) {
 		e.printStackTrace();
 		try {
-			ByteArrayOutputStream ba = new ByteArrayOutputStream();
-			PrintStream p = new PrintStream(ba);
-			e.printStackTrace(p);
-			p.close();
-			String msg = new String(ba.toByteArray(), 0);
+			StringWriter writer = new StringWriter();
+			e.printStackTrace(new PrintWriter(writer));
+			String msg = writer.getBuffer().toString();
 
-			String hdr = e.getMessage() == null ? e.toString() : e.getMessage();
-			hdr = hdr + "\n" + msg;
-			errDialog.setText(hdr);
-			errDialog.show();
+			String message = e.getMessage() == null ? e.toString() : e.getMessage();
+			message = message + "\n" + msg;
+
+			String title = RC("dialog.title.warning");
+			JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE);
 		}
 		catch (Exception z) {
 		}
@@ -2066,8 +2063,9 @@ class Translator extends JFrame {
 
 			int k = bundle.getBundle().getLangCount();
 			if (bundle.getBundle().getItem(newKey) != null) {
-				errDialog.setText(RC("tools.translator.label.rename.dup"));
-				errDialog.show();
+				String errorTitle = RC("dialog.title.warning");
+				String errorMessage = RC("tools.translator.label.rename.dup");
+				JOptionPane.showMessageDialog(this, errorMessage, errorTitle, JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 
