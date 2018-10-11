@@ -141,7 +141,6 @@ class Translator extends JFrame {
 	private JScrollPane scrPane;
 
 	private final String[] CLOSE_BUTTONS = new String[3];
-	private final String[] YESNO_BUTTONS = new String[2];
 	private final String[] REPLACE_BUTTONS = new String[3];
 
 	private static final int MAX_PICK_LENGTH = 40;
@@ -194,9 +193,6 @@ class Translator extends JFrame {
 		REPLACE_BUTTONS[1] = RC("dialog.button.no");
 		REPLACE_BUTTONS[2] = RC("dialog.button.cancel");
 
-		YESNO_BUTTONS[0] = RC("dialog.button.yes");
-		YESNO_BUTTONS[1] = RC("dialog.button.no");
-
 		imgres = new ToolkitResolver();
 		this.setLayout(new BorderLayout(0, 0));
 		add("Center", pane);
@@ -235,6 +231,7 @@ class Translator extends JFrame {
 		panel3.setPreferredSize(new Dimension(0, (int) (panel3.getFontMetrics(panel3.getFont()).getHeight() * 1.5f)));
 		panel3.setLayout(new GridBagLayout());
 		panel3.setBorder(new BevelBorder(BevelBorder.LOWERED));
+
 		sbl1 = new JLabel();
 		JPanel sbl1Panel = new JPanel();
 		sbl1Panel.setPreferredSize(new Dimension(2, 0));
@@ -271,6 +268,7 @@ class Translator extends JFrame {
 
 		pane.setLayout(new BorderLayout());
 		JSplitPane mainPanel = new JSplitPane();
+		mainPanel.setDividerSize(3);
 		mainPanel.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
 		JPanel keyPanel = new JPanel(new GridBagLayout());
 
@@ -609,7 +607,7 @@ class Translator extends JFrame {
 				String trans = ls.tf.getText();
 				BundleItem bi = bundle.getBundle().getItem(wasSelectedKey);
 				if (bi == null) {
-					// do not add the translation implicitely - disable
+					// do not add the translation implicitly - disable
 					// the language field
 					ls.tf.setVisible(false);
 					ls.label.setVisible(false);
@@ -838,7 +836,7 @@ class Translator extends JFrame {
 	}
 
 	private void finish() {
-		hide();
+		setVisible(false);
 		saveIni();
 		dispose();
 	}
@@ -1441,7 +1439,7 @@ class Translator extends JFrame {
 		FileDialog openFileDialog1 = new FileDialog(this, RC("tools.translator.label.opentitle"), FileDialog.LOAD);
 		openFileDialog1.setDirectory(lastDirectory);
 		openFileDialog1.setFile(mask);
-		openFileDialog1.show();
+		openFileDialog1.setVisible(true);
 
 		String filename = openFileDialog1.getFile();
 		if (filename != null) {
@@ -1502,6 +1500,7 @@ class Translator extends JFrame {
 			JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE);
 		}
 		catch (Exception z) {
+			z.printStackTrace();
 		}
 	}
 
