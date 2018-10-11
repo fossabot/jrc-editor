@@ -728,9 +728,6 @@ class Translator extends JFrame {
 		if (key == null) {
 			return;
 		}
-		String title = RC("dialog.title.warning");
-		String message = bundle.replace(RC("tools.translator.message.delkey"), "[%key%]", key);
-
 		TranslationTreeNode tn = tree.getNode(key);
 		if (tn == null) {
 			return;
@@ -739,6 +736,8 @@ class Translator extends JFrame {
 		BundleItem bi = bundle.getBundle().getItem(key);
 		boolean doDeleteThis = false;
 		boolean doDeleteAll = false;
+		String title = RC("dialog.title.warning");
+		String message = bundle.replace(RC("tools.translator.message.delkey"), "[%key%]", key);
 		if ((bi != null) && hasChilds) {
 			String[] options = { RC("dialog.button.delete.all"), RC("dialog.button.delete.this"), RC("dialog.button.cancel") };
 			int selection = JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_CANCEL_OPTION,
@@ -760,41 +759,51 @@ class Translator extends JFrame {
 		}
 
 		if (doDeleteAll) {
-			// remove all subkeys
-			if (key != null) {
-				isDirty = true;
-				tn = tn.getParent();
-				bundle.getBundle().removeKeysBeginningWith(key);
-
-				tree.remove(key); // kill children
-				removeLeafs(key); // clean leafs out of model
-				adjustIndicator(tn);
-				tree.repaint();
-				wasSelectedKey = null;
-				setTranslations();
+			isDirty = true;
+			TranslationTreeNode parentNode = tn.getParent();
+			TranslationTreeNode nextToSelect = tn.getPreviousSibling();
+			if (null == nextToSelect) {
+				nextToSelect = tn.getNextSibling();
 			}
+			if (null == nextToSelect) {
+				nextToSelect = parentNode;
+			}
+			bundle.getBundle().removeKeysBeginningWith(key);
+
+			tree.remove(key); // kill children
+			removeLeafs(key); // clean leafs out of model
+			adjustIndicator(parentNode);
+			tree.selectNode(nextToSelect);
+			tree.repaint();
+			wasSelectedKey = null;
+			setTranslations();
 			updateStatusBar();
 		}
 		else if (doDeleteThis) {
-			// Only this
-			if (key != null) {
-				isDirty = true;
-				// Not an leaf => don't touch tree but update model
-				bundle.getBundle().removeKey(key);
-				if (tree.enumChild(tn).length == 0) {
-					tree.remove(key);
-					removeLeafs(key);
+			isDirty = true;
+			// Not an leaf => don't touch tree but update model
+			bundle.getBundle().removeKey(key);
+			TranslationTreeNode parentNode = tn.getParent();
+			TranslationTreeNode nextToSelect = tn;
+			if (tree.enumChild(tn).length == 0) {
+				nextToSelect = tn.getPreviousSibling();
+				if (null == nextToSelect) {
+					nextToSelect = tn.getNextSibling();
 				}
-				tree.selectNode(tn.getParent());
-
-				adjustIndicator(tn);
-				tree.repaint();
-
-				wasSelectedKey = null;
-				setTranslations();
-				textPanel.invalidate();
-				validate();
+				if (null == nextToSelect) {
+					nextToSelect = parentNode;
+				}
+				tree.remove(key);
 			}
+			tree.selectNode(nextToSelect);
+
+			adjustIndicator(parentNode);
+			tree.repaint();
+
+			wasSelectedKey = null;
+			setTranslations();
+			textPanel.invalidate();
+			validate();
 			updateStatusBar();
 		}
 	}

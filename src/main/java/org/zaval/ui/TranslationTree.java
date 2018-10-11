@@ -182,7 +182,6 @@ public class TranslationTree implements TreeModelListener {
 		TranslationTreeNode node = nodes.remove(key);
 		if (null != node) {
 			treeModel.removeNodeFromParent(node);
-			node.removeFromParent();
 		}
 	}
 

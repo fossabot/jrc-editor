@@ -80,6 +80,11 @@ public class TranslationTreeNode extends DefaultMutableTreeNode {
 	}
 
 	@Override
+	public TranslationTreeNode getPreviousSibling() {
+		return (TranslationTreeNode) super.getPreviousSibling();
+	}
+
+	@Override
 	public TranslationTreeNode getNextSibling() {
 		return (TranslationTreeNode) super.getNextSibling();
 	}
