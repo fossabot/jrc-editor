@@ -139,7 +139,7 @@ public class TranslationTree implements TreeModelListener {
 		selectedNode = newSelectedNode;
 	}
 
-	public void requestFocus() {
+	public void requestFocusInWindow() {
 		tree.requestFocusInWindow();
 	}
 

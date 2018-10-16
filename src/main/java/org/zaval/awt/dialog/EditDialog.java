@@ -53,7 +53,7 @@ public class EditDialog extends JDialog {
 		edit.addActionListener(this::onPerform);
 		constrain(this, edit, 1, 0, 4, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, 1.0, 0.0, 5, 5, 5, 5);
 
-		edit.requestFocus();
+		edit.requestFocusInWindow();
 		ok = new JButton("Ok");
 		cancel = new JButton("Cancel");
 	}
@@ -94,7 +94,7 @@ public class EditDialog extends JDialog {
 	public void doModal() {
 		pack();
 		UiUtils.toCenter(this);
-		edit.requestFocus();
+		edit.requestFocusInWindow();
 		setVisible(true);
 	}
 

@@ -1158,7 +1158,7 @@ class Translator extends JFrame {
 					setTranslations(bi.getId());
 					textPanel.invalidate();
 					validate();
-					tree.requestFocus();
+					tree.requestFocusInWindow();
 					tree.repaint();
 					return;
 				}
@@ -1196,7 +1196,7 @@ class Translator extends JFrame {
 						textPanel.invalidate();
 						validate();
 						if (replaceTo == null) {
-							textPanel.requestFocus();
+							textPanel.requestFocusInWindow();
 							LangState ls = langStates.get(k);
 							ls.tf.requestFocusInWindow();
 						}
@@ -1611,7 +1611,7 @@ class Translator extends JFrame {
 			setTranslations();
 		}
 
-		tree.requestFocus();
+		tree.requestFocusInWindow();
 
 		closeMenu.setEnabled(true);
 		saveBundleMenu.setEnabled(true);
