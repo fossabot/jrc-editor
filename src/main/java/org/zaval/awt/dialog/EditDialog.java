@@ -18,14 +18,11 @@
 
 package org.zaval.awt.dialog;
 
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
+import static org.zaval.ui.UiUtils.constrain;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 
 import javax.swing.JButton;
@@ -34,6 +31,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import org.zaval.ui.UiUtils;
 
 @SuppressWarnings("serial")
 public class EditDialog extends JDialog {
@@ -49,10 +48,10 @@ public class EditDialog extends JDialog {
 
 		label = new JLabel("Name");
 
-		constrain(this, label, 0, 0, 1, 1, GridBagConstraints.NONE, GridBagConstraints.WEST, 0.0, 0.0, 5, 5, 5, 5);
+		constrain(this, label, 0, 0, 1, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 5, 5);
 		edit = new JTextField(20);
 		edit.addActionListener(this::onPerform);
-		constrain(this, edit, 1, 0, 4, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST, 1.0, 0.0, 5, 5, 5, 5);
+		constrain(this, edit, 1, 0, 4, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, 1.0, 0.0, 5, 5, 5, 5);
 
 		edit.requestFocus();
 		ok = new JButton("Ok");
@@ -68,7 +67,7 @@ public class EditDialog extends JDialog {
 		p.add(ok);
 		p.add(cancel);
 
-		constrain(this, p, 0, 10, 2, 1, GridBagConstraints.NONE, GridBagConstraints.EAST, 1.0, 0.0, 5, 5, 5, 5);
+		constrain(this, p, 0, 10, 2, 1, GridBagConstraints.EAST, GridBagConstraints.NONE, 1.0, 0.0, 5, 5, 5, 5);
 	}
 
 	public void setText(String t) {
@@ -92,35 +91,9 @@ public class EditDialog extends JDialog {
 		return isApply;
 	}
 
-	private void toCenter() {
-		Dimension s = Toolkit.getDefaultToolkit().getScreenSize();
-		Dimension d = getSize();
-		setLocation((s.width - d.width) / 2, (s.height - d.height) / 2);
-	}
-
-	protected static void constrain(Container c, Component p, int x, int y, int w, int h, int f, int a, double wx, double wy, int t, int l,
-		int r, int b) {
-		GridBagConstraints cc = new GridBagConstraints();
-
-		cc.gridx = x;
-		cc.gridy = y;
-		cc.gridwidth = w;
-		cc.gridheight = h;
-
-		cc.fill = f;
-		cc.anchor = a;
-		cc.weightx = wx;
-		cc.weighty = wy;
-
-		if ((t + b + l + r) > 0) {
-			cc.insets = new Insets(t, l, b, r);
-		}
-		c.add(p, cc);
-	}
-
 	public void doModal() {
 		pack();
-		toCenter();
+		UiUtils.toCenter(this);
 		edit.requestFocus();
 		setVisible(true);
 	}

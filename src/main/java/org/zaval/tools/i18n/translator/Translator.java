@@ -18,6 +18,8 @@
 
 package org.zaval.tools.i18n.translator;
 
+import static org.zaval.ui.UiUtils.constrain;
+
 import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Component;
@@ -28,7 +30,6 @@ import java.awt.FileDialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -2141,26 +2142,6 @@ class Translator extends JFrame {
 			hideTranslated(tn.getFirstChild(), hide);
 			tn = tn.getNextSibling();
 		}
-	}
-
-	private void constrain(JPanel c, Component p, int x, int y, int width, int height, int anchor, int fill, double weightx, double weighty,
-		int insetLeft, int insetTop, int insetRight, int insetBottom) {
-		GridBagConstraints cc = new GridBagConstraints();
-
-		cc.gridx = x;
-		cc.gridy = y;
-		cc.gridwidth = width;
-		cc.gridheight = height;
-
-		cc.fill = fill;
-		cc.anchor = anchor;
-		cc.weightx = weightx;
-		cc.weighty = weighty;
-
-		if ((insetTop + insetBottom + insetLeft + insetRight) > 0) {
-			cc.insets = new Insets(insetTop, insetLeft, insetBottom, insetRight);
-		}
-		c.add(p, cc);
 	}
 
 	private boolean match_regex(String mask, String val, boolean matchCase) {

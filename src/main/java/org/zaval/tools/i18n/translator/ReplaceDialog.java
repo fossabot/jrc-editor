@@ -18,6 +18,8 @@
 
 package org.zaval.tools.i18n.translator;
 
+import static org.zaval.ui.UiUtils.constrain;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
@@ -93,8 +95,8 @@ class ReplaceDialog extends EditDialog {
 		label = new JLabel("To:");
 		replaceTo = new JTextField(20);
 		replaceTo.addActionListener(this::onPerform);
-		constrain(this, label, 0, 1, 1, 1, GridBagConstraints.NONE, GridBagConstraints.WEST, 0.0, 0.0, 0, 5, 5, 5);
-		constrain(this, replaceTo, 1, 1, 1, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST, 1.0, 0.0, 0, 5, 5, 0);
+		constrain(this, label, 0, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 5, 5);
+		constrain(this, replaceTo, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, 1.0, 0.0, 0, 5, 0, 5);
 
 		JPanel p = new JPanel();
 		p.setLayout(new GridBagLayout());
@@ -102,15 +104,15 @@ class ReplaceDialog extends EditDialog {
 		JPanel p2 = new JPanel();
 		p2.setBorder(new LineBorder(null));
 		p2.setLayout(new GridBagLayout());
-		constrain(p2, exact, 1, 0, 1, 1, GridBagConstraints.NONE, GridBagConstraints.NORTHWEST, 0.0, 0.0, 0, 5, 5, 0);
-		constrain(p2, regex, 1, 1, 1, 1, GridBagConstraints.NONE, GridBagConstraints.NORTHWEST, 0.0, 0.0, 0, 5, 5, 0);
-		constrain(p, p2, 0, 1, 2, 1, GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST, 1.0, 1.0, 5, 0, 0, 0);
+		constrain(p2, exact, 1, 0, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 0, 5);
+		constrain(p2, regex, 1, 1, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 0, 5);
+		constrain(p, p2, 0, 1, 2, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, 1.0, 1.0, 5, 0, 0, 0);
 
-		constrain(p, cases, 0, 2, 2, 1, GridBagConstraints.NONE, GridBagConstraints.NORTHWEST, 0.0, 0.0, 5, 5, 5, 0);
-		constrain(p, prompt, 0, 3, 2, 1, GridBagConstraints.NONE, GridBagConstraints.NORTHWEST, 0.0, 0.0, 0, 5, 5, 0);
-		constrain(p, all, 0, 4, 2, 1, GridBagConstraints.NONE, GridBagConstraints.NORTHWEST, 0.0, 0.0, 0, 5, 5, 5);
+		constrain(p, cases, 0, 2, 2, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 0, 5);
+		constrain(p, prompt, 0, 3, 2, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 0, 5);
+		constrain(p, all, 0, 4, 2, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 5, 5);
 
-		constrain(this, p, 0, 2, 2, 1, GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST, 1.0, 1.0, 5, 5, 5, 5);
+		constrain(this, p, 0, 2, 2, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, 1.0, 1.0, 5, 5, 5, 5);
 		renderDialogFooter();
 	}
 }
