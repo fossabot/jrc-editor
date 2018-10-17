@@ -21,15 +21,15 @@ package org.zaval.tools.i18n.translator;
 import static org.zaval.ui.UiUtils.constrain;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.Event;
 import java.awt.FileDialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -63,6 +63,7 @@ import java.util.zip.ZipFile;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -85,7 +86,6 @@ import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
 import org.zaval.awt.SpeedButton;
 import org.zaval.awt.ToolkitResolver;
-import org.zaval.awt.dialog.MessageBox2;
 import org.zaval.io.IniFile;
 import org.zaval.io.InputIniFile;
 import org.zaval.tools.i18n.translator.generated.JavaParser;
@@ -97,7 +97,7 @@ import org.zaval.util.SafeResourceBundle;
 
 @SuppressWarnings("serial")
 class Translator extends JFrame {
-	private MessageBox2 repDialog;
+	private JOptionPane repDialog;
 
 	private JTextField keyName;
 	private JLabel keynLab;
@@ -445,12 +445,17 @@ class Translator extends JFrame {
 		menuBar.add(helpMenu);
 		setJMenuBar(menuBar);
 
-		repDialog = new MessageBox2(this);
-		repDialog.setText("");
-		repDialog.setTitle(RC("dialog.title.warning"));
-		repDialog.setIcon(imgres.getImage(SYS_DIR + "ogo.gif", repDialog));
-		repDialog.setButtons(REPLACE_BUTTONS);
-		repDialog.addListener(this);
+		String title = RC("dialog.title.warning");
+		repDialog = new JOptionPane("", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, REPLACE_BUTTONS,
+			REPLACE_BUTTONS[0]);
+		JDialog dlg = repDialog.createDialog(this, title);
+		dlg.setModal(false);
+		dlg.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentHidden(ComponentEvent e) {
+				onReplaceDialogClosed();
+			}
+		});
 	}
 
 	private void onToggleAllowUnderscore() {
@@ -546,19 +551,15 @@ class Translator extends JFrame {
 		}
 	}
 
-	@Override
-	public boolean action(Event e, Object arg) {
-		if (e.target == repDialog) {
-			if ((e.arg instanceof Button) && ((Button) e.arg).getLabel().equals(REPLACE_BUTTONS[0])) {
-				makeReplaceImpl();
-			}
-			else if ((e.arg instanceof Button) && ((Button) e.arg).getLabel().equals(REPLACE_BUTTONS[2])) {
-				replaceTo = null;
-			}
-			updateStatusBar();
+	private void onReplaceDialogClosed() {
+		Object value = repDialog.getValue();
+		if (Objects.equals(value, REPLACE_BUTTONS[0])) {
+			makeReplaceImpl();
 		}
-
-		return true;
+		else if (Objects.equals(value, REPLACE_BUTTONS[2])) {
+			replaceTo = null;
+		}
+		updateStatusBar();
 	}
 
 	private void updateStatusBar() {
@@ -1125,12 +1126,14 @@ class Translator extends JFrame {
 				validate();
 				tree.repaint();
 			}
-			repDialog.setModal(replaceAll);
+			JDialog dlg = ((JDialog) repDialog.getTopLevelAncestor());
+			dlg.setModal(replaceAll);
 			String mess = RC("tools.translator.message.found");
 			mess = bundle.replace(mess, "[%found%]", searchCriteria);
 			mess = bundle.replace(mess, "[%subst%]", replaceTo);
-			repDialog.setText(mess);
-			repDialog.show();
+			repDialog.setMessage(mess);
+			dlg.pack();
+			dlg.setVisible(true);
 		}
 		else {
 			makeReplaceImpl();
