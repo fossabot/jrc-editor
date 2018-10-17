@@ -60,6 +60,7 @@ import java.util.stream.IntStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
@@ -89,6 +90,7 @@ import org.zaval.io.IniFile;
 import org.zaval.io.InputIniFile;
 import org.zaval.tools.i18n.translator.generated.JavaParser;
 import org.zaval.tools.i18n.translator.generated.UtfParser;
+import org.zaval.ui.AboutDialog;
 import org.zaval.ui.TranslationTree;
 import org.zaval.ui.TranslationTreeNode;
 import org.zaval.util.SafeResourceBundle;
@@ -1506,13 +1508,14 @@ class Translator extends JFrame {
 	}
 
 	private void onAbout() {
-		MessageBox2 aboutDialog = new MessageBox2(this);
-		aboutDialog.setText(RC("tools.translator.copyright"));
-		aboutDialog.setTitle(RC("dialog.title.info"));
-		aboutDialog.setIcon(imgres.getImage(SYS_DIR + "ZavalCE.gif", aboutDialog));
-		String[] OK_BUT = { RC("dialog.button.ok") };
-		aboutDialog.setButtons(OK_BUT);
-		aboutDialog.show();
+		String title = RC("dialog.title.info");
+		String zavalCopyright = "Copyright &copy; 2001-2002 <a href=\"http://www.zaval.org\">Zaval Creative Engineering Group (http://www.zaval.org)</a><br/>";
+		String cobexerCopyright = "Copyright &copy 2018 <a href=\"mailto:cobexer+jrceditor@gmail.com?subject=JRC-Editor\"> Obexer Christoph &lt;cobexer+jrceditor@gmail.com&gt;</a>";
+		String copyright = "<html>" + zavalCopyright + cobexerCopyright;
+		String ok = RC("dialog.button.ok");
+		ImageIcon image = imgres.getImageIcon(SYS_DIR + "ZavalCE.gif");
+		AboutDialog aboutDialog = new AboutDialog(this, title, copyright, ok, image);
+		aboutDialog.setVisible(true);
 	}
 
 	private void onStatistics() {
