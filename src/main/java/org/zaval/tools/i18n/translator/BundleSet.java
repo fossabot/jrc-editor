@@ -45,6 +45,10 @@ class BundleSet {
 		return lng.size();
 	}
 
+	LangItem[] getLanguages() {
+		return lng.toArray(new LangItem[lng.size()]);
+	}
+
 	LangItem getLanguage(int idx) {
 		return lng.get(idx);
 	}
@@ -58,7 +62,7 @@ class BundleSet {
 		int k = getLangCount();
 		for (int j = 0; j < k; ++j) {
 			LangItem lx = getLanguage(j);
-			if (lx.getLangId().equals(lng)) {
+			if (lx.getId().equals(lng)) {
 				return j;
 			}
 		}
@@ -188,19 +192,19 @@ class BundleSet {
 		if (lan0 == lang) {
 			return;
 		}
-		if (lang.getLangFile() != null) {
+		if (lang.getFileName() != null) {
 			return;
 		}
-		if (lan0.getLangFile() == null) {
+		if (lan0.getFileName() == null) {
 			return;
 		}
-		String base = lan0.getLangFile();
+		String base = lan0.getFileName();
 		int j = base.lastIndexOf('.');
 		if (j < 0) {
 			return;
 		}
-		base = base.substring(0, j) + "_" + lang.getLangId() + base.substring(j);
-		lang.setLangFile(base);
+		base = base.substring(0, j) + "_" + lang.getId() + base.substring(j);
+		lang.setFileName(base);
 	}
 
 	public void resort() {

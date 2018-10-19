@@ -105,7 +105,7 @@ public class Split { // NO_UCD (unused code)
 			Map<String, String> ask = parser.parse();
 
 			bundle.getBundle().addLanguage("en");
-			String rlng = bundle.getBundle().getLanguage(0).getLangId();
+			String rlng = bundle.getBundle().getLanguage(0).getId();
 
 			for (Map.Entry<String, String> stringStringEntry : ask.entrySet()) {
 				bundle.getBundle().addKey(stringStringEntry.getKey());

@@ -141,7 +141,7 @@ class BundleManager {
 	private void proceedLines(List<String> lines, String lang, String fullName) {
 		fullName = fullName != null ? fullName : "tmp_" + lang;
 		set.addLanguage(lang);
-		set.getLanguage(lang).setLangFile(fullName);
+		set.getLanguage(lang).setFileName(fullName);
 		String lastComment = null;
 		for (String line : lines) {
 			line = line.trim();
@@ -338,24 +338,24 @@ class BundleManager {
 		int k = set.getLangCount();
 		for (int j = 0; j < k; ++j) {
 			LangItem lang = set.getLanguage(j);
-			store(lang.getLangId(), fileName);
+			store(lang.getId(), fileName);
 		}
 	}
 
 	private void store(String lng, String fn) throws IOException {
 		LangItem lang = set.getLanguage(lng);
 		if (fn == null) {
-			fn = lang.getLangFile();
+			fn = lang.getFileName();
 		}
 		else {
 			String tmpFn = fn;
 			tmpFn = dirName(tmpFn) + purifyFileName(tmpFn);
 			if (set.getLanguage(0) != lang) {
-				tmpFn += "_" + lang.getLangId();
+				tmpFn += "_" + lang.getId();
 			}
 			tmpFn += TranslatorConstants.RES_EXTENSION;
 			fn = tmpFn;
-			lang.setLangFile(fn);
+			lang.setFileName(fn);
 		}
 
 		if (fn == null) {
@@ -363,7 +363,7 @@ class BundleManager {
 			return;
 		}
 
-		List<String> lines = set.store(lang.getLangId());
+		List<String> lines = set.store(lang.getId());
 		if (fn.endsWith(TranslatorConstants.RES_EXTENSION)) {
 			try (PrintStream f = new PrintStream(new FileOutputStream(fn))) {
 				for (String line : lines) {

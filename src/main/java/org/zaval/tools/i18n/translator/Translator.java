@@ -48,6 +48,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -55,7 +56,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -849,7 +852,7 @@ class Translator extends JFrame {
 		if (bundle.getBundle().getLangCount() == 0) {
 			return;
 		}
-		String fn = bundle.getBundle().getLanguage(0).getLangFile();
+		String fn = bundle.getBundle().getLanguage(0).getFileName();
 		if (fn == null) {
 			onSaveAs();
 			return;
@@ -1073,7 +1076,7 @@ class Translator extends JFrame {
 	}
 
 	private void makeReplaceImpl() {
-		String lang = curLangForReplace.getLangId();
+		String lang = curLangForReplace.getId();
 		String val = curItemForReplace.getTranslation(lang);
 		if (searchRegex) {
 			try {
@@ -1184,7 +1187,7 @@ class Translator extends JFrame {
 			BundleItem bi = bundle.getBundle().getItem(i);
 			for (int k = 0; k < bundle.getBundle().getLangCount(); ++k) {
 				LangItem li = bundle.getBundle().getLanguage(k);
-				String val = bi.getTranslation(li.getLangId());
+				String val = bi.getTranslation(li.getId());
 				if (isMatchedWith(val)) {
 					lastKeyFound = bi.getId();
 
@@ -1384,9 +1387,9 @@ class Translator extends JFrame {
 		LangItem lang2 = bundle.getBundle().getLanguage(lang);
 		int i = bundle.getBundle().getLangIndex(lang);
 
-		String langLab = lang2.getLangDescription();
+		String langLab = lang2.getDescription();
 		LangState ls = new LangState();
-		ls.name = lang2.getLangId();
+		ls.name = lang2.getId();
 		ls.box = new JCheckBoxMenuItem(langLab, false);
 		ls.box.addActionListener(e -> {
 			ls.hidden = !ls.hidden;
@@ -1472,7 +1475,7 @@ class Translator extends JFrame {
 	}
 
 	private void onSaveAs() {
-		String fn = bundle.getBundle().getLanguage(0).getLangFile();
+		String fn = bundle.getBundle().getLanguage(0).getFileName();
 		if (fn == null) {
 			fn = "autosaved";
 		}
@@ -1535,9 +1538,9 @@ class Translator extends JFrame {
 
 	private void onGenCode() {
 		try {
-			String fn = (bundle.getBundle().getLangCount() == 0) || (bundle.getBundle().getLanguage(0).getLangFile() == null)
+			String fn = (bundle.getBundle().getLangCount() == 0) || (bundle.getBundle().getLanguage(0).getFileName() == null)
 				? "Sample"
-				: bundle.baseName(bundle.getBundle().getLanguage(0).getLangFile());
+				: bundle.baseName(bundle.getBundle().getLanguage(0).getFileName());
 			fn = fn.substring(0, 1).toUpperCase() + fn.substring(1);
 
 			String filename = lookupFileForStore(fn + "ResourceMapped.java");
@@ -1566,7 +1569,7 @@ class Translator extends JFrame {
 				clear();
 				initControls();
 				bundle.getBundle().addLanguage("en");
-				String rlng = bundle.getBundle().getLanguage(0).getLangId();
+				String rlng = bundle.getBundle().getLanguage(0).getId();
 
 				for (Map.Entry<String, String> stringStringEntry : ask.entrySet()) {
 					BundleItem bi = bundle.getBundle().addKey(stringStringEntry.getKey());
@@ -1586,7 +1589,7 @@ class Translator extends JFrame {
 		/* Initialize language set */
 		for (int i = 0; i < bundle.getBundle().getLangCount(); ++i) {
 			LangItem lang2 = bundle.getBundle().getLanguage(i);
-			syncLanguage(lang2.getLangId());
+			syncLanguage(lang2.getId());
 		}
 		hideTransMenu.setState(false);
 
@@ -1794,26 +1797,16 @@ class Translator extends JFrame {
 		}
 	}
 
-	private String[] getLangSet() {
-		LangDialog ed = new LangDialog(this, RC("tools.translator.label.choosetitle"), true, this);
+	private List<LangItem> getLangSet() {
+		LangDialog<LangItem> ed = new LangDialog<LangItem>(this, RC("tools.translator.label.choosetitle"), true,
+			i -> String.format("%s: %s", i.getId(), i.getDescription()));
 		ed.setLabelCaption(RC("tools.translator.label.chooselabel"));
 		ed.setButtonsCaption(RC("dialog.button.ok"), CLOSE_BUTTONS[2]);
 
-		LangItem[] lset = new LangItem[bundle.getBundle().getLangCount()];
-		Arrays.setAll(lset, i -> bundle.getBundle().getLanguage(i));
-		ed.setList(lset);
+		ed.setList(bundle.getBundle().getLanguages());
 
 		ed.doModal();
-		String[] ask = ed.getList();
-		if ((ask == null) || (ask.length <= 0) || !ed.isApply()) {
-			return null;
-		}
-		for (int i = 0; i < ask.length; ++i) {
-			if (ask[i].indexOf(':') > 0) {
-				ask[i] = ask[i].substring(0, ask[i].indexOf(':')).trim();
-			}
-		}
-		return ask;
+		return ed.isApply() ? ed.getList() : Collections.EMPTY_LIST;
 	}
 
 	private void onOpen(boolean part) {
@@ -1828,12 +1821,13 @@ class Translator extends JFrame {
 		updateStatusBar();
 	}
 
+	// FIXME: this needs to use a real XML api...
 	private void onSaveXml(boolean part) {
-		String[] parts = part ? getLangSet() : null;
-		if (part && ((parts == null) || (parts.length < 2))) {
+		List<LangItem> parts = part ? getLangSet() : Collections.EMPTY_LIST;
+		if (part && (parts.size() < 2)) {
 			return;
 		}
-		String fn = bundle.getBundle().getLanguage(0).getLangFile();
+		String fn = bundle.getBundle().getLanguage(0).getFileName();
 		if (fn == null) {
 			fn = "autosaved";
 		}
@@ -1846,14 +1840,14 @@ class Translator extends JFrame {
 					int items = set.getItemCount();
 					out.writeChar((char) 0xFEFF);
 					out.writeChars("<xml>\n");
+					Set<String> write = parts.stream().map(LangItem::getId).collect(Collectors.toSet());
 					for (int i = 0; i < items; ++i) {
 						BundleItem bi = set.getItem(i);
 						out.writeChars("\t<key name=\"" + bi.getId() + "\">\n");
 						for (String lang : bi.getLanguages()) {
-							if (part && !inArray(parts, lang)) {
-								continue;
+							if (!part || write.contains(lang)) {
+								out.writeChars("\t\t<value lang=\"" + lang + "\">" + bi.getTranslation(lang) + "</value>\n");
 							}
-							out.writeChars("\t\t<value lang=\"" + lang + "\">" + bi.getTranslation(lang) + "</value>\n");
 						}
 						out.writeChars("\t</key>\n");
 					}
@@ -1866,13 +1860,14 @@ class Translator extends JFrame {
 		}
 	}
 
+	// FIXME: this needs to properly escape the strings for the file format
 	private void onSaveUtf(boolean part) {
-		String[] parts = part ? getLangSet() : null;
-		if (part && ((parts == null) || (parts.length < 2))) {
+		List<LangItem> parts = part ? getLangSet() : Collections.EMPTY_LIST;
+		if (part && (parts.size() < 2)) {
 			return;
 		}
 
-		String fn = bundle.getBundle().getLanguage(0).getLangFile();
+		String fn = bundle.getBundle().getLanguage(0).getFileName();
 		if (fn == null) {
 			fn = "autosaved";
 		}
@@ -1885,14 +1880,14 @@ class Translator extends JFrame {
 					int items = set.getItemCount();
 					out.writeChar((char) 0xFEFF);
 					out.writeChars("#JRC Editor: do not modify this line\r\n\r\n");
+					Set<String> write = parts.stream().map(LangItem::getId).collect(Collectors.toSet());
 					for (int i = 0; i < items; ++i) {
 						BundleItem bi = set.getItem(i);
 						out.writeChars("KEY=\"" + bi.getId() + "\":\r\n");
 						for (String lang : bi.getLanguages()) {
-							if (part && !inArray(parts, lang)) {
-								continue;
+							if (!part || write.contains(lang)) {
+								out.writeChars("\t\"" + lang + "\"=\"" + bi.getTranslation(lang) + "\"\r\n");
 							}
-							out.writeChars("\t\"" + lang + "\"=\"" + bi.getTranslation(lang) + "\"\r\n");
 						}
 						out.writeChars("\r\n");
 					}
@@ -2068,7 +2063,7 @@ class Translator extends JFrame {
 
 			// Keep old values
 			for (int j = 0; j < k; ++j) {
-				String lang = bundle.getBundle().getLanguage(j).getLangId();
+				String lang = bundle.getBundle().getLanguage(j).getId();
 				String value = biOld.getTranslation(lang);
 				if (value != null) {
 					oldValues.put(lang, value);
@@ -2081,7 +2076,7 @@ class Translator extends JFrame {
 			addToTree(newKey);
 			BundleItem biNew = bundle.getBundle().addKey(newKey);
 			for (int j = 0; j < k; ++j) {
-				String lang = bundle.getBundle().getLanguage(j).getLangId();
+				String lang = bundle.getBundle().getLanguage(j).getId();
 				String value = oldValues.get(lang);
 				if (value != null) {
 					biNew.setTranslation(lang, value);
@@ -2122,7 +2117,7 @@ class Translator extends JFrame {
 					}
 					initData(false);
 					// Force new file name for storage
-					bundle.getBundle().getLanguage(0).setLangFile(null);
+					bundle.getBundle().getLanguage(0).setFileName(null);
 					setTitle(filename);
 				}
 			}

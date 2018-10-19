@@ -18,158 +18,114 @@
 
 package org.zaval.tools.i18n.translator;
 
-import java.awt.Button;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dialog;
+import static org.zaval.ui.UiUtils.constrain;
+
 import java.awt.Dimension;
-import java.awt.Event;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.LayoutManager;
-import java.awt.List;
-import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.util.List;
+import java.util.function.Function;
 
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.ListSelectionModel;
+
+import org.zaval.ui.UiUtils;
 
 @SuppressWarnings("serial")
-class LangDialog extends Dialog {
-	private final List edit;
-	private final Button ok;
-	private final Button cancel;
+class LangDialog<ListItem> extends JDialog {
+	private final JList<ListItem> edit;
+	private final JButton ok;
+	private final JButton cancel;
 	private boolean isApply;
-	private final Component listener;
 	private final JLabel label;
 
-	public LangDialog(Frame f, String s, boolean b, Component l) {
-		super(f, s, b);
+	public LangDialog(JFrame owner, String title, boolean modal, Function<ListItem, String> itemMapper) {
+		super(owner, title, modal);
 		setLayout(new GridBagLayout());
 
 		label = new JLabel("List of languages");
-		constrain(this, label, 0, 0, 1, 1, GridBagConstraints.NONE, GridBagConstraints.WEST, 0.0, 0.0, 5, 5, 5, 5);
-		edit = new List(10, true);
-		constrain(this, edit, 0, 1, 4, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST, 1.0, 0.0, 5, 5, 5, 5);
+		constrain(this, label, 0, 0, 1, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 5, 5);
+		edit = new JList<>();
+		edit.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		edit.setCellRenderer(new LangDialogCellRenderer<ListItem>(edit.getCellRenderer(), itemMapper));
+		constrain(this, edit, 0, 1, 4, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, 1.0, 0.0, 5, 5, 5, 5);
 
-		ok = new Button("Ok");
-		cancel = new Button("Cancel");
+		ok = new JButton("Ok");
+		ok.addActionListener(this::onPerform);
+		cancel = new JButton("Cancel");
+		cancel.addActionListener(this::onCancel);
 
 		JPanel p = new JPanel();
 		p.setLayout(new GridLayout(1, 2, 2, 0));
 		p.add(ok);
 		p.add(cancel);
 
-		constrain(this, p, 0, 2, 2, 1, GridBagConstraints.NONE, GridBagConstraints.EAST, 1.0, 0.0, 5, 5, 5, 5);
+		constrain(this, p, 0, 2, 2, 1, GridBagConstraints.EAST, GridBagConstraints.NONE, 1.0, 0.0, 5, 5, 5, 5);
 
-		listener = l;
 		pack();
 	}
 
-	public void setList(LangItem... t) {
-		edit.removeAll();
-		if (t == null) {
-			return;
-		}
-		for (LangItem element : t) {
-			String s = element.getLangId() + ": " + element.getLangDescription();
-			edit.add(s);
-		}
-		edit.select(0); // english is always selected
+	private void onPerform(ActionEvent e) {
+		isApply = true;
+		dispose();
 	}
 
-	public String[] getList() {
-		edit.select(0); // english is always selected
-		return edit.getSelectedItems();
+	private void onCancel(ActionEvent e) {
+		isApply = false;
+		dispose();
+	}
+
+	public void setList(ListItem[] items) {
+		edit.removeAll();
+		edit.setListData(items);
+		edit.setSelectedIndex(0); // first item (English?) is always selected
+	}
+
+	public List<ListItem> getList() {
+		int[] selectedIndices = edit.getSelectedIndices();
+		// make sure that the first item (English=) is always selected
+		if (0 == selectedIndices.length) {
+			edit.setSelectedIndex(0);
+		}
+		else if (0 != selectedIndices[0]) {
+			int[] newSelectedIndices = new int[selectedIndices.length + 1];
+			newSelectedIndices[0] = 0;
+			System.arraycopy(selectedIndices, 0, newSelectedIndices, 1, selectedIndices.length);
+			edit.setSelectedIndices(newSelectedIndices);
+		}
+		return edit.getSelectedValuesList();
 	}
 
 	public void setButtonsCaption(String o, String c) {
-		ok.setLabel(o);
-		cancel.setLabel(c);
+		ok.setText(o);
+		cancel.setText(c);
 	}
 
 	public void setLabelCaption(String l) {
 		label.setText(l);
 	}
 
-	@Override
-	public boolean handleEvent(Event e) {
-		if ((e.id == Event.WINDOW_DESTROY) || ((e.target == cancel) && (e.id == Event.ACTION_EVENT))) {
-			isApply = false;
-			dispose();
-		}
-
-		if ((e.target == ok) && (e.id == Event.ACTION_EVENT)) {
-			isApply = true;
-			listener.postEvent(new Event(this, Event.ACTION_EVENT, null));
-			dispose();
-		}
-		return super.handleEvent(e);
-	}
-
 	public boolean isApply() {
 		return isApply;
 	}
 
-	private void toCenter() {
-		Dimension s = Toolkit.getDefaultToolkit().getScreenSize();
-		Dimension d = getSize();
-		move((s.width - d.width) / 2, (s.height - d.height) / 2);
-	}
-
-	static private void constrain(Container c, Component p, int x, int y, int w, int h, int f, int a, double wx, double wy, int t, int l,
-		int r, int b) {
-		GridBagConstraints cc = new GridBagConstraints();
-
-		cc.gridx = x;
-		cc.gridy = y;
-		cc.gridwidth = w;
-		cc.gridheight = h;
-
-		cc.fill = f;
-		cc.anchor = a;
-		cc.weightx = wx;
-		cc.weighty = wy;
-
-		if ((t + b + l + r) > 0) {
-			cc.insets = new Insets(t, l, b, r);
-		}
-		LayoutManager lm = c.getLayout();
-		if (lm instanceof GridBagLayout) {
-			GridBagLayout gbl = (GridBagLayout) lm;
-			gbl.setConstraints(p, cc);
-		}
-		c.add(p);
-	}
-
 	@Override
-	public boolean keyDown(Event e, int key) {
-		if (((e.target == ok) && (key == Event.ENTER)) || ((e.target == edit) && (key == Event.ENTER))) {
-			isApply = true;
-			listener.postEvent(new Event(this, Event.ACTION_EVENT, null));
-			dispose();
-			return true;
-		}
-		if ((e.target == cancel) && (key == Event.ENTER)) {
-			isApply = false;
-			dispose();
-			return true;
-		}
-		return false;
-	}
-
-	@Override
-	public Dimension preferredSize() {
-		Dimension d = super.preferredSize();
+	public Dimension getPreferredSize() {
+		Dimension d = super.getPreferredSize();
 		d.width *= 2;
 		return d;
 	}
 
 	public void doModal() {
 		pack();
-		toCenter();
-		show();
+		UiUtils.toCenter(this);
+		setVisible(true);
 	}
 }
