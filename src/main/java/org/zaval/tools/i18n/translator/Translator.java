@@ -87,7 +87,6 @@ import javax.swing.text.JTextComponent;
 
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
-import org.zaval.awt.SpeedButton;
 import org.zaval.awt.ToolkitResolver;
 import org.zaval.io.IniFile;
 import org.zaval.io.InputIniFile;
@@ -203,17 +202,19 @@ class Translator extends JFrame {
 		this.setLayout(new BorderLayout(0, 0));
 		add("Center", pane);
 
-		SpeedButton newBundleToolButton = new SpeedButton(this::onNewBundle, imgres.getImage(SYS_DIR + "new.gif", this));
-		SpeedButton openBundleToolButton = new SpeedButton(this::onLoadBundle, imgres.getImage(SYS_DIR + "load.gif", this));
-		SpeedButton saveBundleToolButton = new SpeedButton(this::onSave, imgres.getImage(SYS_DIR + "save.gif", this));
-		SpeedButton saveAsToolButton = new SpeedButton(this::onSaveAs, imgres.getImage(SYS_DIR + "saveas.gif", this));
-		SpeedButton genToolButton = new SpeedButton(this::onGenCode, imgres.getImage(SYS_DIR + "deploy.gif", this));
-		SpeedButton parseToolButton = new SpeedButton(this::onParseCode, imgres.getImage(SYS_DIR + "import.gif", this));
-		SpeedButton newLangToolButton = new SpeedButton(this::onNewResource, imgres.getImage(SYS_DIR + "newlang.gif", this));
-		SpeedButton delToolButton = new SpeedButton(this::onDeleteKey, imgres.getImage(SYS_DIR + "del.gif", this));
-		SpeedButton aboutToolButton = new SpeedButton(this::onAbout, imgres.getImage(SYS_DIR + "about.gif", this));
+		JButton newBundleToolButton = createToolBarButton(this::onNewBundle, SYS_DIR + "new.gif", RC("tools.translator.menu.new.bundle"));
+		JButton openBundleToolButton = createToolBarButton(this::onLoadBundle, SYS_DIR + "load.gif", RC("tools.translator.menu.open"));
+		JButton saveBundleToolButton = createToolBarButton(this::onSave, SYS_DIR + "save.gif", RC("tools.translator.menu.save"));
+		JButton saveAsToolButton = createToolBarButton(this::onSaveAs, SYS_DIR + "saveas.gif", RC("tools.translator.menu.saveas"));
+		JButton genToolButton = createToolBarButton(this::onGenCode, SYS_DIR + "deploy.gif", RC("tools.translator.menu.generate"));
+		JButton parseToolButton = createToolBarButton(this::onParseCode, SYS_DIR + "import.gif", RC("tools.translator.menu.parse"));
+		JButton newLangToolButton = createToolBarButton(this::onNewResource, SYS_DIR + "newlang.gif", RC("tools.translator.menu.new.lang"));
+		JButton delToolButton = createToolBarButton(this::onDeleteKey, SYS_DIR + "del.gif", RC("tools.translator.menu.delete"));
+		JButton aboutToolButton = createToolBarButton(this::onAbout, SYS_DIR + "about.gif", RC("menu.about"));
 
 		JToolBar tool = new JToolBar();
+		tool.setFloatable(false);
+		tool.setRollover(true);
 		tool.add(new JLabel(RC("menu.file") + ":"));
 		tool.add(newBundleToolButton);
 		tool.add(openBundleToolButton);
@@ -459,6 +460,13 @@ class Translator extends JFrame {
 				onReplaceDialogClosed();
 			}
 		});
+	}
+
+	private JButton createToolBarButton(Runnable callback, String icon, String tooltip) {
+		JButton button = new JButton(imgres.getImageIcon(icon));
+		button.addActionListener(e -> callback.run());
+		button.setToolTipText(tooltip);
+		return button;
 	}
 
 	private void onToggleAllowUnderscore() {
