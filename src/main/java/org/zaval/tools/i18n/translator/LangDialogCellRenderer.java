@@ -25,11 +25,11 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
-public class LangDialogCellRenderer<ListItem> implements ListCellRenderer<ListItem> {
+class LangDialogCellRenderer<ListItem> implements ListCellRenderer<ListItem> {
 	private final ListCellRenderer<? super ListItem> cellRenderer;
 	private final Function<ListItem, String> itemMapper;
 
-	public LangDialogCellRenderer(ListCellRenderer<? super ListItem> cellRenderer, Function<ListItem, String> itemMapper) {
+	LangDialogCellRenderer(ListCellRenderer<? super ListItem> cellRenderer, Function<ListItem, String> itemMapper) {
 		this.cellRenderer = cellRenderer;
 		this.itemMapper = itemMapper;
 	}

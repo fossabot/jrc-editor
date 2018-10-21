@@ -47,7 +47,6 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -1905,10 +1904,6 @@ class Translator extends JFrame {
 				infoException(e);
 			}
 		}
-	}
-
-	private boolean inArray(String[] array, String lang) {
-		return Arrays.stream(array).anyMatch(element -> element.equalsIgnoreCase(lang));
 	}
 
 	/**

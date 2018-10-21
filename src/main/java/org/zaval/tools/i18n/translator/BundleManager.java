@@ -32,19 +32,17 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 class BundleManager {
-	private final BundleSet set;
+	private final BundleSet set = new BundleSet();
 
-	BundleManager() {
-		set = new BundleSet();
+	public BundleManager() {
+	}
+
+	BundleManager(String baseFileName) throws IOException {
+		readResources(baseFileName);
 	}
 
 	void appendResource(InputStream stream, String lang) throws IOException {
 		readResource(stream, lang);
-	}
-
-	BundleManager(String baseFileName) throws IOException {
-		set = new BundleSet();
-		readResources(baseFileName);
 	}
 
 	BundleSet getBundle() {

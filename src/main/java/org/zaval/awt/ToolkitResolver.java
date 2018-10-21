@@ -18,9 +18,7 @@
 
 package org.zaval.awt;
 
-import java.awt.Component;
 import java.awt.Image;
-import java.awt.MediaTracker;
 import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
@@ -29,24 +27,7 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
 public class ToolkitResolver {
-	private final Toolkit kit;
-
-	public ToolkitResolver() {
-		kit = Toolkit.getDefaultToolkit();
-	}
-
-	public Image getImage(String str, Component listener) {
-		Image i = kit.getImage(str);
-		MediaTracker track = new MediaTracker(listener);
-		try {
-			track.addImage(i, 0);
-			track.waitForID(0);
-		}
-		catch (Exception e) {
-			i = null;
-		}
-		return i;
-	}
+	private final Toolkit kit = Toolkit.getDefaultToolkit();
 
 	public Image getImage(String str) {
 		return kit.getImage(str);

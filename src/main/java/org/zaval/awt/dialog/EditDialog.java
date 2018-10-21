@@ -36,14 +36,14 @@ import org.zaval.ui.UiUtils;
 
 @SuppressWarnings("serial")
 public class EditDialog extends JDialog {
+	private final JLabel label;
 	private final JTextField edit;
 	private final JButton ok;
 	private final JButton cancel;
 	private boolean isApply;
-	private final JLabel label;
 
-	public EditDialog(JFrame f, String s, boolean b) {
-		super(f, s, b);
+	public EditDialog(JFrame owner, String title, boolean modal) {
+		super(owner, title, modal);
 		setLayout(new GridBagLayout());
 
 		label = new JLabel("Name");
@@ -103,7 +103,7 @@ public class EditDialog extends JDialog {
 		dispose();
 	}
 
-	protected void onCancel(ActionEvent e) {
+	private void onCancel(ActionEvent e) {
 		isApply = false;
 		dispose();
 	}
