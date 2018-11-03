@@ -167,8 +167,7 @@ public class TranslationTree implements TreeModelListener {
 
 	public TranslationTreeNode[] enumChild(TranslationTreeNode tn) {
 		int childCount = tn.getChildCount();
-		TranslationTreeNode[] children = IntStream.range(0, childCount).mapToObj(tn::getChildAt).toArray(TranslationTreeNode[]::new);
-		return children;
+		return IntStream.range(0, childCount).mapToObj(tn::getChildAt).toArray(TranslationTreeNode[]::new);
 	}
 
 	public void remove(String key) {

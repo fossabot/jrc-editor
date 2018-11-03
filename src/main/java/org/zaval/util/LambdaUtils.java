@@ -47,17 +47,17 @@ public class LambdaUtils {
 
 	// from http://4comprehension.com/sneakily-throwing-exceptions-in-lambda-expressions-in-java/
 	@SuppressWarnings("unchecked")
-	static <T extends Exception, R> R sneakyThrow(Exception t) throws T { // NO_UCD (use private)
+	private static <T extends Exception, R> R sneakyThrow(Exception t) throws T { // NO_UCD (use private)
 		throw (T) t; // ( ͡° ͜ʖ ͡°)
 	}
 
 	@FunctionalInterface
-	public static interface ThrowingSupplier<T> {
+	public interface ThrowingSupplier<T> {
 		T get() throws Exception;
 	}
 
 	@FunctionalInterface
-	public static interface ThrowingConsumer<T> {
+	public interface ThrowingConsumer<T> {
 		void accept(T t) throws Exception;
 	}
 }

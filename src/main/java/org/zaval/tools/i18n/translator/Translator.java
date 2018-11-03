@@ -1589,18 +1589,20 @@ class Translator extends JFrame {
 
 		/* Add all keys in tree view ... */
 		BundleItem bi = set.getItems().findFirst().orElse(null);
-		addToTree(bi.getId());
+		if (null != bi) {
+			addToTree(bi.getId());
 
-		AtomicInteger counter = new AtomicInteger();
-		set.getItems().forEachOrdered(bi2 -> {
-			addToTree(bi2.getId());
-			int i = counter.get();
-			if ((i % 250) == 0) {
-				sbl2.setText("    " + i + " " + RC("tools.translator.progress.addkeys"));
-				sbl2.repaint();
-			}
-			counter.incrementAndGet();
-		});
+			AtomicInteger counter = new AtomicInteger();
+			set.getItems().forEachOrdered(bi2 -> {
+				addToTree(bi2.getId());
+				int i = counter.get();
+				if ((i % 250) == 0) {
+					sbl2.setText("    " + i + " " + RC("tools.translator.progress.addkeys"));
+					sbl2.repaint();
+				}
+				counter.incrementAndGet();
+			});
+		}
 		setAllIndicators();
 		sbl2.setText("");
 		sbl2.repaint();
@@ -2028,7 +2030,6 @@ class Translator extends JFrame {
 
 		BundleItem biOldAlone = bundle.getBundle().getItem(oldKeyName);
 		bundle.getBundle().getKeysBeginningWith(oldKeyName).forEachOrdered(biOld -> {
-			Map<String, String> oldValues = new HashMap<>();
 			String newKey = newKeyName;
 			if (biOldAlone == null) {
 				newKey = newKeyName + biOld.getId().substring(oldKeyName.length());
@@ -2042,6 +2043,7 @@ class Translator extends JFrame {
 			}
 
 			// Keep old values
+			Map<String, String> oldValues = new HashMap<>();
 			for (LangItem lang : bundle.getBundle().getLanguages()) {
 				String value = biOld.getTranslation(lang.getId());
 				if (value != null) {

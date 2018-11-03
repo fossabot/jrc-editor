@@ -78,7 +78,7 @@ class BundleSet {
 	}
 
 	Stream<BundleItem> getItems() {
-		return items.entrySet().stream().map(Map.Entry<String, BundleItem>::getValue);
+		return items.entrySet().stream().map(Map.Entry::getValue);
 	}
 
 	int getItemIndex(String key) {
@@ -93,7 +93,7 @@ class BundleSet {
 	}
 
 	BundleItem addKey(String key) {
-		return items.computeIfAbsent(key, k -> new BundleItem(k));
+		return items.computeIfAbsent(key, BundleItem::new);
 	}
 
 	void removeKey(String key) {
@@ -101,7 +101,7 @@ class BundleSet {
 	}
 
 	Stream<BundleItem> getKeysBeginningWith(String key) {
-		return items.entrySet().stream().filter(bi -> bi.getKey().startsWith(key)).map(it -> it.getValue());
+		return items.entrySet().stream().filter(bi -> bi.getKey().startsWith(key)).map(Map.Entry::getValue);
 	}
 
 	void removeKeysBeginningWith(String key) {
