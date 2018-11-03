@@ -40,10 +40,10 @@ public class TranslationTreeNode extends DefaultMutableTreeNode {
 
 	public TranslationTreeNode createChildNode(String fullPath) {
 		TranslationTreeNode nn = new TranslationTreeNode(treeModel, fullPath);
-		int children = getChildCount();
+		int childrenCount = getChildCount();
 		int i = 0;
-		for (; i < children; ++i) {
-			if (getChildAt(i).getText().compareToIgnoreCase(fullPath) > 0) {
+		for (; i < childrenCount; ++i) {
+			if (getChildAt(i).fullPath.compareToIgnoreCase(fullPath) > 0) {
 				i += 1;
 				break;
 			}
@@ -57,7 +57,7 @@ public class TranslationTreeNode extends DefaultMutableTreeNode {
 		this.treeModel = treeModel;
 	}
 
-	public String getCaption() {
+	private String getCaption() {
 		return null != caption ? caption : fullPath;
 	}
 

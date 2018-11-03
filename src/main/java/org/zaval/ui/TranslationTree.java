@@ -24,6 +24,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -166,10 +167,7 @@ public class TranslationTree implements TreeModelListener {
 
 	public TranslationTreeNode[] enumChild(TranslationTreeNode tn) {
 		int childCount = tn.getChildCount();
-		TranslationTreeNode[] children = new TranslationTreeNode[childCount];
-		for (int i = 0; i < childCount; ++i) {
-			children[i] = tn.getChildAt(i);
-		}
+		TranslationTreeNode[] children = IntStream.range(0, childCount).mapToObj(tn::getChildAt).toArray(TranslationTreeNode[]::new);
 		return children;
 	}
 

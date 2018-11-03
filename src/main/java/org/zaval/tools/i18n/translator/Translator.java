@@ -46,6 +46,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -146,7 +147,6 @@ class Translator extends JFrame {
 	private String SYS_DIR;
 	private BundleManager bundle = new BundleManager();
 	private final JPanel pane = new JPanel();
-	private JScrollPane scrPane;
 
 	private final String[] CLOSE_BUTTONS = new String[3];
 	private final String[] REPLACE_BUTTONS = new String[3];
@@ -168,8 +168,6 @@ class Translator extends JFrame {
 	private String replaceTo;
 	private BundleItem curItemForReplace;
 	private LangItem curLangForReplace;
-
-	private final List<Component> tabOrder = new ArrayList<>();
 
 	public Translator(String s, SafeResourceBundle res) {
 		init(s, res);
@@ -297,16 +295,11 @@ class Translator extends JFrame {
 		pane.add(keyPanel, "South");
 		pane.add(mainPanel, "Center");
 		textPanel = new JPanel();
-		scrPane = new JScrollPane(textPanel);
+		JScrollPane scrPane = new JScrollPane(textPanel);
 		mainPanel.setLeftComponent(tree.getComponent());
 		mainPanel.setRightComponent(scrPane);
 		GridBagLayout textLayout = new GridBagLayout();
 		textPanel.setLayout(textLayout);
-
-		tabOrder.add(tree.getComponent());
-		tabOrder.add(keyName);
-		tabOrder.add(keyInsertButton);
-		tabOrder.add(keyDeleteButton);
 
 		JMenuBar menuBar = new JMenuBar();
 		fileMenu = new JMenu(RC("menu.file"));
@@ -453,7 +446,7 @@ class Translator extends JFrame {
 		setJMenuBar(menuBar);
 
 		String title = RC("dialog.title.warning");
-		repDialog = new JOptionPane("", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, REPLACE_BUTTONS,
+		repDialog = new JOptionPane("", JOptionPane.WARNING_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, REPLACE_BUTTONS,
 			REPLACE_BUTTONS[0]);
 		JDialog dlg = repDialog.createDialog(this, title);
 		dlg.setModal(false);
@@ -577,8 +570,10 @@ class Translator extends JFrame {
 	}
 
 	private void updateStatusBar() {
-		sbl1.setText(
-			" " + getVisLangCount() + "/" + bundle.getBundle().getLanguageCount() + ", " + bundle.getBundle().getItemCount() + " ");
+		int visLangCount = getVisLangCount();
+		int languageCount = bundle.getBundle().getLanguageCount();
+		int itemCount = bundle.getBundle().getItemCount();
+		sbl1.setText(MessageFormat.format(" {0}/{1}, {2} ", visLangCount, languageCount, itemCount));
 	}
 
 	private void onDelete() {
@@ -1268,7 +1263,7 @@ class Translator extends JFrame {
 		initControls();
 		bundle.getBundle().addLanguage("en");
 		bundle.getBundle().addKey("creationDate");
-		bundle.getBundle().updateValue("creationDate", "en", (new Date()).toLocaleString());
+		bundle.getBundle().updateValue("creationDate", "en", (new Date()).toString());
 		initData(false);
 		setTitle(null);
 		isDirty = false;
@@ -1323,7 +1318,7 @@ class Translator extends JFrame {
 
 		@Override
 		public void run() {
-			setCursor(Cursor.WAIT_CURSOR);
+			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			sbl2.setText(RC("tools.translator.progress.loadfiles"));
 			sbl2.repaint();
 			try {
@@ -1440,7 +1435,6 @@ class Translator extends JFrame {
 			TranslationTreeNode ttpar = tree.getNode(tname);
 			TranslationTreeNode tnew = ttpar.createChildNode(s);
 			tnew.setCaption(s.substring(ind + 1));
-			tnew = tree.getNode(s);
 		}
 	}
 
@@ -1464,7 +1458,7 @@ class Translator extends JFrame {
 		FileDialog openFileDialog1 = new FileDialog(this, RC("tools.translator.label.saveastitle"), FileDialog.SAVE);
 		openFileDialog1.setDirectory(lastDirectory);
 		openFileDialog1.setFile(fileName);
-		openFileDialog1.show();
+		openFileDialog1.setVisible(true);
 
 		String filename = openFileDialog1.getFile();
 		if ((filename != null) && keepLastDir) {
@@ -1497,8 +1491,7 @@ class Translator extends JFrame {
 
 	private void infoException(Exception e) {
 		e.printStackTrace();
-		try {
-			StringWriter writer = new StringWriter();
+		try (StringWriter writer = new StringWriter()) {
 			e.printStackTrace(new PrintWriter(writer));
 			String msg = writer.getBuffer().toString();
 
@@ -1611,7 +1604,7 @@ class Translator extends JFrame {
 		setAllIndicators();
 		sbl2.setText("");
 		sbl2.repaint();
-		setCursor(Cursor.DEFAULT_CURSOR);
+		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
 		/* ... and make all keys closed by default */
 
@@ -1801,7 +1794,7 @@ class Translator extends JFrame {
 	}
 
 	private List<LangItem> getLangSet() {
-		LangDialog<LangItem> ed = new LangDialog<LangItem>(this, RC("tools.translator.label.choosetitle"), true,
+		LangDialog<LangItem> ed = new LangDialog<>(this, RC("tools.translator.label.choosetitle"), true,
 			i -> String.format("%s: %s", i.getId(), i.getDescription()));
 		ed.setLabelCaption(RC("tools.translator.label.chooselabel"));
 		ed.setButtonsCaption(RC("dialog.button.ok"), CLOSE_BUTTONS[2]);
@@ -1809,7 +1802,7 @@ class Translator extends JFrame {
 		ed.setList(bundle.getBundle().getLanguages());
 
 		ed.doModal();
-		return ed.isApply() ? ed.getList() : Collections.EMPTY_LIST;
+		return ed.isApply() ? ed.getList() : Collections.emptyList();
 	}
 
 	private void onOpen(boolean part) {
@@ -1826,7 +1819,7 @@ class Translator extends JFrame {
 
 	// FIXME: this needs to use a real XML api...
 	private void onSaveXml(boolean part) {
-		List<LangItem> parts = part ? getLangSet() : Collections.EMPTY_LIST;
+		List<LangItem> parts = part ? getLangSet() : Collections.emptyList();
 		if (part && (parts.size() < 2)) {
 			return;
 		}
@@ -1863,7 +1856,7 @@ class Translator extends JFrame {
 
 	// FIXME: this needs to properly escape the strings for the file format
 	private void onSaveUtf(boolean part) {
-		List<LangItem> parts = part ? getLangSet() : Collections.EMPTY_LIST;
+		List<LangItem> parts = part ? getLangSet() : Collections.emptyList();
 		if (part && (parts.size() < 2)) {
 			return;
 		}
