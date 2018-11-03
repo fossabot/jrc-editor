@@ -19,14 +19,16 @@
 package org.zaval.tools.i18n.translator;
 
 import java.awt.Dimension;
+import java.awt.GraphicsEnvironment;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.io.File;
 import java.util.Locale;
 
-import org.zaval.util.SafeResourceBundle;
-
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+
+import org.zaval.util.SafeResourceBundle;
 
 public class Main { // NO_UCD (unused code)
 	public static void main(String arg[]) {
@@ -55,8 +57,12 @@ public class Main { // NO_UCD (unused code)
 		Dimension gdz = Toolkit.getDefaultToolkit().getScreenSize();
 		int optimalX = (gdz.width / 4) * 3;
 		int optimalY = (gdz.height / 4) * 3;
-		t.move((gdz.width - optimalX) / 2, (gdz.height - optimalY) / 2);
-		t.resize(optimalX, optimalY);
-		t.show();
+		t.setSize(optimalX, optimalY);
+		Point center = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
+		center.x -= optimalX / 2;
+		center.y -= optimalY / 2;
+		t.setLocation(center);
+		t.setLocationByPlatform(true);
+		t.setVisible(true);
 	}
 }
