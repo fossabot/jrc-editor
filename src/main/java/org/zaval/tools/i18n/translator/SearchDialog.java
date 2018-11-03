@@ -34,14 +34,14 @@ import org.zaval.awt.dialog.EditDialog;
 
 @SuppressWarnings("serial")
 class SearchDialog extends EditDialog {
-	private final JRadioButton inKeys;
-	private final JRadioButton inVals;
+	private final JRadioButton inKeys = new JRadioButton("", false);
+	private final JRadioButton inVals = new JRadioButton("", true);
 
-	private final JRadioButton regex;
-	private final JRadioButton mask;
-	private final JRadioButton exact;
+	private final JRadioButton regex = new JRadioButton("", false);
+	private final JRadioButton mask = new JRadioButton("", false);
+	private final JRadioButton exact = new JRadioButton("", true);
 
-	private final JCheckBox cases;
+	private final JCheckBox cases = new JCheckBox("", true);
 
 	public void setKVGroupLabels(String s1, String s2) {
 		inKeys.setText(s1);
@@ -76,40 +76,30 @@ class SearchDialog extends EditDialog {
 
 	public SearchDialog(JFrame f, String s, boolean b) {
 		super(f, s, b);
-
-		inKeys = new JRadioButton("", false);
-		inVals = new JRadioButton("", true);
 		ButtonGroup keysOrValues = new ButtonGroup();
 		keysOrValues.add(inKeys);
 		keysOrValues.add(inVals);
 
-		regex = new JRadioButton("", false);
-		mask = new JRadioButton("", false);
-		exact = new JRadioButton("", true);
 		ButtonGroup matchTypeGroup = new ButtonGroup();
 		matchTypeGroup.add(regex);
 		matchTypeGroup.add(mask);
 		matchTypeGroup.add(exact);
 
-		cases = new JCheckBox("", true);
-
-		JPanel p = new JPanel();
-		p.setLayout(new GridBagLayout());
-
 		JPanel p1 = new JPanel();
 		p1.setLayout(new GridBagLayout());
 		p1.setBorder(new LineBorder(null));
-		JPanel p2 = new JPanel();
-		p2.setLayout(new GridBagLayout());
-		p2.setBorder(new LineBorder(null));
-
 		constrain(p1, inVals, 0, 0, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 0, 5);
 		constrain(p1, inKeys, 0, 1, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 0, 5);
 
+		JPanel p2 = new JPanel();
+		p2.setLayout(new GridBagLayout());
+		p2.setBorder(new LineBorder(null));
 		constrain(p2, exact, 1, 0, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 0, 5);
 		constrain(p2, mask, 1, 1, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 0, 5);
 		constrain(p2, regex, 1, 2, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 0, 5);
 
+		JPanel p = new JPanel();
+		p.setLayout(new GridBagLayout());
 		constrain(p, p1, 0, 0, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, 1.0, 1.0, 5, 0, 0, 5);
 		constrain(p, p2, 1, 0, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, 1.0, 1.0, 5, 0, 0, 0);
 		constrain(p, cases, 0, 3, 2, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 5, 5);

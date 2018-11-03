@@ -28,7 +28,7 @@ class SrcGenerator {
 
 	SrcGenerator(String filename) throws IOException {
 		FileOutputStream fop = new FileOutputStream(filename);
-		out = new PrintStream(fop);
+		this.out = new PrintStream(fop);
 		this.filename = filename;
 	}
 

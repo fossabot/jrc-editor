@@ -36,26 +36,21 @@ import org.zaval.ui.UiUtils;
 
 @SuppressWarnings("serial")
 public class EditDialog extends JDialog {
-	private final JLabel label;
-	private final JTextField edit;
-	private final JButton ok;
-	private final JButton cancel;
+	private final JLabel label = new JLabel("");
+	private final JTextField edit = new JTextField(20);
+	private final JButton ok = new JButton("");
+	private final JButton cancel = new JButton("");
 	private boolean isApply;
 
-	public EditDialog(JFrame owner, String title, boolean modal) {
+	protected EditDialog(JFrame owner, String title, boolean modal) {
 		super(owner, title, modal);
 		setLayout(new GridBagLayout());
 
-		label = new JLabel("Name");
-
 		constrain(this, label, 0, 0, 1, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 5, 5);
-		edit = new JTextField(20);
 		edit.addActionListener(this::onPerform);
 		constrain(this, edit, 1, 0, 4, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, 1.0, 0.0, 5, 5, 5, 5);
 
 		edit.requestFocusInWindow();
-		ok = new JButton("Ok");
-		cancel = new JButton("Cancel");
 	}
 
 	protected void renderDialogFooter() {
@@ -68,10 +63,6 @@ public class EditDialog extends JDialog {
 		p.add(cancel);
 
 		constrain(this, p, 0, 10, 2, 1, GridBagConstraints.EAST, GridBagConstraints.NONE, 1.0, 0.0, 5, 5, 5, 5);
-	}
-
-	public void setText(String t) {
-		edit.setText(null == t ? "" : t);
 	}
 
 	public String getText() {

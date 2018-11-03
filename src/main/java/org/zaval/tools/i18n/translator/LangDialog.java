@@ -40,26 +40,22 @@ import org.zaval.ui.UiUtils;
 
 @SuppressWarnings("serial")
 class LangDialog<ListItem> extends JDialog {
-	private final JList<ListItem> edit;
-	private final JButton ok;
-	private final JButton cancel;
+	private final JLabel label = new JLabel("");
+	private final JList<ListItem> edit = new JList<>();
+	private final JButton ok = new JButton("");
+	private final JButton cancel = new JButton("");
 	private boolean isApply;
-	private final JLabel label;
 
 	public LangDialog(JFrame owner, String title, boolean modal, Function<ListItem, String> itemMapper) {
 		super(owner, title, modal);
 		setLayout(new GridBagLayout());
 
-		label = new JLabel("List of languages");
 		constrain(this, label, 0, 0, 1, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 5, 5);
-		edit = new JList<>();
 		edit.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		edit.setCellRenderer(new LangDialogCellRenderer<ListItem>(edit.getCellRenderer(), itemMapper));
+		edit.setCellRenderer(new LangDialogCellRenderer<>(edit.getCellRenderer(), itemMapper));
 		constrain(this, edit, 0, 1, 4, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, 1.0, 0.0, 5, 5, 5, 5);
 
-		ok = new JButton("Ok");
 		ok.addActionListener(this::onPerform);
-		cancel = new JButton("Cancel");
 		cancel.addActionListener(this::onCancel);
 
 		JPanel p = new JPanel();

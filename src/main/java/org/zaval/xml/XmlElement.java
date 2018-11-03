@@ -33,9 +33,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class XmlElement {
-
-	private final Map<String, String> attributes;
-	private final List<XmlElement> children;
+	private final Map<String, String> attributes = new HashMap<>();
+	private final List<XmlElement> children = new ArrayList<>();
 	private String name;
 	private String contents;
 	private final Map<String, char[]> entities;
@@ -55,8 +54,6 @@ public class XmlElement {
 		this.ignoreCase = ignoreCase;
 		this.name = null;
 		this.contents = "";
-		this.attributes = new HashMap<>();
-		this.children = new ArrayList<>();
 		this.entities = entities;
 		if (fillBasicConversionTable) {
 			this.entities.put("amp", new char[] { '&' });

@@ -35,7 +35,6 @@ import javax.swing.event.HyperlinkEvent;
 
 @SuppressWarnings("serial")
 public class AboutDialog extends JDialog {
-
 	public AboutDialog(Frame owner, String title, String copyright, String ok, ImageIcon image) {
 		super(owner, title, true);
 		((JPanel) getContentPane()).setBorder(new EmptyBorder(10, 10, 10, 10));

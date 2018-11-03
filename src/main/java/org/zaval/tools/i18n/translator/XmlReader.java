@@ -27,10 +27,9 @@ import org.zaval.xml.XmlElement;
 import org.zaval.xml.XmlParseException;
 
 class XmlReader {
-	private final XmlElement xml;
+	private final XmlElement xml = new XmlElement();
 
 	public XmlReader(String body) throws IOException, XmlParseException {
-		xml = new XmlElement();
 		xml.parse(new StringReader(body));
 	}
 

@@ -38,17 +38,16 @@ import javax.swing.tree.TreeSelectionModel;
 
 public class TranslationTree implements TreeModelListener {
 	private final Map<String, TranslationTreeNode> nodes = new HashMap<>();
-	private final TranslationTreeNode rootNode;
+	private final TranslationTreeNode rootNode = TranslationTreeNode.createRootNode();
 	private final JTree tree;
 	private final JScrollPane component;
 	private final DefaultTreeModel treeModel;
+	private final ImageIcon warningIcon;
 
 	private TranslationTreeNode selectedNode; // highlighted node
-	private ImageIcon warningIcon;
 
 	public TranslationTree(ImageIcon warningIcon) {
 		this.warningIcon = warningIcon;
-		rootNode = TranslationTreeNode.createRootNode();
 		nodes.put("", rootNode);
 		tree = new JTree(rootNode);
 		treeModel = (DefaultTreeModel) tree.getModel();
@@ -76,10 +75,6 @@ public class TranslationTree implements TreeModelListener {
 
 	public JComponent getComponent() {
 		return component;
-	}
-
-	public JTree getTree() {
-		return tree;
 	}
 
 	public TranslationTreeNode getSelectedNode() {

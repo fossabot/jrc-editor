@@ -36,14 +36,14 @@ import org.zaval.awt.dialog.EditDialog;
 
 @SuppressWarnings("serial")
 class ReplaceDialog extends EditDialog {
-	private final JRadioButton regex;
-	private final JRadioButton exact;
+	private final JRadioButton regex = new JRadioButton("", false);
+	private final JRadioButton exact = new JRadioButton("", true);
 
-	private final JCheckBox cases;
-	private final JCheckBox prompt;
-	private final JCheckBox all;
-	private final JTextField replaceTo;
-	private final JLabel label;
+	private final JCheckBox cases = new JCheckBox("", true);
+	private final JCheckBox prompt = new JCheckBox("", true);
+	private final JCheckBox all = new JCheckBox("", false);
+	private final JTextField replaceTo = new JTextField(20);
+	private final JLabel label = new JLabel("");
 
 	public void setReplaceLabel(String s) {
 		label.setText(s);
@@ -82,32 +82,22 @@ class ReplaceDialog extends EditDialog {
 
 	public ReplaceDialog(JFrame f, String s, boolean b) {
 		super(f, s, b);
-
-		regex = new JRadioButton("", false);
-		exact = new JRadioButton("", true);
 		ButtonGroup matchType = new ButtonGroup();
 		matchType.add(regex);
 		matchType.add(exact);
-		cases = new JCheckBox("", true);
-		prompt = new JCheckBox("", true);
-		all = new JCheckBox("", false);
-
-		label = new JLabel("To:");
-		replaceTo = new JTextField(20);
 		replaceTo.addActionListener(this::onPerform);
 		constrain(this, label, 0, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 5, 5);
 		constrain(this, replaceTo, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, 1.0, 0.0, 0, 5, 0, 5);
-
-		JPanel p = new JPanel();
-		p.setLayout(new GridBagLayout());
 
 		JPanel p2 = new JPanel();
 		p2.setBorder(new LineBorder(null));
 		p2.setLayout(new GridBagLayout());
 		constrain(p2, exact, 1, 0, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 0, 5);
 		constrain(p2, regex, 1, 1, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 0, 5);
-		constrain(p, p2, 0, 1, 2, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, 1.0, 1.0, 5, 0, 0, 0);
 
+		JPanel p = new JPanel();
+		p.setLayout(new GridBagLayout());
+		constrain(p, p2, 0, 1, 2, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, 1.0, 1.0, 5, 0, 0, 0);
 		constrain(p, cases, 0, 2, 2, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 0, 5);
 		constrain(p, prompt, 0, 3, 2, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 0, 5);
 		constrain(p, all, 0, 4, 2, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 5, 5);
