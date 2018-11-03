@@ -30,6 +30,7 @@ import java.util.StringTokenizer;
 
 import org.zaval.tools.i18n.translator.generated.JavaParser;
 import org.zaval.tools.i18n.translator.generated.UtfParser;
+import org.zaval.util.LambdaUtils;
 
 public class Split { // NO_UCD (unused code)
 	private BundleManager bundle = new BundleManager();
@@ -45,15 +46,13 @@ public class Split { // NO_UCD (unused code)
 	private void join(BundleManager bundle2, boolean part) {
 		if (part) {
 			BundleSet set = bundle2.getBundle();
-			int items = set.getItemCount();
-			for (int i = 0; i < items; ++i) {
-				BundleItem bi = set.getItem(i);
+			set.getItems().forEachOrdered(bi -> {
 				bundle.getBundle().addKey(bi.getId());
 				for (String lang : bi.getLanguages()) {
 					bundle.getBundle().addLanguage(lang);
 					bundle.getBundle().updateValue(bi.getId(), lang, bi.getTranslation(lang));
 				}
-			}
+			});
 		}
 		else {
 			bundle = bundle2;
@@ -105,7 +104,7 @@ public class Split { // NO_UCD (unused code)
 			Map<String, String> ask = parser.parse();
 
 			bundle.getBundle().addLanguage("en");
-			String rlng = bundle.getBundle().getLanguage(0).getId();
+			String rlng = bundle.getBundle().getFirstLanguage().getId();
 
 			for (Map.Entry<String, String> stringStringEntry : ask.entrySet()) {
 				bundle.getBundle().addKey(stringStringEntry.getKey());
@@ -119,11 +118,9 @@ public class Split { // NO_UCD (unused code)
 			try {
 				try (DataOutputStream out = new DataOutputStream(new FileOutputStream(fileName))) {
 					BundleSet set = bundle.getBundle();
-					int items = set.getItemCount();
 					out.writeChar((char) 0xFEFF);
 					out.writeChars("<xml>\n");
-					for (int i = 0; i < items; ++i) {
-						BundleItem bi = set.getItem(i);
+					set.getItems().forEachOrdered(LambdaUtils.unchecked(bi -> {
 						out.writeChars("\t<key name=\"" + bi.getId() + "\">\n");
 						for (String lang : bi.getLanguages()) {
 							if (!inArray(parts, lang)) {
@@ -132,7 +129,7 @@ public class Split { // NO_UCD (unused code)
 							out.writeChars("\t\t<value lang=\"" + lang + "\">" + bi.getTranslation(lang) + "</value>\n");
 						}
 						out.writeChars("\t</key>\n");
-					}
+					}));
 					out.writeChars("</xml>\n");
 				}
 			}
@@ -147,11 +144,9 @@ public class Split { // NO_UCD (unused code)
 			try {
 				try (DataOutputStream out = new DataOutputStream(new FileOutputStream(fileName))) {
 					BundleSet set = bundle.getBundle();
-					int items = set.getItemCount();
 					out.writeChar((char) 0xFEFF);
 					out.writeChars("#JRC Editor 2.0: do not modify this line\r\n\r\n");
-					for (int i = 0; i < items; ++i) {
-						BundleItem bi = set.getItem(i);
+					set.getItems().forEachOrdered(LambdaUtils.unchecked(bi -> {
 						out.writeChars("KEY=\"" + bi.getId() + "\":\r\n");
 						for (String lang : bi.getLanguages()) {
 							if (!inArray(parts, lang)) {
@@ -160,7 +155,7 @@ public class Split { // NO_UCD (unused code)
 							out.writeChars("\t\"" + lang + "\"=\"" + bi.getTranslation(lang) + "\"\r\n");
 						}
 						out.writeChars("\r\n");
-					}
+					}));
 				}
 			}
 			catch (Exception e) {

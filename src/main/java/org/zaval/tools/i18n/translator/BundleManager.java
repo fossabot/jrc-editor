@@ -170,7 +170,6 @@ class BundleManager {
 			bi.setComment(lastComment);
 			lastComment = null;
 		}
-		set.resort();
 	}
 
 	private List<String> getLines(String fileName) throws IOException {
@@ -333,9 +332,7 @@ class BundleManager {
 	}
 
 	void store(String fileName) throws IOException {
-		int k = set.getLangCount();
-		for (int j = 0; j < k; ++j) {
-			LangItem lang = set.getLanguage(j);
+		for (LangItem lang : set.getLanguages()) {
 			store(lang.getId(), fileName);
 		}
 	}
@@ -348,7 +345,8 @@ class BundleManager {
 		else {
 			String tmpFn = fn;
 			tmpFn = dirName(tmpFn) + purifyFileName(tmpFn);
-			if (set.getLanguage(0) != lang) {
+			LangItem firstLanguage = set.getFirstLanguage();
+			if (firstLanguage != lang) {
 				tmpFn += "_" + lang.getId();
 			}
 			tmpFn += TranslatorConstants.RES_EXTENSION;

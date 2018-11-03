@@ -51,12 +51,15 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.zip.ZipEntry;
@@ -94,6 +97,7 @@ import org.zaval.tools.i18n.translator.generated.UtfParser;
 import org.zaval.ui.AboutDialog;
 import org.zaval.ui.TranslationTree;
 import org.zaval.ui.TranslationTreeNode;
+import org.zaval.util.LambdaUtils;
 import org.zaval.util.SafeResourceBundle;
 
 @SuppressWarnings("serial")
@@ -104,7 +108,7 @@ class Translator extends JFrame {
 	private JLabel keynLab;
 	private TranslationTree tree;
 	private JPanel textPanel;
-	private List<LangState> langStates = new ArrayList<>();
+	private final Map<String, LangState> langStates = new LinkedHashMap<>();
 	private String lastDirectory = ".";
 
 	// Options
@@ -573,7 +577,8 @@ class Translator extends JFrame {
 	}
 
 	private void updateStatusBar() {
-		sbl1.setText(" " + getVisLangCount() + "/" + bundle.getBundle().getLangCount() + ", " + bundle.getBundle().getItemCount() + " ");
+		sbl1.setText(
+			" " + getVisLangCount() + "/" + bundle.getBundle().getLanguageCount() + ", " + bundle.getBundle().getItemCount() + " ");
 	}
 
 	private void onDelete() {
@@ -614,7 +619,7 @@ class Translator extends JFrame {
 
 	private void setTranslations(String newKey) {
 		if (wasSelectedKey != null) {
-			for (LangState ls : langStates) {
+			for (LangState ls : langStates.values()) {
 				if (ls.hidden) {
 					continue;
 				}
@@ -651,7 +656,7 @@ class Translator extends JFrame {
 		}
 
 		BundleItem bi = bundle.getBundle().getItem(newKey);
-		for (LangState ls : langStates) {
+		for (LangState ls : langStates.values()) {
 			String ss = bi == null ? null : bi.getTranslation(ls.name);
 			if (ss == null) {
 				ss = "";
@@ -710,29 +715,27 @@ class Translator extends JFrame {
 	}
 
 	private void onInsertKey() {
-		if (bundle.getBundle().getLangCount() == 0) {
-			return;
-		}
-		String key = getValidKey();
-		if (key != null) {
-			addToTree(key);
-			bundle.getBundle().addKey(key);
-			bundle.getBundle().resort();
-			commField.setText("");
-			isDirty = true;
-			tree.selectNode(key);
-			tree.repaint();
-			setTranslations();
-			saveBundleMenu.setEnabled(true);
-			saveAsBundleMenu.setEnabled(true);
-			genMenu.setEnabled(true);
-			setIndicators(tree.getRootNode());
-			isDirty = true;
+		if (bundle.getBundle().hasLanguages()) {
+			String key = getValidKey();
+			if (key != null) {
+				addToTree(key);
+				bundle.getBundle().addKey(key);
+				commField.setText("");
+				isDirty = true;
+				tree.selectNode(key);
+				tree.repaint();
+				setTranslations();
+				saveBundleMenu.setEnabled(true);
+				saveAsBundleMenu.setEnabled(true);
+				genMenu.setEnabled(true);
+				setIndicators(tree.getRootNode());
+				isDirty = true;
 
-			textPanel.invalidate();
-			validate();
+				textPanel.invalidate();
+				validate();
+			}
+			updateStatusBar();
 		}
-		updateStatusBar();
 	}
 
 	private void onDeleteKey() {
@@ -856,22 +859,22 @@ class Translator extends JFrame {
 	}
 
 	private void onSave() {
-		if (bundle.getBundle().getLangCount() == 0) {
-			return;
+		LangItem firstLanguage = bundle.getBundle().getFirstLanguage();
+		if (null != firstLanguage) {
+			String fn = firstLanguage.getFileName();
+			if (fn == null) {
+				onSaveAs();
+				return;
+			}
+			setTranslations();
+			try {
+				bundle.store(null);
+			}
+			catch (Exception e) {
+				infoException(e);
+			}
+			isDirty = false;
 		}
-		String fn = bundle.getBundle().getLanguage(0).getFileName();
-		if (fn == null) {
-			onSaveAs();
-			return;
-		}
-		setTranslations();
-		try {
-			bundle.store(null);
-		}
-		catch (Exception e) {
-			infoException(e);
-		}
-		isDirty = false;
 	}
 
 	private void clear() {
@@ -891,7 +894,7 @@ class Translator extends JFrame {
 		validate();
 		isDirty = false;
 		bundle = new BundleManager();
-		langStates = new ArrayList<>();
+		langStates.clear();
 
 		closeMenu.setEnabled(false);
 		saveBundleMenu.setEnabled(false);
@@ -901,11 +904,11 @@ class Translator extends JFrame {
 	}
 
 	private int getVisLangCount() {
-		return (int) langStates.stream().filter(ls -> !ls.hidden).count();
+		return (int) langStates.values().stream().filter(ls -> !ls.hidden).count();
 	}
 
 	private void setAllIndicators() {
-		for (LangState ls : langStates) {
+		for (LangState ls : langStates.values()) {
 			ls.hidden = false;
 			ls.box.setState(true);
 		}
@@ -951,7 +954,7 @@ class Translator extends JFrame {
 		}
 		boolean isPres = false;
 		boolean isAbs = false;
-		for (LangState ls : langStates) {
+		for (LangState ls : langStates.values()) {
 			if (ls.hidden) {
 				continue;
 			}
@@ -1112,8 +1115,7 @@ class Translator extends JFrame {
 		curItemForReplace.setTranslation(lang, val);
 
 		if (tree.getSelectedText().equals(curItemForReplace.getId())) {
-			int k = bundle.getBundle().getLangIndex(lang);
-			LangState ls = langStates.get(k);
+			LangState ls = langStates.get(lang);
 			if (ls != null) {
 				ls.tf.setText(val);
 				ls.tf.requestFocusInWindow();
@@ -1158,25 +1160,22 @@ class Translator extends JFrame {
 		boolean first = lastKeyFound == null;
 
 		int j = 0;
+		BundleSet set = bundle.getBundle();
 		if (lastKeyFound != null) {
-			j = bundle.getBundle().getItemIndex(lastKeyFound) + 1;
+			j = set.getItemIndex(lastKeyFound) + 1;
 		}
-		int i;
 		if (!searchData) { // Key names
-			for (i = j; i < bundle.getBundle().getItemCount(); ++i) {
-				BundleItem bi = bundle.getBundle().getItem(i);
-				String val = bi.getId();
-				if (isMatchedWith(val)) {
-					lastKeyFound = val;
-					tree.selectNode(bi.getId());
-					tree.openToNode(bi.getId());
-					setTranslations(bi.getId());
-					textPanel.invalidate();
-					validate();
-					tree.requestFocusInWindow();
-					tree.repaint();
-					return;
-				}
+			Optional<BundleItem> nextMatch = set.getItems().skip(j).filter(it -> isMatchedWith(it.getId())).findFirst();
+			if (nextMatch.isPresent()) {
+				lastKeyFound = nextMatch.get().getId();
+				tree.selectNode(lastKeyFound);
+				tree.openToNode(lastKeyFound);
+				setTranslations(lastKeyFound);
+				textPanel.invalidate();
+				validate();
+				tree.requestFocusInWindow();
+				tree.repaint();
+				return;
 			}
 			lastKeyFound = null;
 			if (first) {
@@ -1190,10 +1189,9 @@ class Translator extends JFrame {
 		}
 
 		int replacements = 0;
-		for (i = j; i < bundle.getBundle().getItemCount(); ++i) {
-			BundleItem bi = bundle.getBundle().getItem(i);
-			for (int k = 0; k < bundle.getBundle().getLangCount(); ++k) {
-				LangItem li = bundle.getBundle().getLanguage(k);
+		BundleItem[] items = set.getItems().skip(j).toArray(BundleItem[]::new);
+		for (BundleItem bi : items) {
+			for (LangItem li : set.getLanguages()) {
 				String val = bi.getTranslation(li.getId());
 				if (isMatchedWith(val)) {
 					lastKeyFound = bi.getId();
@@ -1212,8 +1210,7 @@ class Translator extends JFrame {
 						validate();
 						if (replaceTo == null) {
 							textPanel.requestFocusInWindow();
-							LangState ls = langStates.get(k);
-							ls.tf.requestFocusInWindow();
+							langStates.get(li.getId()).tf.requestFocusInWindow();
 						}
 						return;
 					}
@@ -1253,7 +1250,7 @@ class Translator extends JFrame {
 		bundle.getBundle().addLanguage(text);
 		syncLanguage(text);
 
-		for (LangState ls : langStates) {
+		for (LangState ls : langStates.values()) {
 			JCheckBoxMenuItem cmi = ls.box;
 			boolean show = cmi.getState();
 			ls.tf.setVisible(show);
@@ -1272,7 +1269,6 @@ class Translator extends JFrame {
 		bundle.getBundle().addLanguage("en");
 		bundle.getBundle().addKey("creationDate");
 		bundle.getBundle().updateValue("creationDate", "en", (new Date()).toLocaleString());
-		bundle.getBundle().resort();
 		initData(false);
 		setTitle(null);
 		isDirty = false;
@@ -1303,16 +1299,13 @@ class Translator extends JFrame {
 	private void join(BundleManager bundle2, boolean part) {
 		if (part) {
 			BundleSet set = bundle2.getBundle();
-			int items = set.getItemCount();
-			for (int i = 0; i < items; ++i) {
-				BundleItem bi = set.getItem(i);
+			set.getItems().forEachOrdered(bi -> {
 				BundleItem bi2 = bundle.getBundle().addKey(bi.getId());
 				for (String lang : bi.getLanguages()) {
 					bundle.getBundle().addLanguage(lang);
 					bi2.setTranslation(lang, bi.getTranslation(lang));
 				}
-			}
-			set.resort();
+			});
 		}
 		else {
 			bundle = bundle2;
@@ -1392,8 +1385,6 @@ class Translator extends JFrame {
 
 	private void syncLanguage(String lang) {
 		LangItem lang2 = bundle.getBundle().getLanguage(lang);
-		int i = bundle.getBundle().getLangIndex(lang);
-
 		String langLab = lang2.getDescription();
 		LangState ls = new LangState();
 		ls.name = lang2.getId();
@@ -1420,8 +1411,10 @@ class Translator extends JFrame {
 			}
 		});
 
-		langStates.add(ls);
+		langStates.put(lang, ls);
 		langMenu.add(ls.box);
+
+		int i = bundle.getBundle().getLanguageIndex(lang);
 
 		constrain(textPanel, ls.label, 0, i + 2, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 10, 3, 0, 3);
 		constrain(textPanel, ls.tf, 1, i + 2, 2, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, 1.0, 1.0, 3, 3, 5, 3);
@@ -1482,7 +1475,7 @@ class Translator extends JFrame {
 	}
 
 	private void onSaveAs() {
-		String fn = bundle.getBundle().getLanguage(0).getFileName();
+		String fn = bundle.getBundle().getFirstLanguage().getFileName();
 		if (fn == null) {
 			fn = "autosaved";
 		}
@@ -1535,7 +1528,7 @@ class Translator extends JFrame {
 		nullsCount = 0;
 		notCompletedCount = 0;
 		setIndicators(tree.getRootNode());
-		String text = RC("tools.translator.label.statistics.lang") + bundle.getBundle().getLangCount() + "\n";
+		String text = RC("tools.translator.label.statistics.lang") + bundle.getBundle().getLanguageCount() + "\n";
 		text = text + RC("tools.translator.label.statistics.record") + bundle.getBundle().getItemCount() + "\n";
 		text = text + RC("tools.translator.label.statistics.nulls") + nullsCount + "\n";
 		text = text + RC("tools.translator.label.statistics.notcompleted") + notCompletedCount;
@@ -1545,15 +1538,17 @@ class Translator extends JFrame {
 
 	private void onGenCode() {
 		try {
-			String fn = (bundle.getBundle().getLangCount() == 0) || (bundle.getBundle().getLanguage(0).getFileName() == null)
+			BundleSet b = bundle.getBundle();
+			LangItem firstLanguage = b.getFirstLanguage();
+			String fn = (null == firstLanguage) || (firstLanguage.getFileName() == null)
 				? "Sample"
-				: bundle.baseName(bundle.getBundle().getLanguage(0).getFileName());
+				: bundle.baseName(firstLanguage.getFileName());
 			fn = fn.substring(0, 1).toUpperCase() + fn.substring(1);
 
 			String filename = lookupFileForStore(fn + "ResourceMapped.java");
 			if (filename != null) {
 				SrcGenerator srcgen = new SrcGenerator(bundle.replace(filename, "\\", "/"));
-				srcgen.perform(bundle.getBundle());
+				srcgen.perform(b);
 			}
 		}
 		catch (Exception e) {
@@ -1576,13 +1571,12 @@ class Translator extends JFrame {
 				clear();
 				initControls();
 				bundle.getBundle().addLanguage("en");
-				String rlng = bundle.getBundle().getLanguage(0).getId();
+				String rlng = bundle.getBundle().getFirstLanguage().getId();
 
 				for (Map.Entry<String, String> stringStringEntry : ask.entrySet()) {
 					BundleItem bi = bundle.getBundle().addKey(stringStringEntry.getKey());
 					bi.setTranslation(rlng, stringStringEntry.getValue());
 				}
-				bundle.getBundle().resort();
 				initData(false);
 				setTitle(filename);
 			}
@@ -1594,24 +1588,26 @@ class Translator extends JFrame {
 
 	private void initData(boolean part) {
 		/* Initialize language set */
-		for (int i = 0; i < bundle.getBundle().getLangCount(); ++i) {
-			LangItem lang2 = bundle.getBundle().getLanguage(i);
-			syncLanguage(lang2.getId());
+		BundleSet set = bundle.getBundle();
+		for (LangItem lang : set.getLanguages()) {
+			syncLanguage(lang.getId());
 		}
 		hideTransMenu.setState(false);
 
 		/* Add all keys in tree view ... */
-		BundleItem bi = bundle.getBundle().getItem(0);
+		BundleItem bi = set.getItems().findFirst().orElse(null);
 		addToTree(bi.getId());
 
-		for (int i = 1; i < bundle.getBundle().getItemCount(); ++i) {
-			BundleItem bi2 = bundle.getBundle().getItem(i);
+		AtomicInteger counter = new AtomicInteger();
+		set.getItems().forEachOrdered(bi2 -> {
 			addToTree(bi2.getId());
+			int i = counter.get();
 			if ((i % 250) == 0) {
 				sbl2.setText("    " + i + " " + RC("tools.translator.progress.addkeys"));
 				sbl2.repaint();
 			}
-		}
+			counter.incrementAndGet();
+		});
 		setAllIndicators();
 		sbl2.setText("");
 		sbl2.repaint();
@@ -1620,8 +1616,8 @@ class Translator extends JFrame {
 		/* ... and make all keys closed by default */
 
 		/* ... find first key, open it and select */
-		if (bundle.getBundle().getItemCount() > 0) {
-			String id = bundle.getBundle().getItem(0).getId();
+		if (null != bi) {
+			String id = bi.getId();
 			tree.selectNode(id);
 			wasSelectedKey = null;
 			setTranslations();
@@ -1834,7 +1830,7 @@ class Translator extends JFrame {
 		if (part && (parts.size() < 2)) {
 			return;
 		}
-		String fn = bundle.getBundle().getLanguage(0).getFileName();
+		String fn = bundle.getBundle().getFirstLanguage().getFileName();
 		if (fn == null) {
 			fn = "autosaved";
 		}
@@ -1844,12 +1840,10 @@ class Translator extends JFrame {
 			try {
 				try (DataOutputStream out = new DataOutputStream(new FileOutputStream(filename))) {
 					BundleSet set = bundle.getBundle();
-					int items = set.getItemCount();
 					out.writeChar((char) 0xFEFF);
 					out.writeChars("<xml>\n");
 					Set<String> write = parts.stream().map(LangItem::getId).collect(Collectors.toSet());
-					for (int i = 0; i < items; ++i) {
-						BundleItem bi = set.getItem(i);
+					set.getItems().forEachOrdered(LambdaUtils.unchecked(bi -> {
 						out.writeChars("\t<key name=\"" + bi.getId() + "\">\n");
 						for (String lang : bi.getLanguages()) {
 							if (!part || write.contains(lang)) {
@@ -1857,7 +1851,7 @@ class Translator extends JFrame {
 							}
 						}
 						out.writeChars("\t</key>\n");
-					}
+					}));
 					out.writeChars("</xml>\n");
 				}
 			}
@@ -1874,7 +1868,8 @@ class Translator extends JFrame {
 			return;
 		}
 
-		String fn = bundle.getBundle().getLanguage(0).getFileName();
+		BundleSet set = bundle.getBundle();
+		String fn = set.getFirstLanguage().getFileName();
 		if (fn == null) {
 			fn = "autosaved";
 		}
@@ -1883,13 +1878,10 @@ class Translator extends JFrame {
 		if (filename != null) {
 			try {
 				try (DataOutputStream out = new DataOutputStream(new FileOutputStream(filename))) {
-					BundleSet set = bundle.getBundle();
-					int items = set.getItemCount();
 					out.writeChar((char) 0xFEFF);
 					out.writeChars("#JRC Editor: do not modify this line\r\n\r\n");
 					Set<String> write = parts.stream().map(LangItem::getId).collect(Collectors.toSet());
-					for (int i = 0; i < items; ++i) {
-						BundleItem bi = set.getItem(i);
+					set.getItems().forEachOrdered(LambdaUtils.unchecked(bi -> {
 						out.writeChars("KEY=\"" + bi.getId() + "\":\r\n");
 						for (String lang : bi.getLanguages()) {
 							if (!part || write.contains(lang)) {
@@ -1897,7 +1889,7 @@ class Translator extends JFrame {
 							}
 						}
 						out.writeChars("\r\n");
-					}
+					}));
 				}
 			}
 			catch (Exception e) {
@@ -1942,7 +1934,6 @@ class Translator extends JFrame {
 			bundle.getBundle().addKey(key);
 			bundle.getBundle().updateValue(key, lang, stringStringEntry.getValue());
 		}
-		bundle.getBundle().resort();
 	}
 
 	private void onLoadXml(boolean part) {
@@ -2030,11 +2021,7 @@ class Translator extends JFrame {
 	}
 
 	private void onRenameKey() {
-		String oldKeyName = keyName.getText();
-		if (oldKeyName.endsWith(".")) {
-			oldKeyName = oldKeyName.substring(0, oldKeyName.length() - 1);
-		}
-
+		String oldKeyName = keyName.getText().replaceFirst("\\.$", "");
 		String title = RC("tools.translator.label.rename.caption");
 		String message = RC("tools.translator.label.rename.label");
 		String newKeyName = (String) JOptionPane.showInputDialog(this, message, title, JOptionPane.PLAIN_MESSAGE, null, null, oldKeyName);
@@ -2047,16 +2034,13 @@ class Translator extends JFrame {
 		}
 
 		BundleItem biOldAlone = bundle.getBundle().getItem(oldKeyName);
-		List<BundleItem> en = bundle.getBundle().getKeysBeginningWith(oldKeyName);
-		Map<String, String> oldValues = new HashMap<>();
-		for (BundleItem biOld : en) {
-			oldValues.clear();
+		bundle.getBundle().getKeysBeginningWith(oldKeyName).forEachOrdered(biOld -> {
+			Map<String, String> oldValues = new HashMap<>();
 			String newKey = newKeyName;
 			if (biOldAlone == null) {
 				newKey = newKeyName + biOld.getId().substring(oldKeyName.length());
 			}
 
-			int k = bundle.getBundle().getLangCount();
 			if (bundle.getBundle().getItem(newKey) != null) {
 				String errorTitle = RC("dialog.title.warning");
 				String errorMessage = RC("tools.translator.label.rename.dup");
@@ -2065,11 +2049,10 @@ class Translator extends JFrame {
 			}
 
 			// Keep old values
-			for (int j = 0; j < k; ++j) {
-				String lang = bundle.getBundle().getLanguage(j).getId();
-				String value = biOld.getTranslation(lang);
+			for (LangItem lang : bundle.getBundle().getLanguages()) {
+				String value = biOld.getTranslation(lang.getId());
 				if (value != null) {
-					oldValues.put(lang, value);
+					oldValues.put(lang.getId(), value);
 				}
 			}
 			bundle.getBundle().removeKey(biOld.getId());
@@ -2078,20 +2061,18 @@ class Translator extends JFrame {
 			keyName.setText(newKey);
 			addToTree(newKey);
 			BundleItem biNew = bundle.getBundle().addKey(newKey);
-			for (int j = 0; j < k; ++j) {
-				String lang = bundle.getBundle().getLanguage(j).getId();
-				String value = oldValues.get(lang);
+			for (LangItem lang : bundle.getBundle().getLanguages()) {
+				String value = oldValues.get(lang.getId());
 				if (value != null) {
-					biNew.setTranslation(lang, value);
+					biNew.setTranslation(lang.getId(), value);
 				}
 			}
-		}
+		});
 		isDirty = true;
 
 		// Remove old key
 		tree.remove(oldKeyName);
 		removeLeafs(oldKeyName);
-		bundle.getBundle().resort();
 
 		tree.selectNode(newKeyName);
 		tree.repaint();
@@ -2120,7 +2101,7 @@ class Translator extends JFrame {
 					}
 					initData(false);
 					// Force new file name for storage
-					bundle.getBundle().getLanguage(0).setFileName(null);
+					bundle.getBundle().getFirstLanguage().setFileName(null);
 					setTitle(filename);
 				}
 			}

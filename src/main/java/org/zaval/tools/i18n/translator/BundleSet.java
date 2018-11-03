@@ -19,52 +19,52 @@
 package org.zaval.tools.i18n.translator;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.TreeMap;
+import java.util.stream.Stream;
 
 class BundleSet {
-	private final List<BundleItem> items = new ArrayList<>();
-	private final List<LangItem> lng = new ArrayList<>();
-	private final Map<String, BundleItem> nameCache = new HashMap<>();
+	private final Map<String, BundleItem> items = new TreeMap<>();
+	private final Map<String, LangItem> lng = new LinkedHashMap<>();
 
-	private void addLanguage(String slng, String desc) {
-		if (getLanguage(slng) != null) {
-			return;
-		}
-		LangItem newl = new LangItem(slng, desc);
-		lng.add(newl);
-		correctFileName(newl);
+	private void addLanguage(String id, String desc) {
+		lng.computeIfAbsent(id, k -> {
+			LangItem lang = new LangItem(k, desc);
+			correctFileName(lang);
+			return lang;
+		});
 	}
 
-	int getLangCount() {
+	boolean hasLanguages() {
+		return !lng.isEmpty();
+	}
+
+	int getLanguageCount() {
 		return lng.size();
 	}
 
+	LangItem getFirstLanguage() {
+		return lng.isEmpty() ? null : lng.entrySet().iterator().next().getValue();
+	}
+
 	LangItem[] getLanguages() {
-		return lng.toArray(new LangItem[lng.size()]);
+		return lng.values().toArray(new LangItem[0]);
 	}
 
-	LangItem getLanguage(int idx) {
-		return lng.get(idx);
+	LangItem getLanguage(String id) {
+		return lng.get(id);
 	}
 
-	LangItem getLanguage(String lng) {
-		int j = getLangIndex(lng);
-		return j < 0 ? null : getLanguage(j);
-	}
-
-	int getLangIndex(String lng) {
-		int k = getLangCount();
-		for (int j = 0; j < k; ++j) {
-			LangItem lx = getLanguage(j);
-			if (lx.getId().equals(lng)) {
+	int getLanguageIndex(String id) {
+		int j = 0;
+		for (LangItem lx : lng.values()) {
+			if (lx.getId().equals(id)) {
 				return j;
 			}
+			j++;
 		}
 		return -1;
 	}
@@ -73,62 +73,43 @@ class BundleSet {
 		return items.size();
 	}
 
-	BundleItem getItem(int idx) {
-		return items.get(idx);
+	BundleItem getItem(String key) {
+		return items.get(key);
 	}
 
-	BundleItem getItem(String key) {
-		return nameCache.get(key);
+	Stream<BundleItem> getItems() {
+		return items.entrySet().stream().map(Map.Entry<String, BundleItem>::getValue);
 	}
 
 	int getItemIndex(String key) {
-		int k = getItemCount();
-		for (int j = k - 1; j >= 0; --j) {
-			BundleItem bi = getItem(j);
+		int i = -1;
+		for (BundleItem bi : items.values()) {
 			if (bi.getId().equals(key)) {
-				return j;
+				return i;
 			}
+			++i;
 		}
 		return -1;
 	}
 
 	BundleItem addKey(String key) {
-		BundleItem ask = getItem(key);
-		if (ask == null) {
-			ask = new BundleItem(key);
-			items.add(ask);
-			nameCache.put(key, ask);
-		}
-		return ask;
+		return items.computeIfAbsent(key, k -> new BundleItem(k));
 	}
 
 	void removeKey(String key) {
-		int j = getItemIndex(key);
-		if (j >= 0) {
-			items.remove(j);
-		}
-		nameCache.remove(key);
+		items.remove(key);
 	}
 
-	List<BundleItem> getKeysBeginningWith(String key) {
-		return IntStream.range(0, getItemCount())
-			.mapToObj(this::getItem)
-			.filter(bi -> bi.getId().startsWith(key))
-			.collect(Collectors.toList());
+	Stream<BundleItem> getKeysBeginningWith(String key) {
+		return items.entrySet().stream().filter(bi -> bi.getKey().startsWith(key)).map(it -> it.getValue());
 	}
 
 	void removeKeysBeginningWith(String key) {
-		for (int j = 0; j < getItemCount(); ++j) {
-			BundleItem bi = getItem(j);
-			if (bi.getId().startsWith(key)) {
-				removeKey(bi.getId());
-				--j;
-			}
-		}
+		items.entrySet().removeIf(it -> it.getKey().startsWith(key));
 	}
 
 	void updateValue(String key, String lang, String value) {
-		BundleItem bi = getItem(key);
+		BundleItem bi = items.get(key);
 		if (bi != null) {
 			bi.setTranslation(lang, value);
 		}
@@ -171,8 +152,7 @@ class BundleSet {
 		getLanguage(lng);
 		List<String> lines = new ArrayList<>();
 
-		for (int j = 0; j < getItemCount(); ++j) {
-			BundleItem bi = getItem(j);
+		for (BundleItem bi : items.values()) {
 			if (bi.getComment() != null) {
 				lines.add("#" + bi.getComment());
 			}
@@ -185,10 +165,10 @@ class BundleSet {
 	}
 
 	private void correctFileName(LangItem lang) {
-		if (getLangCount() < 1) {
+		if (lng.isEmpty()) {
 			return;
 		}
-		LangItem lan0 = getLanguage(0);
+		LangItem lan0 = lng.values().iterator().next();
 		if (lan0 == lang) {
 			return;
 		}
@@ -205,21 +185,5 @@ class BundleSet {
 		}
 		base = base.substring(0, j) + "_" + lang.getId() + base.substring(j);
 		lang.setFileName(base);
-	}
-
-	public void resort() {
-		items.sort(new BundleItemComparator());
-	}
-
-	private static class BundleItemComparator implements Comparator<BundleItem> {
-		@Override
-		public int compare(BundleItem o1, BundleItem o2) {
-			return o1.getId().compareTo(o2.getId());
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			return this == obj;
-		}
 	}
 }

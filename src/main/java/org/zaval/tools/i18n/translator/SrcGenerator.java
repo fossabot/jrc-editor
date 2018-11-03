@@ -34,26 +34,21 @@ class SrcGenerator {
 
 	void perform(BundleSet set) {
 		out.println("import java.util.*;\n\npublic class " + baseName(filename) + "\n{");
-		int j;
-		int k = set.getItemCount();
-		for (j = 0; j < k; ++j) {
-			BundleItem bi = set.getItem(j);
+		BundleItem[] items = set.getItems().toArray(BundleItem[]::new);
+		for (BundleItem bi : items) {
 			out.println("\tprivate String " + makeVarName(bi) + ";");
 		}
 		out.println();
-		for (j = 0; j < k; ++j) {
-			BundleItem bi = set.getItem(j);
+		for (BundleItem bi : items) {
 			out.println("\tpublic final String get" + makeFunName(bi) + "()\t{ return " + makeVarName(bi) + ";}");
 		}
 		out.println();
-		for (j = 0; j < k; ++j) {
-			BundleItem bi = set.getItem(j);
+		for (BundleItem bi : items) {
 			out.println("\tpublic final void set" + makeFunName(bi) + "(String what)\t{ this." + makeVarName(bi) + " = what;}");
 		}
 		out.println();
 		out.println("\tpublic void loadFromResource(ResourceBundle rs)\n\t{");
-		for (j = 0; j < k; ++j) {
-			BundleItem bi = set.getItem(j);
+		for (BundleItem bi : items) {
 			out.println("\t\ttry{ set"
 				+ makeFunName(bi)
 				+ "(rs.getString(\""
