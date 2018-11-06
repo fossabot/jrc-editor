@@ -1680,7 +1680,7 @@ class Translator extends JFrame {
 		if (j >= fileMenu.getItemCount()) {
 			return;
 		}
-		for (; j < fileMenu.getItemCount();) {
+		while (j < fileMenu.getItemCount()) {
 			fileMenu.remove(j);
 		}
 	}
