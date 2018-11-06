@@ -25,18 +25,17 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
-class LangDialogCellRenderer<ListItem> implements ListCellRenderer<ListItem> {
-	private final ListCellRenderer<? super ListItem> cellRenderer;
-	private final Function<ListItem, String> itemMapper;
+class LangDialogCellRenderer<T> implements ListCellRenderer<T> {
+	private final ListCellRenderer<? super T> cellRenderer;
+	private final Function<T, String> itemMapper;
 
-	LangDialogCellRenderer(ListCellRenderer<? super ListItem> cellRenderer, Function<ListItem, String> itemMapper) {
+	LangDialogCellRenderer(ListCellRenderer<? super T> cellRenderer, Function<T, String> itemMapper) {
 		this.cellRenderer = cellRenderer;
 		this.itemMapper = itemMapper;
 	}
 
 	@Override
-	public Component getListCellRendererComponent(JList<? extends ListItem> list, ListItem value, int index, boolean isSelected,
-		boolean cellHasFocus) {
+	public Component getListCellRendererComponent(JList<? extends T> list, T value, int index, boolean isSelected, boolean cellHasFocus) {
 		JLabel l = (JLabel) cellRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 		l.setText(itemMapper.apply(value));
 		return l;
