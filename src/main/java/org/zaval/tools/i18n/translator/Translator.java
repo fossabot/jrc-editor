@@ -1508,10 +1508,14 @@ class Translator extends JFrame {
 		nullsCount = 0;
 		notCompletedCount = 0;
 		setIndicators(tree.getRootNode());
-		String text = RC("tools.translator.label.statistics.lang") + bundle.getBundle().getLanguageCount() + "\n";
-		text = text + RC("tools.translator.label.statistics.record") + bundle.getBundle().getItemCount() + "\n";
-		text = text + RC("tools.translator.label.statistics.nulls") + nullsCount + "\n";
-		text = text + RC("tools.translator.label.statistics.notcompleted") + notCompletedCount;
+		String lang = RC("tools.translator.label.statistics.lang");
+		String record = RC("tools.translator.label.statistics.record");
+		String nulls = RC("tools.translator.label.statistics.nulls");
+		String notcompleted = RC("tools.translator.label.statistics.notcompleted");
+		int langCount = bundle.getBundle().getLanguageCount();
+		int recordCount = bundle.getBundle().getItemCount();
+		String format = "%s %d\n%s %d\n%s %d\n%s %d";
+		String text = String.format(format, lang, langCount, record, recordCount, nulls, nullsCount, notcompleted, notCompletedCount);
 		JOptionPane.showMessageDialog(this, text, RC("dialog.title.info"), JOptionPane.INFORMATION_MESSAGE);
 		updateStatusBar();
 	}
