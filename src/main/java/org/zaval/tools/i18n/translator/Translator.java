@@ -673,7 +673,6 @@ class Translator extends JFrame {
 			commField.setText(commText == null ? "" : commText);
 		}
 		keynLab.setText("Key: " + newKey);
-		keynLab.repaint();
 		sbl2.setText(newKey);
 		adjustIndicator(tree.getNode(newKey));
 
@@ -914,11 +913,9 @@ class Translator extends JFrame {
 
 	private void setIndicatorsInit() {
 		sbl2.setText(RC("tools.translator.progress.indicator"));
-		sbl2.repaint();
 		setIndicators(tree.getRootNode());
 		hideTransMenu.setEnabled(true);
 		sbl2.setText("");
-		sbl2.repaint();
 	}
 
 	private boolean setIndicators(TranslationTreeNode tn) {
@@ -1320,7 +1317,6 @@ class Translator extends JFrame {
 		public void run() {
 			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			sbl2.setText(RC("tools.translator.progress.loadfiles"));
-			sbl2.repaint();
 			try {
 				BundleManager bundle2 = new BundleManager(fileName);
 				join(bundle2, part);
@@ -1329,7 +1325,6 @@ class Translator extends JFrame {
 				infoException(e);
 			}
 			sbl2.setText(RC("tools.translator.progress.maketree"));
-			sbl2.repaint();
 
 			if (!part) {
 				initControls();
@@ -1598,14 +1593,12 @@ class Translator extends JFrame {
 				int i = counter.get();
 				if ((i % 250) == 0) {
 					sbl2.setText("    " + i + " " + RC("tools.translator.progress.addkeys"));
-					sbl2.repaint();
 				}
 				counter.incrementAndGet();
 			});
 		}
 		setAllIndicators();
 		sbl2.setText("");
-		sbl2.repaint();
 		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
 		/* ... and make all keys closed by default */
