@@ -84,6 +84,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+import javax.swing.SwingWorker;
 import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.text.JTextComponent;
@@ -906,12 +907,7 @@ class Translator extends JFrame {
 			ls.hidden = false;
 			ls.box.setState(true);
 		}
-		// Fire it async as it take large time
 		hideTransMenu.setEnabled(false);
-		(new Thread(this::setIndicatorsInit)).start();
-	}
-
-	private void setIndicatorsInit() {
 		sbl2.setText(RC("tools.translator.progress.indicator"));
 		setIndicators(tree.getRootNode());
 		hideTransMenu.setEnabled(true);
@@ -1288,23 +1284,7 @@ class Translator extends JFrame {
 		sbl2.setText(filename == null ? "" : filename);
 	}
 
-	private void join(BundleManager bundle2, boolean part) {
-		if (part) {
-			BundleSet set = bundle2.getBundle();
-			set.getItems().forEachOrdered(bi -> {
-				BundleItem bi2 = bundle.getBundle().addKey(bi.getId());
-				for (String lang : bi.getLanguages()) {
-					bundle.getBundle().addLanguage(lang);
-					bi2.setTranslation(lang, bi.getTranslation(lang));
-				}
-			});
-		}
-		else {
-			bundle = bundle2;
-		}
-	}
-
-	private class Loader implements Runnable {
+	private class Loader extends SwingWorker<BundleManager, Void> {
 		private final String fileName;
 		private final boolean part;
 
@@ -1314,16 +1294,26 @@ class Translator extends JFrame {
 		}
 
 		@Override
-		public void run() {
-			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			sbl2.setText(RC("tools.translator.progress.loadfiles"));
-			try {
-				BundleManager bundle2 = new BundleManager(fileName);
-				join(bundle2, part);
+		protected BundleManager doInBackground() throws Exception {
+			BundleManager bundle2 = new BundleManager(fileName);
+			if (part) {
+				BundleSet set = bundle.getBundle();
+				bundle2.getBundle().getItems().forEachOrdered(bi -> {
+					BundleItem bi2 = set.addKey(bi.getId());
+					for (String lang : bi.getLanguages()) {
+						set.addLanguage(lang);
+						bi2.setTranslation(lang, bi.getTranslation(lang));
+					}
+				});
 			}
-			catch (Exception e) {
-				infoException(e);
+			else {
+				bundle = bundle2;
 			}
+			return bundle;
+		}
+
+		@Override
+		protected void done() {
 			sbl2.setText(RC("tools.translator.progress.maketree"));
 
 			if (!part) {
@@ -1346,10 +1336,12 @@ class Translator extends JFrame {
 			return;
 		}
 
-		(new Thread(new Loader(fileName, part))).start();
 		setTitle(fileName);
 		addToPickList(fileName);
 		updateStatusBar();
+		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		sbl2.setText(RC("tools.translator.progress.loadfiles"));
+		new Loader(fileName, part).execute();
 	}
 
 	private void initControls() {
