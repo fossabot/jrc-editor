@@ -313,8 +313,10 @@ class Translator extends JFrame {
 		saveAsBundleMenu.addChangeListener(e -> saveAsToolButton.setEnabled(saveAsBundleMenu.isEnabled()));
 		saveAsBundleMenu.setEnabled(false);
 		closeMenu = createMenuItem(this::onCloseMenu, RC("tools.translator.menu.close"));
+		closeMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_DOWN_MASK));
 		closeMenu.setEnabled(false);
 		exitMenu = createMenuItem(this::onClose, RC("menu.exit"));
+		exitMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
 
 		JMenu editMenu = new JMenu(RC("menu.edit"));
 
