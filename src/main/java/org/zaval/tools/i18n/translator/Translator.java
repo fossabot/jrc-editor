@@ -1657,6 +1657,7 @@ class Translator extends JFrame {
 		for (String aPickList : pickList) {
 			String patz = stretchPath(aPickList);
 			JMenuItem item = new JMenuItem(patz);
+			item.setToolTipText(String.format("%s '%s'", RC("tools.translator.menu.open"), aPickList));
 			item.addActionListener(e -> {
 				clear();
 				readResources(aPickList, false);
