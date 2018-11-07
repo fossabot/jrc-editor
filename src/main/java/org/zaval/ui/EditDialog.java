@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package org.zaval.awt.dialog;
+package org.zaval.ui;
 
 import static org.zaval.ui.UiUtils.constrain;
 
@@ -31,8 +31,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-
-import org.zaval.ui.UiUtils;
 
 @SuppressWarnings("serial")
 public class EditDialog extends JDialog {

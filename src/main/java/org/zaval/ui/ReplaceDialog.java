@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package org.zaval.tools.i18n.translator;
+package org.zaval.ui;
 
 import static org.zaval.ui.UiUtils.constrain;
 
@@ -32,10 +32,8 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
-import org.zaval.awt.dialog.EditDialog;
-
 @SuppressWarnings("serial")
-class ReplaceDialog extends EditDialog {
+public class ReplaceDialog extends EditDialog {
 	private final JRadioButton regex = new JRadioButton("", false);
 	private final JRadioButton exact = new JRadioButton("", true);
 

@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package org.zaval.tools.i18n.translator;
+package org.zaval.ui;
 
 import java.awt.Component;
 import java.util.function.Function;

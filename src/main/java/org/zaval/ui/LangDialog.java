@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package org.zaval.tools.i18n.translator;
+package org.zaval.ui;
 
 import static org.zaval.ui.UiUtils.constrain;
 
@@ -36,10 +36,8 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 
-import org.zaval.ui.UiUtils;
-
 @SuppressWarnings("serial")
-class LangDialog<ListItem> extends JDialog {
+public class LangDialog<ListItem> extends JDialog {
 	private final JLabel label = new JLabel("");
 	private final JList<ListItem> edit = new JList<>();
 	private final JButton ok = new JButton("");
