@@ -1704,7 +1704,7 @@ class Translator extends JFrame {
 	private void loadPickList() {
 		removePickList();
 		try {
-			String path = System.getProperty("user.home") + "/.jrc-editor.conf";
+			String path = System.getProperty("user.home") + File.separator + TranslatorConstants.LEGACY_CONFIG_FILENAME;
 			InputIniFile ini = new InputIniFile(path);
 			Map<String, String> tbl = ini.getItems();
 
@@ -1772,7 +1772,7 @@ class Translator extends JFrame {
 
 	private void saveIni() {
 		try {
-			String path = System.getProperty("user.home") + "/.jrc-editor.conf";
+			String path = System.getProperty("user.home") + File.separator + TranslatorConstants.LEGACY_CONFIG_FILENAME;
 			IniFile ini = new IniFile(path);
 			for (int j = 0; j < pickList.size(); ++j) {
 				ini.putString("picklist." + j, pickList.get(j));

@@ -25,4 +25,5 @@ abstract class TranslatorConstants {
 	public static final char KEY_SEPARATOR_2 = '_';
 
 	public static final String WARN_IMAGE = "incomplete.gif";
+	public static final String LEGACY_CONFIG_FILENAME = ".jrc-editor.conf";
 }
