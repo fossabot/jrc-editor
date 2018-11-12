@@ -290,6 +290,7 @@ class Translator extends JFrame {
 
 		keyName = new JTextField();
 		constrain(keyPanel, keyName, 1, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.BOTH, 1.0, 1.0, 5, 5, 5, 5);
+		keyName.addActionListener((e) -> onInsertKey());
 
 		JButton keyInsertButton = createButton(this::onInsertKey, RC("tools.translator.label.insert"));
 		constrain(keyPanel, keyInsertButton, 2, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 5, 5);
