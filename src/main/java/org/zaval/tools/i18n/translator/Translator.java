@@ -123,6 +123,7 @@ class Translator extends JFrame {
 	private boolean allowDot = true;
 	private boolean allowUScore = true;
 
+	private JMenu openRecentMenu;
 	private JMenuItem saveBundleMenu;
 	private JMenuItem saveAsBundleMenu;
 	private JMenuItem genMenu;
@@ -309,6 +310,8 @@ class Translator extends JFrame {
 		fileMenu = new JMenu(RC("menu.file"));
 		JMenuItem newBundleMenu = createMenuItem(this::onNewBundle, RC("tools.translator.menu.new.bundle"), KeyEvent.VK_N);
 		JMenuItem openBundleMenu = createMenuItem(this::onLoadBundle, RC("tools.translator.menu.open"), KeyEvent.VK_O);
+		openRecentMenu = new JMenu(RC("tools.translator.menu.open.recent"));
+		openRecentMenu.setEnabled(false);
 		saveBundleMenu = createMenuItem(this::onSave, RC("tools.translator.menu.save"), KeyEvent.VK_S);
 		saveBundleMenu.addChangeListener(e -> saveBundleToolButton.setEnabled(saveBundleMenu.isEnabled()));
 		saveBundleMenu.setEnabled(false);
@@ -386,10 +389,11 @@ class Translator extends JFrame {
 
 		fileMenu.add(newBundleMenu);
 		fileMenu.add(openBundleMenu);
+		fileMenu.add(openRecentMenu);
 		fileMenu.add(saveBundleMenu);
 		fileMenu.add(saveAsBundleMenu);
 		fileMenu.add(closeMenu);
-		fileMenu.addSeparator();
+		fileMenu.add(exitMenu);
 
 		editMenu.add(newLangMenu);
 		editMenu.addSeparator();
@@ -1654,20 +1658,18 @@ class Translator extends JFrame {
 	}
 
 	private void linkPickList() {
+		openRecentMenu.removeAll();
 		for (String aPickList : pickList) {
 			String patz = stretchPath(aPickList);
 			JMenuItem item = new JMenuItem(patz);
-			item.setToolTipText(String.format("%s '%s'", RC("tools.translator.menu.open"), aPickList));
+			item.setToolTipText(aPickList);
 			item.addActionListener(e -> {
 				clear();
 				readResources(aPickList, false);
 			});
-			fileMenu.add(item);
+			openRecentMenu.add(item);
 		}
-		if (!pickList.isEmpty()) {
-			fileMenu.addSeparator();
-		}
-		fileMenu.add(exitMenu);
+		openRecentMenu.setEnabled(!pickList.isEmpty());
 	}
 
 	private void removePickList() {
@@ -1742,33 +1744,17 @@ class Translator extends JFrame {
 		catch (Exception e1) {
 		}
 
-		for (int j = 0; j < pickList.size(); ++j) {
-			Object obj = pickList.get(j);
-			if (obj == null) {
-				pickList.remove(j);
-				--j;
-			}
-		}
+		pickList.removeIf(it -> null == it);
 		linkPickList();
 	}
 
 	private void addToPickList(String name) {
-		if (name == null) {
-			return;
+		if (null != name) {
+			pickList.remove(name);
+			pickList.add(0, name);
+			pickList = pickList.subList(0, Math.min(7, pickList.size()) - 1);
+			saveIni();
 		}
-		for (int j = 0; j < pickList.size(); ++j) {
-			String v1 = pickList.get(j);
-			if (v1.equals(name)) {
-				pickList.remove(j);
-				--j;
-			}
-		}
-
-		pickList.add(0, name);
-		while (pickList.size() >= 8) {
-			pickList.remove(7);
-		}
-		saveIni();
 	}
 
 	private void saveIni() {
