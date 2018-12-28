@@ -41,6 +41,7 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -89,11 +90,12 @@ import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.text.JTextComponent;
 
+import org.apache.commons.configuration2.INIConfiguration;
+import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
 import org.zaval.awt.ToolkitResolver;
-import org.zaval.io.IniFile;
-import org.zaval.io.InputIniFile;
 import org.zaval.tools.i18n.translator.generated.JavaParser;
 import org.zaval.tools.i18n.translator.generated.UtfParser;
 import org.zaval.ui.AboutDialog;
@@ -107,6 +109,13 @@ import org.zaval.util.SafeResourceBundle;
 
 @SuppressWarnings("serial")
 class Translator extends JFrame {
+	private static final String OPTION_PICKLIST = "picklist";
+	private static final String OPTION_ALLOW_DOT = "allowDot";
+	private static final String OPTION_AUTO_EXPAND_TF = "autoExpandTF";
+	private static final String OPTION_OMIT_SPACES = "omitSpaces";
+	private static final String OPTION_KEEP_LAST_DIR = "keepLastDir";
+	private static final String OPTION_ALLOW_U_SCORE = "allowUScore";
+
 	private JOptionPane repDialog;
 
 	private JTextField keyName;
@@ -478,22 +487,27 @@ class Translator extends JFrame {
 
 	private void onToggleAllowUnderscore() {
 		allowUScore = allowUScoreMenu.getState();
+		saveIni();
 	}
 
 	private void onToggleAllowDot() {
 		allowDot = allowDotMenu.getState();
+		saveIni();
 	}
 
 	private void onToggleAutoExpandTF() {
 		autoExpandTF = autoExpandTFMenu.getState();
+		saveIni();
 	}
 
 	private void onToggleOmitSpaces() {
 		omitSpaces = omitSpacesMenu.getState();
+		saveIni();
 	}
 
 	private void onToggleKeepLastDir() {
 		keepLastDir = keepLastDirMenu.getState();
+		saveIni();
 	}
 
 	private void onShowNulls() {
@@ -1708,33 +1722,16 @@ class Translator extends JFrame {
 	private void loadPickList() {
 		removePickList();
 		try {
-			String path = System.getProperty("user.home") + File.separator + TranslatorConstants.LEGACY_CONFIG_FILENAME;
-			InputIniFile ini = new InputIniFile(path);
-			Map<String, String> tbl = ini.getItems();
+			String path = getLegacyConfigFileName();
+			INIConfiguration ini = new INIConfiguration();
+			ini.read(new FileReader(path));
 
-			for (String key : tbl.keySet()) {
-				String val = tbl.get(key);
-				if (!key.startsWith("picklist.")) {
-					continue;
-				}
-				try {
-					key = key.substring(key.indexOf('.') + 1);
-					int pickLevel = Integer.parseInt(key);
-					while (pickList.size() <= pickLevel) {
-						pickList.add(null);
-					}
-					pickList.set(pickLevel, val);
-				}
-				catch (Exception error) {
-					error.printStackTrace();
-				}
-			}
-
-			keepLastDir = (tbl.get("keepLastDir") == null) || "Y".equals(tbl.get("keepLastDir"));
-			omitSpaces = (tbl.get("omitSpaces") == null) || "Y".equals(tbl.get("omitSpaces"));
-			autoExpandTF = (tbl.get("autoExpandTF") == null) || "Y".equals(tbl.get("autoExpandTF"));
-			allowDot = (tbl.get("allowDot") == null) || "Y".equals(tbl.get("allowDot"));
-			allowUScore = (tbl.get("allowUScore") == null) || "Y".equals(tbl.get("allowUScore"));
+			pickList.addAll(ini.getList(String.class, OPTION_PICKLIST, Collections.emptyList()));
+			keepLastDir = ini.getBoolean(OPTION_KEEP_LAST_DIR, true);
+			omitSpaces = ini.getBoolean(OPTION_OMIT_SPACES, true);
+			autoExpandTF = ini.getBoolean(OPTION_AUTO_EXPAND_TF, true);
+			allowDot = ini.getBoolean(OPTION_ALLOW_DOT, true);
+			allowUScore = ini.getBoolean(OPTION_ALLOW_U_SCORE, true);
 
 			keepLastDirMenu.setState(keepLastDir);
 			omitSpacesMenu.setState(omitSpaces);
@@ -1742,39 +1739,44 @@ class Translator extends JFrame {
 			allowDotMenu.setState(allowDot);
 			allowUScoreMenu.setState(allowUScore);
 		}
-		catch (Exception e1) {
+		catch (Exception ex) {
+			ex.printStackTrace();
 		}
 
-		pickList.removeIf(it -> null == it);
+		pickList.removeIf(it -> null == it || it.trim().isEmpty());
 		linkPickList();
 	}
 
 	private void addToPickList(String name) {
-		if (null != name) {
+		if (null != name && !name.isEmpty()) {
 			pickList.remove(name);
 			pickList.add(0, name);
-			pickList = pickList.subList(0, Math.min(7, pickList.size()) - 1);
+			pickList = pickList.subList(0, Math.min(7, pickList.size()));
 			saveIni();
 		}
 	}
 
 	private void saveIni() {
 		try {
-			String path = System.getProperty("user.home") + File.separator + TranslatorConstants.LEGACY_CONFIG_FILENAME;
-			IniFile ini = new IniFile(path);
-			for (int j = 0; j < pickList.size(); ++j) {
-				ini.putString("picklist." + j, pickList.get(j));
-			}
-
-			ini.putString("keepLastDir", keepLastDir ? "Y" : "N");
-			ini.putString("omitSpaces", omitSpaces ? "Y" : "N");
-			ini.putString("autoExpandTF", autoExpandTF ? "Y" : "N");
-			ini.putString("allowDot", allowDot ? "Y" : "N");
-			ini.putString("allowUScore", keepLastDir ? "Y" : "N");
-			ini.close();
+			String path = getLegacyConfigFileName();
+			Configurations configs = new Configurations();
+			FileBasedConfigurationBuilder<INIConfiguration> builder = configs.iniBuilder(path);
+			INIConfiguration ini = builder.getConfiguration();
+			ini.setProperty(OPTION_PICKLIST, pickList);
+			ini.setProperty(OPTION_KEEP_LAST_DIR, keepLastDir);
+			ini.setProperty(OPTION_OMIT_SPACES, omitSpaces);
+			ini.setProperty(OPTION_AUTO_EXPAND_TF, autoExpandTF);
+			ini.setProperty(OPTION_ALLOW_DOT, allowDot);
+			ini.setProperty(OPTION_ALLOW_U_SCORE, allowUScore);
+			builder.save();
 		}
 		catch (Exception e) {
+			e.printStackTrace();
 		}
+	}
+
+	private String getLegacyConfigFileName() {
+		return System.getProperty("user.home") + File.separator + TranslatorConstants.LEGACY_CONFIG_FILENAME;
 	}
 
 	private List<LangItem> getLangSet() {
