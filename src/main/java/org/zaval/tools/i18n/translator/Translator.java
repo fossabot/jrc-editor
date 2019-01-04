@@ -67,6 +67,7 @@ import java.util.stream.IntStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -95,7 +96,6 @@ import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
-import org.zaval.awt.ToolkitResolver;
 import org.zaval.tools.i18n.translator.generated.JavaParser;
 import org.zaval.tools.i18n.translator.generated.UtfParser;
 import org.zaval.ui.AboutDialog;
@@ -154,11 +154,9 @@ class Translator extends JFrame {
 	private JLabel sbl1;
 	private JLabel sbl2;
 
-	private ToolkitResolver imgres;
 	private boolean exitInitiated = true;
 	private boolean isDirty;
 	private String wasSelectedKey;
-	private String SYS_DIR;
 	private BundleManager bundle = new BundleManager();
 	private final JPanel pane = new JPanel();
 
@@ -183,18 +181,18 @@ class Translator extends JFrame {
 	private BundleItem curItemForReplace;
 	private LangItem curLangForReplace;
 
-	public Translator(String s, SafeResourceBundle res) {
-		init(s, res);
+	public Translator(SafeResourceBundle res) {
+		init(res);
 		onNewBundle();
 	}
 
-	public Translator(String s, SafeResourceBundle res, String bundleName) {
-		init(s, res);
+	public Translator(SafeResourceBundle res, String bundleName) {
+		init(res);
 		clear();
 		readResources(bundleName, false);
 	}
 
-	private void init(String s, SafeResourceBundle res) {
+	private void init(SafeResourceBundle res) {
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter() {
 			@Override
@@ -202,7 +200,6 @@ class Translator extends JFrame {
 				onClose();
 			}
 		});
-		SYS_DIR = s;
 		rcTable = res;
 
 		CLOSE_BUTTONS[0] = RC("dialog.button.yes");
@@ -213,19 +210,18 @@ class Translator extends JFrame {
 		REPLACE_BUTTONS[1] = RC("dialog.button.no");
 		REPLACE_BUTTONS[2] = RC("dialog.button.cancel");
 
-		imgres = new ToolkitResolver();
 		this.setLayout(new BorderLayout(0, 0));
 		add("Center", pane);
 
-		JButton newBundleToolButton = createToolBarButton(this::onNewBundle, SYS_DIR + "new.gif", RC("tools.translator.menu.new.bundle"));
-		JButton openBundleToolButton = createToolBarButton(this::onLoadBundle, SYS_DIR + "load.gif", RC("tools.translator.menu.open"));
-		JButton saveBundleToolButton = createToolBarButton(this::onSave, SYS_DIR + "save.gif", RC("tools.translator.menu.save"));
-		JButton saveAsToolButton = createToolBarButton(this::onSaveAs, SYS_DIR + "saveas.gif", RC("tools.translator.menu.saveas"));
-		JButton genToolButton = createToolBarButton(this::onGenCode, SYS_DIR + "deploy.gif", RC("tools.translator.menu.generate"));
-		JButton parseToolButton = createToolBarButton(this::onParseCode, SYS_DIR + "import.gif", RC("tools.translator.menu.parse"));
-		JButton newLangToolButton = createToolBarButton(this::onNewResource, SYS_DIR + "newlang.gif", RC("tools.translator.menu.new.lang"));
-		JButton delToolButton = createToolBarButton(this::onDeleteKey, SYS_DIR + "del.gif", RC("tools.translator.menu.delete"));
-		JButton aboutToolButton = createToolBarButton(this::onAbout, SYS_DIR + "about.gif", RC("menu.about"));
+		JButton newBundleToolButton = createToolBarButton(this::onNewBundle, "new.gif", RC("tools.translator.menu.new.bundle"));
+		JButton openBundleToolButton = createToolBarButton(this::onLoadBundle, "load.gif", RC("tools.translator.menu.open"));
+		JButton saveBundleToolButton = createToolBarButton(this::onSave, "save.gif", RC("tools.translator.menu.save"));
+		JButton saveAsToolButton = createToolBarButton(this::onSaveAs, "saveas.gif", RC("tools.translator.menu.saveas"));
+		JButton genToolButton = createToolBarButton(this::onGenCode, "deploy.gif", RC("tools.translator.menu.generate"));
+		JButton parseToolButton = createToolBarButton(this::onParseCode, "import.gif", RC("tools.translator.menu.parse"));
+		JButton newLangToolButton = createToolBarButton(this::onNewResource, "newlang.gif", RC("tools.translator.menu.new.lang"));
+		JButton delToolButton = createToolBarButton(this::onDeleteKey, "del.gif", RC("tools.translator.menu.delete"));
+		JButton aboutToolButton = createToolBarButton(this::onAbout, "about.gif", RC("menu.about"));
 
 		JToolBar tool = new JToolBar();
 		tool.setFloatable(false);
@@ -247,7 +243,7 @@ class Translator extends JFrame {
 		tool.add(aboutToolButton);
 		add("North", tool);
 
-		setIconImage(imgres.getImage(SYS_DIR + "jrc-editor.gif"));
+		setIconImage(getImageIcon("jrc-editor.gif").getImage());
 
 		JPanel panel3 = new JPanel();
 		panel3.setPreferredSize(new Dimension(0, (int) (panel3.getFontMetrics(panel3.getFont()).getHeight() * 1.5f)));
@@ -271,7 +267,7 @@ class Translator extends JFrame {
 		constrain(panel3, sbl2Panel, 1, 0, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, 0.8, 1.0, 0, 0, 0, 0);
 		add("South", panel3);
 
-		tree = new TranslationTree(imgres.getImageIcon(SYS_DIR + TranslatorConstants.WARN_IMAGE));
+		tree = new TranslationTree(getImageIcon(TranslatorConstants.WARN_IMAGE));
 		tree.addSelectionListener(this::onTreeSelectionchanged);
 		tree.addKeyListener(this::onTreeKeyEvent);
 
@@ -478,8 +474,17 @@ class Translator extends JFrame {
 		});
 	}
 
+	public ImageIcon getImageIcon(String name) {
+		try {
+			return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("org/zaval/ui/images/" + name))); //$NON-NLS-1$
+		}
+		catch (IOException ioe) {
+			throw new RuntimeException(ioe);
+		}
+	}
+
 	private JButton createToolBarButton(Runnable callback, String icon, String tooltip) {
-		JButton button = new JButton(imgres.getImageIcon(icon));
+		JButton button = new JButton(getImageIcon(icon));
 		button.addActionListener(e -> callback.run());
 		button.setToolTipText(tooltip);
 		return button;
@@ -1523,7 +1528,7 @@ class Translator extends JFrame {
 		String cobexerCopyright = "Copyright &copy 2018 <a href=\"mailto:cobexer+jrceditor@gmail.com?subject=JRC-Editor\"> Obexer Christoph &lt;cobexer+jrceditor@gmail.com&gt;</a>";
 		String copyright = "<html>" + zavalCopyright + cobexerCopyright;
 		String ok = RC("dialog.button.ok");
-		ImageIcon image = imgres.getImageIcon(SYS_DIR + "ZavalCE.gif");
+		ImageIcon image = getImageIcon("ZavalCE.gif");
 		AboutDialog aboutDialog = new AboutDialog(this, title, copyright, ok, image);
 		aboutDialog.setVisible(true);
 	}

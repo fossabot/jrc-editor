@@ -22,7 +22,6 @@ import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.Toolkit;
-import java.io.File;
 import java.util.Locale;
 
 import javax.swing.UIManager;
@@ -32,14 +31,6 @@ import org.zaval.util.SafeResourceBundle;
 
 public class Main { // NO_UCD (unused code)
 	public static void main(String arg[]) {
-		String altDir = System.getProperty("my.root.dir");
-		File f = new File(altDir != null ? altDir : ".");
-		String path = f.getAbsolutePath();
-		if (path.endsWith(".")) {
-			path = path.substring(0, path.length() - 1);
-		}
-		path += "/images/";
-
 		try {
 			if ("linux".equalsIgnoreCase(System.getProperty("os.name"))) {
 				UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
@@ -53,10 +44,10 @@ public class Main { // NO_UCD (unused code)
 
 		Translator t;
 		if (arg.length > 0) {
-			t = new Translator(path, new SafeResourceBundle("jrc-editor", Locale.getDefault()), arg[0]);
+			t = new Translator(new SafeResourceBundle("jrc-editor", Locale.getDefault()), arg[0]);
 		}
 		else {
-			t = new Translator(path, new SafeResourceBundle("jrc-editor", Locale.getDefault()));
+			t = new Translator(new SafeResourceBundle("jrc-editor", Locale.getDefault()));
 		}
 
 		Dimension gdz = Toolkit.getDefaultToolkit().getScreenSize();
