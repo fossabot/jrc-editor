@@ -1525,7 +1525,7 @@ class Translator extends JFrame {
 	private void onAbout() {
 		String title = RC("dialog.title.info");
 		String zavalCopyright = "Copyright &copy; 2001-2002 <a href=\"http://www.zaval.org\">Zaval Creative Engineering Group (http://www.zaval.org)</a><br/>";
-		String cobexerCopyright = "Copyright &copy 2018 <a href=\"mailto:cobexer+jrceditor@gmail.com?subject=JRC-Editor\"> Obexer Christoph &lt;cobexer+jrceditor@gmail.com&gt;</a>";
+		String cobexerCopyright = "Copyright &copy 2018-2019 <a href=\"mailto:cobexer+jrceditor@gmail.com?subject=JRC-Editor\"> Obexer Christoph &lt;cobexer+jrceditor@gmail.com&gt;</a>";
 		String copyright = "<html>" + zavalCopyright + cobexerCopyright;
 		String ok = RC("dialog.button.ok");
 		ImageIcon image = getImageIcon("ZavalCE.gif");
