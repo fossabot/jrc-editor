@@ -62,7 +62,7 @@ public class LangDialog<ListItem> extends JDialog {
 		constrain(this, label, 0, 0, 1, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 5, 5);
 		edit.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		edit.setCellRenderer(new LangDialogCellRenderer<>(edit.getCellRenderer(), itemMapper));
-		constrain(this, edit, 0, 1, 4, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, 1.0, 0.0, 5, 5, 5, 5);
+		constrain(this, edit, 0, 1, 4, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH, 1.0, 1.0, 5, 5, 5, 5);
 
 		ok.addActionListener(this::onPerform);
 		cancel.addActionListener(this::onCancel);
