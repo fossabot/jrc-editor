@@ -390,7 +390,7 @@ Namely:
 
 Some JRC Editor's functions can be configured via command-line options.
 These options are global and cannot be changed during JRC Editor execution.
-All options can be set via standard '`set`' command, or can be attached to command line with '`-D`' parameter before main class name (the main class name is '`org.zaval.tools.i18n.translator.Main`').
+All options can be set via standard '`set`' command, or can be attached to command line with '`-D`' parameter before main class name (the main class name is '`org.zaval.tools.i18n.translator.JrcEditor`').
 
 Options:
 

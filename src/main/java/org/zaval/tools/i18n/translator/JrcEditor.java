@@ -29,7 +29,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import org.zaval.util.SafeResourceBundle;
 
-public class Main { // NO_UCD (unused code)
+public class JrcEditor { // NO_UCD (unused code)
 	public static void main(String arg[]) {
 		try {
 			if ("linux".equalsIgnoreCase(System.getProperty("os.name"))) {

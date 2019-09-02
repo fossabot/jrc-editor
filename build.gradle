@@ -26,7 +26,7 @@ plugins {
 }
 
 application {
-	mainClassName = 'org.zaval.tools.i18n.translator.Main'
+	mainClassName = 'org.zaval.tools.i18n.translator.JrcEditor'
 	executableDir = ''
 }
 
