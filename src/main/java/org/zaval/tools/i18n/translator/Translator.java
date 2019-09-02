@@ -243,6 +243,7 @@ class Translator extends JFrame {
 		tool.add(aboutToolButton);
 		add("North", tool);
 
+		//TODO: use setIconImages to provide higher resolution images
 		setIconImage(getImageIcon("jrc-editor.gif").getImage());
 
 		JPanel panel3 = new JPanel();
