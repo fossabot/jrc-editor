@@ -1309,7 +1309,7 @@ class Translator extends JFrame {
 		if (filename != null) {
 			add = " [" + filename + "]";
 		}
-		super.setTitle("Zaval JRC Editor" + add);
+		super.setTitle("JRC Editor" + add);
 		sbl2.setText(filename == null ? "" : filename);
 	}
 
