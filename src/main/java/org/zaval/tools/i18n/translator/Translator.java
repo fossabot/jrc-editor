@@ -1727,9 +1727,11 @@ class Translator extends JFrame {
 	private void loadPickList() {
 		removePickList();
 		try {
-			String path = getLegacyConfigFileName();
+			File path = getLegacyConfigFile();
 			INIConfiguration ini = new INIConfiguration();
-			ini.read(new FileReader(path));
+			if (path.exists() && path.isFile()) {
+				ini.read(new FileReader(path));
+			}
 
 			pickList.addAll(ini.getList(String.class, OPTION_PICKLIST, Collections.emptyList()));
 			keepLastDir = ini.getBoolean(OPTION_KEEP_LAST_DIR, true);
@@ -1763,7 +1765,10 @@ class Translator extends JFrame {
 
 	private void saveIni() {
 		try {
-			String path = getLegacyConfigFileName();
+			File path = getLegacyConfigFile();
+			if (!path.exists()) {
+				path.createNewFile();
+			}
 			Configurations configs = new Configurations();
 			FileBasedConfigurationBuilder<INIConfiguration> builder = configs.iniBuilder(path);
 			INIConfiguration ini = builder.getConfiguration();
@@ -1780,8 +1785,8 @@ class Translator extends JFrame {
 		}
 	}
 
-	private String getLegacyConfigFileName() {
-		return System.getProperty("user.home") + File.separator + TranslatorConstants.LEGACY_CONFIG_FILENAME;
+	private File getLegacyConfigFile() {
+		return new File(System.getProperty("user.home") + File.separator + TranslatorConstants.LEGACY_CONFIG_FILENAME);
 	}
 
 	private List<LangItem> getLangSet() {
