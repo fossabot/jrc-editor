@@ -31,6 +31,7 @@ import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.DefaultTreeModel;
@@ -210,7 +211,9 @@ public class TranslationTree implements TreeModelListener {
 		if (1 == nodes.size()) {
 			// auto expand the root node because JTree is such a smart useful thing that doesn't do this on it's own...
 			// I mean JTrees with hidden collapsed root are so very useful... Am I right??
-			expandNode(new TreePath(rootNode), true);
+			SwingUtilities.invokeLater(() -> {
+				expandNode(new TreePath(rootNode), true);
+			});
 		}
 		for (Object n : e.getChildren()) {
 			TranslationTreeNode node = (TranslationTreeNode) n;
