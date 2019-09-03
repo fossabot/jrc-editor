@@ -1416,27 +1416,20 @@ class Translator extends JFrame implements TranslationTreeListener {
 		constrain(textPanel, ls.tf, 1, i + 2, 2, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, 1.0, 1.0, 3, 3, 5, 3);
 	}
 
-	private void addToTree(String s) {
-		if (tree.getNode(s) != null) {
-			return;
-		}
-		int ind = allowDot ? s.lastIndexOf(TranslatorConstants.KEY_SEPARATOR) : -1;
-		int ind2 = allowUScore ? s.lastIndexOf(TranslatorConstants.KEY_SEPARATOR_2) : -1;
-		if (ind2 > ind) {
-			ind = ind2;
-		}
+	private TranslationTreeNode addToTree(String s) {
+		TranslationTreeNode node = tree.getNode(s);
+		if (null == node) {
+			int ind = allowDot ? s.lastIndexOf(TranslatorConstants.KEY_SEPARATOR) : -1;
+			int ind2 = allowUScore ? s.lastIndexOf(TranslatorConstants.KEY_SEPARATOR_2) : -1;
+			if (ind2 > ind) {
+				ind = ind2;
+			}
 
-		if (ind < 0) {
-			TranslationTreeNode tnew = tree.getRootNode().createChildNode(s);
-			tnew.setCaption(s);
+			TranslationTreeNode nodeParent = ind < 0 ? tree.getRootNode() : addToTree(s.substring(0, ind));
+			node = nodeParent.createChildNode(s);
+			node.setCaption(s.substring(ind + 1));
 		}
-		else {
-			String tname = s.substring(0, ind);
-			addToTree(tname);
-			TranslationTreeNode ttpar = tree.getNode(tname);
-			TranslationTreeNode tnew = ttpar.createChildNode(s);
-			tnew.setCaption(s.substring(ind + 1));
-		}
+		return node;
 	}
 
 	private String lookupFileForLoad(String mask) {
