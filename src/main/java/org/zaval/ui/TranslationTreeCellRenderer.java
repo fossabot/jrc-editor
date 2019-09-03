@@ -37,9 +37,10 @@ class TranslationTreeCellRenderer implements TreeCellRenderer {
 	@Override
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row,
 		boolean hasFocus) {
-		JLabel c = (JLabel) treeCellRenderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+		TranslationTreeNode node = (TranslationTreeNode) value;
+		JLabel c = (JLabel) treeCellRenderer.getTreeCellRendererComponent(tree, node.getCaption(), selected, expanded, leaf, row, hasFocus);
 
-		if (((TranslationTreeNode) value).isShowIndicator()) {
+		if (node.isShowIndicator()) {
 			c.setIcon(warningIcon);
 		}
 		else {

@@ -64,7 +64,7 @@ public class TranslationTreeNode extends DefaultMutableTreeNode {
 		this.treeModel = treeModel;
 	}
 
-	private String getCaption() {
+	public String getCaption() {
 		return null != caption ? caption : fullPath;
 	}
 
