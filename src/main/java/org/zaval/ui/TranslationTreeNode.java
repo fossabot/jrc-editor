@@ -53,6 +53,14 @@ public class TranslationTreeNode extends DefaultMutableTreeNode {
 		return nn;
 	}
 
+	public void removeRecursive() {
+		for (int i = getChildCount(); 0 != i; --i) {
+			TranslationTreeNode child = getChildAt(i - 1);
+			child.removeRecursive();
+		}
+		treeModel.removeNodeFromParent(this);
+	}
+
 	public void setModel(DefaultTreeModel treeModel) {
 		this.treeModel = treeModel;
 	}

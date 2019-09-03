@@ -172,9 +172,9 @@ public class TranslationTree implements TreeModelListener {
 	}
 
 	public void remove(String key) {
-		TranslationTreeNode node = nodes.remove(key);
+		TranslationTreeNode node = nodes.get(key);
 		if (null != node) {
-			treeModel.removeNodeFromParent(node);
+			node.removeRecursive();
 		}
 	}
 
@@ -230,8 +230,7 @@ public class TranslationTree implements TreeModelListener {
 
 	public void removeAll() {
 		for (TranslationTreeNode child : enumChild(rootNode)) {
-			treeModel.removeNodeFromParent(child);
-			child.removeFromParent();
+			child.removeRecursive();
 		}
 	}
 
