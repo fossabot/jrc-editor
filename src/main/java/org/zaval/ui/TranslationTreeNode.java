@@ -48,8 +48,7 @@ public class TranslationTreeNode extends DefaultMutableTreeNode {
 				break;
 			}
 		}
-		insert(nn, i);
-		treeModel.nodesWereInserted(this, new int[] { i });
+		treeModel.insertNodeInto(nn, this, i);
 		return nn;
 	}
 
