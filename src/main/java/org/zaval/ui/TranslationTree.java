@@ -196,16 +196,6 @@ public class TranslationTree implements TreeModelListener {
 		tree.setComponentPopupMenu(ctNodeMenu);
 	}
 
-	public void repaint() {
-		//FIXME: Auto-generated method stub
-		//FIXME: remove the _need_ for this method
-	}
-
-	public void invalidate() {
-		//FIXME: Auto-generated method stub
-		//FIXME: remove the _need_ for this method
-	}
-
 	public void openNode(String key) {
 		TranslationTreeNode node = getNode(key);
 		if (null != node) {

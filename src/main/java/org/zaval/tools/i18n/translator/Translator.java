@@ -517,7 +517,6 @@ class Translator extends JFrame implements TranslationTreeListener {
 
 	private void onShowNulls() {
 		setIndicators(tree.getRootNode());
-		tree.repaint();
 	}
 
 	private void onToggleHideTranslated() {
@@ -527,12 +526,10 @@ class Translator extends JFrame implements TranslationTreeListener {
 
 	private void onCollapseAllTreeNodes() {
 		tree.setAllExpandedState(false);
-		tree.repaint();
 	}
 
 	private void onExpandAllTreeNodes() {
 		tree.setAllExpandedState(true);
-		tree.repaint();
 	}
 
 	private void onCloseMenu() {
@@ -638,8 +635,7 @@ class Translator extends JFrame implements TranslationTreeListener {
 	}
 
 	private void setTranslations() {
-		String newKey = tree.getSelectedText();
-		setTranslations(newKey);
+		setTranslations(tree.getSelectedText());
 	}
 
 	private void setTranslations(String newKey) {
@@ -672,9 +668,9 @@ class Translator extends JFrame implements TranslationTreeListener {
 			if (bi != null) {
 				bi.setComment(comm);
 			}
-			adjustIndicator(tree.getNode(wasSelectedKey));
-			setIndicators(tree.getNode(wasSelectedKey));
-			tree.repaint();
+			TranslationTreeNode selectedNode = tree.getNode(wasSelectedKey);
+			adjustIndicator(selectedNode);
+			setIndicators(selectedNode);
 		}
 		if (newKey == null) {
 			return;
@@ -709,7 +705,6 @@ class Translator extends JFrame implements TranslationTreeListener {
 		wasSelectedKey = newKey;
 		String startValue = wasSelectedKey + ".";
 		keyName.setText(startValue);
-		tree.repaint();
 	}
 
 	private String getValidKey() {
@@ -747,7 +742,6 @@ class Translator extends JFrame implements TranslationTreeListener {
 				commField.setText("");
 				isDirty = true;
 				tree.selectNode(key);
-				tree.repaint();
 				setTranslations();
 				saveBundleMenu.setEnabled(true);
 				saveAsBundleMenu.setEnabled(true);
@@ -763,14 +757,11 @@ class Translator extends JFrame implements TranslationTreeListener {
 	}
 
 	private void onDeleteKey() {
-		String key = tree.getSelectedText();
-		if (key == null) {
-			return;
-		}
-		TranslationTreeNode tn = tree.getNode(key);
+		TranslationTreeNode tn = tree.getSelectedNode();
 		if (tn == null) {
 			return;
 		}
+		String key = tn.getText();
 		boolean hasChilds = tree.enumChild(tn).length != 0;
 		BundleItem bi = bundle.getBundle().getItem(key);
 		boolean doDeleteThis = false;
@@ -813,7 +804,6 @@ class Translator extends JFrame implements TranslationTreeListener {
 			removeLeafs(key); // clean leafs out of model
 			adjustIndicator(parentNode);
 			tree.selectNode(nextToSelect);
-			tree.repaint();
 			wasSelectedKey = null;
 			setTranslations();
 			updateStatusBar();
@@ -837,7 +827,6 @@ class Translator extends JFrame implements TranslationTreeListener {
 			tree.selectNode(nextToSelect);
 
 			adjustIndicator(parentNode);
-			tree.repaint();
 
 			wasSelectedKey = null;
 			setTranslations();
@@ -913,7 +902,6 @@ class Translator extends JFrame implements TranslationTreeListener {
 		textPanel.removeAll();
 		langMenu.removeAll();
 		tree.removeAll();
-		tree.repaint();
 		textPanel.invalidate();
 		validate();
 		isDirty = false;
@@ -1153,7 +1141,6 @@ class Translator extends JFrame implements TranslationTreeListener {
 				setTranslations(curItemForReplace.getId());
 				textPanel.invalidate();
 				validate();
-				tree.repaint();
 			}
 			JDialog dlg = ((JDialog) repDialog.getTopLevelAncestor());
 			dlg.setModal(replaceAll);
@@ -1191,7 +1178,6 @@ class Translator extends JFrame implements TranslationTreeListener {
 				textPanel.invalidate();
 				validate();
 				tree.requestFocusInWindow();
-				tree.repaint();
 				return;
 			}
 			lastKeyFound = null;
@@ -1217,7 +1203,6 @@ class Translator extends JFrame implements TranslationTreeListener {
 						tree.selectNode(bi.getId());
 						tree.openToNode(bi.getId());
 						setTranslations(bi.getId());
-						tree.repaint();
 
 						if (replaceTo != null) {
 							makeReplace(bi, li);
@@ -2064,7 +2049,6 @@ class Translator extends JFrame implements TranslationTreeListener {
 		removeLeafs(oldKeyName);
 
 		tree.selectNode(newKeyName);
-		tree.repaint();
 		setTranslations();
 		setIndicators(tree.getSelectedNode());
 		updateStatusBar();
@@ -2103,9 +2087,7 @@ class Translator extends JFrame implements TranslationTreeListener {
 
 	private void hideTranslated(boolean hide) {
 		hideTranslated(tree.getRootNode(), hide);
-		tree.invalidate();
 		validate();
-		tree.repaint();
 	}
 
 	private void hideTranslated(TranslationTreeNode tn, boolean hide) {
