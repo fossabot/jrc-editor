@@ -23,6 +23,7 @@ import java.awt.event.KeyListener;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
@@ -47,9 +48,11 @@ public class TranslationTree implements TreeModelListener {
 	private final ImageIcon warningIcon;
 
 	private TranslationTreeNode selectedNode; // highlighted node
+	private final TranslationTreeListener translationTreeListener;
 
-	public TranslationTree(ImageIcon warningIcon) {
+	public TranslationTree(ImageIcon warningIcon, TranslationTreeListener translationTreeListener) {
 		this.warningIcon = warningIcon;
+		this.translationTreeListener = translationTreeListener;
 		nodes.put("", rootNode);
 		tree = new JTree(rootNode);
 		treeModel = (DefaultTreeModel) tree.getModel();
@@ -65,6 +68,7 @@ public class TranslationTree implements TreeModelListener {
 
 		addSelectionListener(this::treeSelectionChanged);
 		treeModel.addTreeModelListener(this);
+		addKeyListener();
 	}
 
 	public ImageIcon getWarningIcon() {
@@ -83,27 +87,31 @@ public class TranslationTree implements TreeModelListener {
 		return selectedNode;
 	}
 
-	public void addSelectionListener(Consumer<TranslationTreeNode> callback) {
-		tree.addTreeSelectionListener(e -> callback.accept((TranslationTreeNode) e.getPath().getLastPathComponent()));
+	private void addSelectionListener(Consumer<TreePath> callback) {
+		tree.addTreeSelectionListener(e -> callback.accept(e.getNewLeadSelectionPath()));
 	}
 
-	public void addKeyListener(Consumer<KeyEvent> callback) {
-		tree.addKeyListener(new KeyListener() {
-			@Override
-			public void keyTyped(KeyEvent e) {
-				// not forwarded
-			}
+	private void addKeyListener() {
+		if (null != translationTreeListener) {
+			tree.addKeyListener(new KeyListener() {
+				@Override
+				public void keyTyped(KeyEvent e) {
+					// not forwarded
+				}
 
-			@Override
-			public void keyReleased(KeyEvent e) {
-				// not forwarded
-			}
+				@Override
+				public void keyReleased(KeyEvent e) {
+					// not forwarded
+				}
 
-			@Override
-			public void keyPressed(KeyEvent e) {
-				callback.accept(e);
-			}
-		});
+				@Override
+				public void keyPressed(KeyEvent e) {
+					if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+						translationTreeListener.onDeleteTreeNode(Optional.ofNullable(selectedNode));
+					}
+				}
+			});
+		}
 	}
 
 	public void setAllExpandedState(boolean expanded) {
@@ -132,8 +140,14 @@ public class TranslationTree implements TreeModelListener {
 		}
 	}
 
-	private void treeSelectionChanged(TranslationTreeNode newSelectedNode) {
-		selectedNode = newSelectedNode;
+	private void treeSelectionChanged(TreePath newSelectedPath) {
+		selectedNode = null;
+		if (null != newSelectedPath) {
+			selectedNode = (TranslationTreeNode) newSelectedPath.getLastPathComponent();
+		}
+		if (null != translationTreeListener) {
+			translationTreeListener.onTreeSelectionChanged(Optional.ofNullable(selectedNode));
+		}
 	}
 
 	public void requestFocusInWindow() {

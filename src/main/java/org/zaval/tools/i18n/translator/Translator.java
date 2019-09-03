@@ -103,12 +103,13 @@ import org.zaval.ui.LangDialog;
 import org.zaval.ui.ReplaceDialog;
 import org.zaval.ui.SearchDialog;
 import org.zaval.ui.TranslationTree;
+import org.zaval.ui.TranslationTreeListener;
 import org.zaval.ui.TranslationTreeNode;
 import org.zaval.util.LambdaUtils;
 import org.zaval.util.SafeResourceBundle;
 
 @SuppressWarnings("serial")
-class Translator extends JFrame {
+class Translator extends JFrame implements TranslationTreeListener {
 	private static final String OPTION_PICKLIST = "picklist";
 	private static final String OPTION_ALLOW_DOT = "allowDot";
 	private static final String OPTION_AUTO_EXPAND_TF = "autoExpandTF";
@@ -268,9 +269,7 @@ class Translator extends JFrame {
 		constrain(panel3, sbl2Panel, 1, 0, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, 0.8, 1.0, 0, 0, 0, 0);
 		add("South", panel3);
 
-		tree = new TranslationTree(getImageIcon(TranslatorConstants.WARN_IMAGE));
-		tree.addSelectionListener(this::onTreeSelectionchanged);
-		tree.addKeyListener(this::onTreeKeyEvent);
+		tree = new TranslationTree(getImageIcon(TranslatorConstants.WARN_IMAGE), this);
 
 		JPopupMenu ctNodeMenu = new JPopupMenu("");
 		JMenuItem ctNewMenu = createMenuItem(this::onNewKey, RC("tools.translator.menu.insert"));
@@ -575,18 +574,18 @@ class Translator extends JFrame {
 		return item;
 	}
 
-	private void onTreeSelectionchanged(TranslationTreeNode newSelectedNode) {
-		String newKey = null != newSelectedNode ? newSelectedNode.getText() : null;
+	@Override
+	public void onTreeSelectionChanged(Optional<TranslationTreeNode> newSelectedNode) {
+		String newKey = newSelectedNode.map(n -> n.getText()).orElse(null);
 		if (!Objects.equals(wasSelectedKey, newKey)) {
 			setTranslations(newKey);
 			invokeAutoFit();
 		}
 	}
 
-	private void onTreeKeyEvent(KeyEvent e) {
-		if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-			onDeleteKey();
-		}
+	@Override
+	public void onDeleteTreeNode(Optional<TranslationTreeNode> selectedNode) {
+		onDeleteKey();
 	}
 
 	private void onReplaceDialogClosed() {
