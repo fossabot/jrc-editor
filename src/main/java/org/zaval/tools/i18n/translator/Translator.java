@@ -96,7 +96,6 @@ import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
-import org.zaval.tools.i18n.translator.generated.JavaParser;
 import org.zaval.tools.i18n.translator.generated.UtfParser;
 import org.zaval.ui.AboutDialog;
 import org.zaval.ui.LangDialog;
@@ -219,7 +218,6 @@ class Translator extends JFrame implements TranslationTreeListener {
 		JButton saveBundleToolButton = createToolBarButton(this::onSave, "save.gif", RC("tools.translator.menu.save"));
 		JButton saveAsToolButton = createToolBarButton(this::onSaveAs, "saveas.gif", RC("tools.translator.menu.saveas"));
 		JButton genToolButton = createToolBarButton(this::onGenCode, "deploy.gif", RC("tools.translator.menu.generate"));
-		JButton parseToolButton = createToolBarButton(this::onParseCode, "import.gif", RC("tools.translator.menu.parse"));
 		JButton newLangToolButton = createToolBarButton(this::onNewResource, "newlang.gif", RC("tools.translator.menu.new.lang"));
 		JButton delToolButton = createToolBarButton(this::onDeleteKey, "del.gif", RC("tools.translator.menu.delete"));
 		JButton aboutToolButton = createToolBarButton(this::onAbout, "about.gif", RC("menu.about"));
@@ -234,7 +232,6 @@ class Translator extends JFrame implements TranslationTreeListener {
 		tool.add(saveAsToolButton);
 		tool.addSeparator();
 		tool.add(genToolButton);
-		tool.add(parseToolButton);
 		tool.addSeparator();
 		tool.add(new JLabel(RC("menu.edit") + ":"));
 		tool.add(newLangToolButton);
@@ -379,7 +376,6 @@ class Translator extends JFrame implements TranslationTreeListener {
 		genMenu = createMenuItem(this::onGenCode, RC("tools.translator.menu.generate"));
 		genMenu.addChangeListener(e -> genToolButton.setEnabled(genMenu.isEnabled()));
 		genMenu.setEnabled(false);
-		JMenuItem parseMenu = createMenuItem(this::onParseCode, RC("tools.translator.menu.parse"));
 		JMenuItem saveXmlBundleMenu = createMenuItem(() -> onSaveXml(false), RC("tools.translator.menu.save.xml"));
 		JMenuItem saveUtfBundleMenu = createMenuItem(() -> onSaveUtf(false), RC("tools.translator.menu.save.utf"));
 		JMenuItem loadXmlBundleMenu = createMenuItem(() -> onLoadXml(false), RC("tools.translator.menu.load.xml"));
@@ -449,7 +445,6 @@ class Translator extends JFrame implements TranslationTreeListener {
 		toolMenu.add(saveUtfBundleMenuP);
 		toolMenu.addSeparator();
 		toolMenu.add(genMenu);
-		toolMenu.add(parseMenu);
 
 		helpMenu.add(aboutMenu);
 
@@ -1540,36 +1535,6 @@ class Translator extends JFrame implements TranslationTreeListener {
 			if (filename != null) {
 				SrcGenerator srcgen = new SrcGenerator(bundle.replace(filename, "\\", "/"));
 				srcgen.perform(b);
-			}
-		}
-		catch (Exception e) {
-			infoException(e);
-		}
-	}
-
-	private void onParseCode() {
-		try {
-			String mask = "*.java";
-			String filename = lookupFileForLoad(mask);
-			if (filename != null) {
-				filename = bundle.replace(filename, "\\", "/");
-				JavaParser parser = new JavaParser(new FileInputStream(filename));
-				Map<String, String> ask = parser.parse();
-				if (ask.isEmpty()) {
-					ask.put("empty", "");
-				}
-
-				clear();
-				initControls();
-				bundle.getBundle().addLanguage("en");
-				String rlng = bundle.getBundle().getFirstLanguage().getId();
-
-				for (Map.Entry<String, String> stringStringEntry : ask.entrySet()) {
-					BundleItem bi = bundle.getBundle().addKey(stringStringEntry.getKey());
-					bi.setTranslation(rlng, stringStringEntry.getValue());
-				}
-				initData(false);
-				setTitle(filename);
 			}
 		}
 		catch (Exception e) {

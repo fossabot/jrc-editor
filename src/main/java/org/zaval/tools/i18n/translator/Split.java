@@ -28,7 +28,6 @@ import java.io.StringReader;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.zaval.tools.i18n.translator.generated.JavaParser;
 import org.zaval.tools.i18n.translator.generated.UtfParser;
 import org.zaval.util.LambdaUtils;
 
@@ -94,22 +93,6 @@ public class Split { // NO_UCD (unused code)
 		}
 		catch (Exception e) {
 			infoException(fileName, e);
-		}
-	}
-
-	private void onParseCode(String fileName) throws Exception {
-		if (fileName != null) {
-			fileName = bundle.replace(fileName, "\\", "/");
-			JavaParser parser = new JavaParser(new FileInputStream(fileName));
-			Map<String, String> ask = parser.parse();
-
-			bundle.getBundle().addLanguage("en");
-			String rlng = bundle.getBundle().getFirstLanguage().getId();
-
-			for (Map.Entry<String, String> stringStringEntry : ask.entrySet()) {
-				bundle.getBundle().addKey(stringStringEntry.getKey());
-				bundle.getBundle().updateValue(stringStringEntry.getKey(), rlng, stringStringEntry.getValue());
-			}
 		}
 	}
 
@@ -229,12 +212,6 @@ public class Split { // NO_UCD (unused code)
 	}
 
 	private void tryToLoad(String fileName) throws IOException {
-		try {
-			onParseCode(fileName);
-			return;
-		}
-		catch (Exception e) {
-		}
 		try {
 			onLoadXml(fileName);
 			return;
