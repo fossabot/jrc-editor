@@ -30,6 +30,7 @@ import java.util.StringTokenizer;
 
 import org.zaval.tools.i18n.translator.generated.UtfParser;
 import org.zaval.util.LambdaUtils;
+import org.zaval.xml.XmlReader;
 
 public class Split { // NO_UCD (unused code)
 	private BundleManager bundle = new BundleManager();

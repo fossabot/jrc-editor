@@ -106,6 +106,7 @@ import org.zaval.ui.TranslationTreeListener;
 import org.zaval.ui.TranslationTreeNode;
 import org.zaval.util.LambdaUtils;
 import org.zaval.util.SafeResourceBundle;
+import org.zaval.xml.XmlReader;
 
 @SuppressWarnings("serial")
 class Translator extends JFrame implements TranslationTreeListener {

@@ -16,17 +16,14 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package org.zaval.tools.i18n.translator;
+package org.zaval.xml;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.zaval.xml.XmlElement;
-import org.zaval.xml.XmlParseException;
-
-class XmlReader {
+public class XmlReader {
 	private final XmlElement xml = new XmlElement();
 
 	public XmlReader(String body) throws IOException, XmlParseException {
