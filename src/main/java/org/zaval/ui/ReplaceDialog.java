@@ -93,8 +93,7 @@ public class ReplaceDialog extends EditDialog {
 		constrain(p2, exact, 1, 0, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 0, 5);
 		constrain(p2, regex, 1, 1, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 0, 5);
 
-		JPanel p = new JPanel();
-		p.setLayout(new GridBagLayout());
+		JPanel p = new JPanel(new GridBagLayout());
 		constrain(p, p2, 0, 1, 2, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, 1.0, 1.0, 5, 0, 0, 0);
 		constrain(p, cases, 0, 2, 2, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 0, 5);
 		constrain(p, prompt, 0, 3, 2, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 0, 5);

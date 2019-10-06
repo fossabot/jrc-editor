@@ -159,7 +159,7 @@ class Translator extends JFrame implements TranslationTreeListener {
 	private boolean isDirty;
 	private String wasSelectedKey;
 	private BundleManager bundle = new BundleManager();
-	private final JPanel pane = new JPanel();
+	private final JPanel pane = new JPanel(new BorderLayout());
 
 	private final String[] CLOSE_BUTTONS = new String[3];
 	private final String[] REPLACE_BUTTONS = new String[3];
@@ -245,21 +245,18 @@ class Translator extends JFrame implements TranslationTreeListener {
 		//TODO: use setIconImages to provide higher resolution images
 		setIconImage(getImageIcon("jrc-editor.gif").getImage());
 
-		JPanel panel3 = new JPanel();
+		JPanel panel3 = new JPanel(new GridBagLayout());
 		panel3.setPreferredSize(new Dimension(0, (int) (panel3.getFontMetrics(panel3.getFont()).getHeight() * 1.5f)));
-		panel3.setLayout(new GridBagLayout());
 		panel3.setBorder(new BevelBorder(BevelBorder.LOWERED));
 
 		sbl1 = new JLabel();
-		JPanel sbl1Panel = new JPanel();
+		JPanel sbl1Panel = new JPanel(new GridLayout(1, 1));
 		sbl1Panel.setPreferredSize(new Dimension(2, 0));
-		sbl1Panel.setLayout(new GridLayout(1, 1));
 		sbl1Panel.setBorder(new BevelBorder(BevelBorder.LOWERED));
 		sbl1Panel.add(sbl1);
 		sbl2 = new JLabel();
-		JPanel sbl2Panel = new JPanel();
+		JPanel sbl2Panel = new JPanel(new GridLayout(1, 1));
 		sbl2Panel.setPreferredSize(new Dimension(8, 0));
-		sbl2Panel.setLayout(new GridLayout(1, 1));
 		sbl2Panel.setBorder(new BevelBorder(BevelBorder.LOWERED));
 		sbl2Panel.add(sbl2);
 
@@ -282,7 +279,6 @@ class Translator extends JFrame implements TranslationTreeListener {
 		ctNodeMenu.add(ctNodeRenameMenu);
 		tree.setComponentPopupMenu(ctNodeMenu);
 
-		pane.setLayout(new BorderLayout());
 		JSplitPane mainPanel = new JSplitPane();
 		mainPanel.setDividerSize(3);
 		mainPanel.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
@@ -303,12 +299,10 @@ class Translator extends JFrame implements TranslationTreeListener {
 
 		pane.add(keyPanel, "South");
 		pane.add(mainPanel, "Center");
-		textPanel = new JPanel();
+		textPanel = new JPanel(new GridBagLayout());
 		JScrollPane scrPane = new JScrollPane(textPanel);
 		mainPanel.setLeftComponent(tree.getComponent());
 		mainPanel.setRightComponent(scrPane);
-		GridBagLayout textLayout = new GridBagLayout();
-		textPanel.setLayout(textLayout);
 
 		JMenuBar menuBar = new JMenuBar();
 		fileMenu = new JMenu(RC("menu.file"));

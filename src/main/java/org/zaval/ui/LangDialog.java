@@ -67,8 +67,7 @@ public class LangDialog<ListItem> extends JDialog {
 		ok.addActionListener(this::onPerform);
 		cancel.addActionListener(this::onCancel);
 
-		JPanel p = new JPanel();
-		p.setLayout(new GridLayout(1, 2, 2, 0));
+		JPanel p = new JPanel(new GridLayout(1, 2, 2, 0));
 		p.add(ok);
 		p.add(cancel);
 
