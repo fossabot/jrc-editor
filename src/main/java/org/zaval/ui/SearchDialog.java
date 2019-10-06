@@ -22,6 +22,7 @@ import static org.zaval.ui.UiUtils.constrain;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
@@ -83,18 +84,16 @@ public class SearchDialog extends EditDialog {
 		matchTypeGroup.add(mask);
 		matchTypeGroup.add(exact);
 
-		JPanel p1 = new JPanel();
-		p1.setLayout(new GridBagLayout());
+		JPanel p1 = new JPanel(new GridLayout(2, 1));
 		p1.setBorder(new LineBorder(null));
-		constrain(p1, inVals, 0, 0, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 0, 5);
-		constrain(p1, inKeys, 0, 1, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 0, 5);
+		p1.add(inVals);
+		p1.add(inKeys);
 
-		JPanel p2 = new JPanel();
-		p2.setLayout(new GridBagLayout());
+		JPanel p2 = new JPanel(new GridLayout(3, 1));
 		p2.setBorder(new LineBorder(null));
-		constrain(p2, exact, 1, 0, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 0, 5);
-		constrain(p2, mask, 1, 1, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 0, 5);
-		constrain(p2, regex, 1, 2, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 0, 5, 0, 5);
+		p2.add(exact);
+		p2.add(mask);
+		p2.add(regex);
 
 		JPanel p = new JPanel(new GridBagLayout());
 		constrain(p, p1, 0, 0, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, 1.0, 1.0, 5, 0, 0, 5);
